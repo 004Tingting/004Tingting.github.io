@@ -131,3 +131,92 @@ M0 就必须定死、避免返工的：双语路由骨架、字体加载方案�
   - 安装入口：https://github.com/apps/giscus/installations/new
 - 主题 `preferred_color_scheme`：跟随系统深浅色
 
+## 8. 生活板块（/life，M5 规划定稿）
+
+### 8.1 结构
+
+导航：`Ting · 博客 / 生活 / 项目 / 关于`
+
+```
+/life              总览（三个入口 + 计数摘要）
+├── /life/music    音乐：Now Playing + 乐器 cover + 音乐随笔入口
+├── /life/games    游戏：条目库（筛选）+ 关联测评长文
+└── /life/log      记录：追剧 / 番 / 小说（时长汇总 + 条目）
+```
+
+首页 hero 下方新增 **Now Playing 状态带**（杂志编者注的质感）。
+
+### 8.2 页面线框
+
+**/life 总览**
+```
+· 生活
+Life
+──────────────────────────────
+音乐      03 首 cover · 正在听 …
+游戏      12 款 · 通关 8 · 均分 8.1
+记录      剧 6 · 番 9 · 小说 4 · 共 210h
+```
+
+**/life/games**
+```
+[全部] [在玩] [通关] [弃坑] [设计研究]        ← 筛选 chips
+01  游戏名                        8.5   PC · 42h
+    一句话短评…                        2026.09
+    ◉ 设计研究   → 测评长文
+02  …
+```
+
+**/life/music**
+```
+· 正在听
+[ 网易云嵌入播放器 ｜ 降级：歌名 — 歌手 → 外链 ]
+· 乐器 cover
+01  曲名 — 原曲           吉他   2026.07
+    [ B站嵌入播放器（lazy） ]
+· 音乐随笔 → 博客「音乐」分类
+```
+
+**/life/log**
+```
+剧 6 · 番 9 · 小说 4 · 共 210 小时
+──────────────────────────────
+01  作品名      番    24h   2026.08   → 测评
+02  …
+```
+
+**首页状态带**
+```
+· 正在听：歌名 — 歌手  ▸
+```
+
+### 8.3 数据结构（全部「每项一个 md」，与 posts/projects 同管道）
+
+| 内容 | 路径 | frontmatter 字段 |
+|---|---|---|
+| 游戏条目 | `content/life/games/{zh,en}/*.md` | `title` / `platform` / `status`（在玩·通关·弃坑）/ `rating`（10 分制）/ `hours` / `designStudy`（bool）/ `date` / `review`（关联博客长文路径）/ `summary`；正文可选短评 |
+| 记录条目 | `content/life/screen/{zh,en}/*.md` | 同上 + `type`（剧·番·影·小说） |
+| 乐器 cover | `content/life/covers/{zh,en}/*.md` | `title` / `instrument` / `date` / `bilibili`（BV 号）/ `notes` |
+| Now Playing | `content/life/now.json` | `{ songId, title, artist, note }`（songId 用于网易云外链） |
+
+- 测评长文 = 博客文章（分类加「音乐 / 游戏 / 影视」），条目用 `review` 字段链过去
+- 记录页的时长/数量汇总由构建时自动计算，不手工维护
+
+### 8.4 组件
+
+| 组件 | 用途 |
+|---|---|
+| `NowPlaying` | 首页状态带：网易云 outchain 嵌入 + 文字降级 |
+| `EmbedPlayer` | 通用嵌入（B站 iframe / 网易云 iframe），`loading="lazy"` + 降级链接 |
+| `LifeEntryList` | 游戏 / 记录共用条目渲染：筛选 chips、状态、10 分制、时长、设计研究标记 |
+
+### 8.5 风险与对策
+
+| 风险 | 对策 |
+|---|---|
+| 网易云 outchain 为非官方能力，可能被 Referer 限制 | 实测端点 200；组件必须带文字降级（歌名 + 外链），嵌入失败不破版 |
+| YouTube 嵌入国内不可达（实测 000） | 只用 B站，YouTube 仅作候选链接 |
+| 双语条目维护成本 | 字段双语，短评允许单语（延续渐进式策略），未翻译条目在另一语言列表不出现 |
+| 条目越多手工统计越累 | 时长/均分/计数全部由 `lib/life.ts` 在构建时自动汇总 |
+
+
