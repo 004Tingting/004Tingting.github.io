@@ -108,3 +108,26 @@
 
 M0 就必须定死、避免返工的：双语路由骨架、字体加载方案、色板 token、布局栅格。
 其余（首字下沉、标签筛选、prev/next）随里程碑逐步加。
+
+## 6. SEO 与分享（M4 落地）
+
+| 项 | 方案 |
+|---|---|
+| 分享卡片 | 静态 `public/og.png`（1200×630，杂志风：纸色底 + 衬线 Ting + 朱红副题），由 `npm run og` 生成 |
+| metadata | `metadataBase` + openGraph / Twitter card；文章额外带 `publishedTime`、`tags` |
+| 多语言 | 每页 hreflang alternates（zh-CN ↔ en），canonical 各自独立 |
+| sitemap / robots | `app/sitemap.ts` / `app/robots.ts`，构建时产出静态文件 |
+| RSS | `/feed.xml`（中文）、`/en/feed.xml`（英文） |
+| 404 | 杂志腔定制页（「这一页还没有被排版。」），`scripts/postbuild.mjs` 生成，不依赖 `_next` 资源 |
+| 主题色 | `themeColor` 随深浅模式切换 |
+| URL 规范 | `trailingSlash: true`，全站目录式（`/blog/x/`），GitHub Pages 兼容性最好 |
+
+## 7. 评论（giscus）
+
+- 基于 GitHub Discussions，映射方式 `pathname`——中英文文章天然分成两条讨论线
+- 分类用 **Announcements**：读者只能评论，不能新建讨论（避免仓库 Discussions 被滥用）
+- 配置集中在 `lib/site.ts`；repo / category ID 已填
+- **启用条件**：安装 giscus GitHub App 后，把 `GISCUS.enabled` 改为 `true` 并推送
+  - 安装入口：https://github.com/apps/giscus/installations/new
+- 主题 `preferred_color_scheme`：跟随系统深浅色
+
