@@ -1,0 +1,23 @@
+{
+  "source": "lastfm",
+  "generatedAt": "2026-10-05T19:58:42.203Z",
+  "nowPlaying": false,
+  "track": {
+    "title": "病名は愛だった",
+    "artist": "Neru",
+    "album": "",
+    "url": "https://www.last.fm/music/Neru/_/%E7%97%85%E5%90%8D%E3%81%AF%E6%84%9B%E3%81%A0%E3%81%A3%E3%81%9F",
+    "cover": "/now-cover.jpg",
+    "playedAt": "2026-10-05T19:57:05.000Z"
+  },
+  "recent": [
+    {
+      "title": "ブルーバード",
+      "artist": "いきものがかり",
+      "album": "",
+      "url": "https://www.last.fm/music/%E3%81%84%E3%81%8D%E3%82%82%E3%81%AE%E3%81%8C%E3%81%8B%E3%82%8A/_/%E3%83%96%E3%83%AB%E3%83%BC%E3%83%90%E3%83%BC%E3%83%89",
+      "cover": "",
+      "playedAt": "2026-10-05T19:57:04.000Z"
+    }
+  ]
+}

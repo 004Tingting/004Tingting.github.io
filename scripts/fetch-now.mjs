@@ -51,6 +51,28 @@ const pickCover = (t) => {
   return big?.["#text"] ?? "";
 };
 
+/**
+ * Last.fm 已停供封面图（image 字段全为空），用网易云公开搜索接口兜底：
+ * 搜索「歌名 + 艺术家」→ 歌曲 id → song/detail → 专辑封面 URL
+ */
+async function findNetEaseCover(title, artist) {
+  if (!title) return "";
+  try {
+    const q = encodeURIComponent([title, artist].filter(Boolean).join(" "));
+    const search = await fetch(`https://music.163.com/api/search/get/web?s=${q}&type=1&limit=1`).then(
+      (r) => r.json(),
+    );
+    const song = search?.result?.songs?.[0];
+    if (!song?.id) return "";
+    const detail = await fetch(
+      `https://music.163.com/api/song/detail?ids=%5B${song.id}%5D`,
+    ).then((r) => r.json());
+    return detail?.songs?.[0]?.album?.picUrl ?? "";
+  } catch {
+    return "";
+  }
+}
+
 const toEntry = (t) => ({
   title: t.name ?? "",
   artist: t.artist?.["#text"] ?? "",
@@ -62,7 +84,14 @@ const toEntry = (t) => ({
 
 const nowPlaying = tracks[0]?.["@attr"]?.nowplaying === "true";
 const head = toEntry(tracks[0]);
-const recent = (nowPlaying ? tracks.slice(1) : tracks).map(toEntry);
+// 第一条已作为 track 展示（正在播放 / 最近一条），列表里不重复
+const recent = tracks.slice(1).map(toEntry);
+
+// 封面：Last.fm 字段为空时走网易云搜索兜底
+if (!head.cover) {
+  head.cover = await findNetEaseCover(head.title, head.artist);
+  if (head.cover) console.log(`· 封面来自网易云搜索：${head.title}`);
+}
 
 // 封面本地化（失败不致命，降级为无图）
 if (head.cover) {
