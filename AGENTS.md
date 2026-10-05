@@ -69,6 +69,7 @@ scripts/
 4. **客户端边界**：`"use client"` 组件不得 import 含 `node:fs` 的模块——共享逻辑放 `lib/*-shared.ts`
 5. **设计语言**：编辑杂志风——衬线大标题、纸色/墨色 + 唯一朱红强调色、1px hairline、kicker（`· 标签`）、条目序号。**不引入 UI 组件库**，样式用 Tailwind 原子类 + token
 6. **不装多余依赖**：静态站优先零运行时依赖；需要新依赖先说清理由
+7. **工作日志（必须）**：**每次完成实质性修改后**（建功能、改结构、修 bug、内容体系变化），往 `.workbuddy/memory/WORKLOG.md` **顶部**追加一条日志——**单文件多条目、最新在最上面**。条目格式：`## YYYY-MM-DD HH:mm · 标题`，正文含「改了什么 / 关键决策与依据 / 涉及文件 / 状态与遗留」
 
 ## 常用命令
 
@@ -101,10 +102,13 @@ git add -A && git commit && git push   # 发布（Actions 自动部署）
 
 | 文件 | 内容 |
 |---|---|
+| `.workbuddy/memory/WORKLOG.md` | **工作日志（单文件多条目，最新在上）——每次修改后必须追加** |
+| `.workbuddy/memory/YYYY-MM-DD.md` | 当日详细档案（完整调研过程与细节） |
+| `.workbuddy/memory/MEMORY.md` | 项目长期记忆（技术决策、待办、环境注意） |
 | `README.md` | 门面：地址、命令、发布流程、索引 |
-| `PLAN.md` | 建站规划与里程碑（M0–M4 全部完成） |
-| `DESIGN.md` | 设计规格：字体、色板、双语策略、页面线框、SEO、评论 |
-| `PITFALLS.md` | 16 条踩坑记录 + 快速修复清单 |
+| `PLAN.md` | 建站规划与里程碑 |
+| `DESIGN.md` | 设计规格：字体、色板、双语策略、页面线框、SEO、评论、生活板块 |
+| `PITFALLS.md` | 踩坑记录 + 快速修复清单 |
 
 ## 当前状态 / 待办
 

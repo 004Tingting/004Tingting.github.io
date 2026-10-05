@@ -1,17 +1,23 @@
 /**
- * 构建前执行：从 Last.fm 拉取「正在播放 / 最近收听」，写入 content/life/lastfm.json。
+ * 构建前执行：从 Last.fm 拉取「正在播放 / 最近收听」，写入 content/life/lastfm.json；
+ * 同时为最近 10 首生成网易云封面映射（public/covers/<hash>.jpg + content/life/covers.json）。
  *
- * - 需要环境变量 LASTFM_API_KEY 与 LASTFM_USER（本地放 .env.local / CI 放 GitHub Secrets）
- * - 未配置或拉取失败时：静默跳过并保留已有数据，绝不阻塞构建
- * - 正在播放曲目的封面下载到 public/now-cover.jpg（避免依赖 Last.fm 的图片 CDN 可达性）
+ * 为什么要预生成封面：
+ *   浏览器无法直连网易云接口（无 CORS），iTunes 等替代源对日文/中文歌匹配不准，
+ *   因此采用「构建时映射表 + 同源图片」：前端切歌时查 covers.json 即时换图。
+ *
+ * - 需要 LASTFM_API_KEY / LASTFM_USER（本地 .env.local、CI 用 GitHub Secrets）
+ * - 未配置或拉取失败：静默跳过并保留已有数据，绝不阻塞构建
  */
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outFile = path.join(root, "content", "life", "lastfm.json");
-const coverFile = path.join(root, "public", "now-cover.jpg");
+const coversJson = path.join(root, "public", "covers.json");
+const coversDir = path.join(root, "public", "covers");
 
 const apiKey = process.env.LASTFM_API_KEY;
 const user = process.env.LASTFM_USER;
@@ -42,19 +48,21 @@ if (!tracks.length) {
   process.exit(0);
 }
 
-const pickCover = (t) => {
-  const imgs = t.image ?? [];
-  const big =
-    imgs.find((i) => i.size === "extralarge") ??
-    imgs.find((i) => i.size === "large") ??
-    imgs[imgs.length - 1];
-  return big?.["#text"] ?? "";
-};
+const toEntry = (t) => ({
+  title: t.name ?? "",
+  artist: t.artist?.["#text"] ?? "",
+  album: t.album?.["#text"] ?? "",
+  url: t.url ?? "",
+  cover: "",
+  playedAt: t.date?.uts ? new Date(Number(t.date.uts) * 1000).toISOString() : null,
+});
 
-/**
- * Last.fm 已停供封面图（image 字段全为空），用网易云公开搜索接口兜底：
- * 搜索「歌名 + 艺术家」→ 歌曲 id → song/detail → 专辑封面 URL
- */
+const nowPlaying = tracks[0]?.["@attr"]?.nowplaying === "true";
+const head = toEntry(tracks[0]);
+// 第一条已作为 head 展示（正在播放 / 最近一条），列表里不重复
+let recent = tracks.slice(1).map(toEntry);
+
+/** 网易云公开搜索接口 → 歌曲详情 → 专辑封面 URL */
 async function findNetEaseCover(title, artist) {
   if (!title) return "";
   try {
@@ -73,42 +81,45 @@ async function findNetEaseCover(title, artist) {
   }
 }
 
-const toEntry = (t) => ({
-  title: t.name ?? "",
-  artist: t.artist?.["#text"] ?? "",
-  album: t.album?.["#text"] ?? "",
-  url: t.url ?? "",
-  cover: pickCover(t),
-  playedAt: t.date?.uts ? new Date(Number(t.date.uts) * 1000).toISOString() : null,
-});
+const hashName = (s) => crypto.createHash("md5").update(s).digest("hex").slice(0, 12);
 
-const nowPlaying = tracks[0]?.["@attr"]?.nowplaying === "true";
-const head = toEntry(tracks[0]);
-// 第一条已作为 track 展示（正在播放 / 最近一条），列表里不重复
-const recent = tracks.slice(1).map(toEntry);
+// ---- 封面映射表：最近 10 首，每次构建重建 ----
+const coverMap = {};
+const all = [head, ...recent].slice(0, 10);
+const seen = new Set();
+if (all.length) {
+  fs.rmSync(coversDir, { recursive: true, force: true }); // 少量文件，避免无限累积
+  fs.mkdirSync(coversDir, { recursive: true });
 
-// 封面：Last.fm 字段为空时走网易云搜索兜底
-if (!head.cover) {
-  head.cover = await findNetEaseCover(head.title, head.artist);
-  if (head.cover) console.log(`· 封面来自网易云搜索：${head.title}`);
-}
+  for (const t of all) {
+    const key = `${t.title}|${t.artist}`;
+    if (!t.title || seen.has(key)) continue;
+    seen.add(key);
 
-// 封面本地化（失败不致命，降级为无图）
-if (head.cover) {
-  try {
-    const img = await fetch(head.cover);
-    if (img.ok) {
-      fs.writeFileSync(coverFile, Buffer.from(await img.arrayBuffer()));
-      head.cover = "/now-cover.jpg";
+    const remote = await findNetEaseCover(t.title, t.artist);
+    if (!remote) continue;
+
+    const thumb = remote.includes("?") ? remote : `${remote}?param=200y200`;
+    try {
+      const img = await fetch(thumb);
+      if (!img.ok) continue;
+      const file = `${hashName(key)}.jpg`;
+      fs.writeFileSync(path.join(coversDir, file), Buffer.from(await img.arrayBuffer()));
+      coverMap[key] = `/covers/${file}`;
+    } catch {
+      /* 单张失败不影响整体 */
     }
-  } catch {
-    /* 保留远程 URL，组件侧做兜底 */
   }
+
+  fs.writeFileSync(coversJson, `${JSON.stringify(coverMap, null, 2)}\n`);
 }
+
+head.cover = coverMap[`${head.title}|${head.artist}`] ?? "";
+recent = recent.map((t) => ({ ...t, cover: coverMap[`${t.title}|${t.artist}`] ?? "" }));
 
 fs.writeFileSync(
   outFile,
-  JSON.stringify(
+  `${JSON.stringify(
     {
       source: "lastfm",
       generatedAt: new Date().toISOString(),
@@ -118,9 +129,10 @@ fs.writeFileSync(
     },
     null,
     2,
-  ),
+  )}\n`,
 );
 
 console.log(
-  `✓ lastfm.json 已更新（${nowPlaying ? "正在播放" : "最近收听"}：${head.title} — ${head.artist}，最近 ${recent.length} 条）`,
+  `✓ lastfm.json 已更新（${nowPlaying ? "正在播放" : "最近收听"}：${head.title} — ${head.artist}，` +
+    `最近 ${recent.length} 条，封面 ${Object.keys(coverMap).length}/${seen.size}）`,
 );
