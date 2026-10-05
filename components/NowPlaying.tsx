@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getNow } from "@/lib/life";
 import { dic, type Lang } from "@/lib/i18n";
 
-/** 首页状态带：一行「正在听」，链接到 /life/music（播放器在那里，首页不加载第三方 iframe） */
+/** 首页状态带：封面缩略图 +「正在播放 / 最近在听」+ 曲目，点击进 /life/music */
 export default function NowPlaying({ lang }: { lang: Lang }) {
   const now = getNow();
   if (!now) return null;
@@ -11,15 +11,22 @@ export default function NowPlaying({ lang }: { lang: Lang }) {
   const href = lang === "zh" ? "/life/music" : "/en/life/music";
 
   return (
-    <Link
-      href={href}
-      className="group inline-flex flex-wrap items-baseline gap-x-2 font-mono text-sm text-muted"
-    >
-      <span className="text-accent">·</span>
-      <span>{t.nowPlayingLabel}</span>
-      <span className="text-ink group-hover:text-accent">{now.title}</span>
-      {now.subtitle ? <span className="hidden sm:inline">— {now.subtitle}</span> : null}
-      {now.note ? <span className="hidden text-muted md:inline">（{now.note}）</span> : null}
+    <Link href={href} className="group inline-flex items-center gap-4">
+      {now.cover ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={now.cover}
+          alt=""
+          loading="lazy"
+          className="h-12 w-12 shrink-0 border border-rule object-cover"
+        />
+      ) : null}
+      <span className="font-mono text-sm text-muted">
+        <span className="text-accent">·</span>{" "}
+        {now.live ? t.nowLiveLabel : t.nowPlayingLabel}
+        <span className="text-ink group-hover:text-accent">{now.title}</span>
+        {now.subtitle ? ` — ${now.subtitle}` : ""}
+      </span>
     </Link>
   );
 }

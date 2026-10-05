@@ -9,12 +9,16 @@ import {
   summarize,
   type CoverEntry,
   type GameEntry,
+  type LastfmData,
+  type LastfmTrack,
   type LifeStats,
   type NowPlaying,
   type ScreenEntry,
 } from "@/lib/life-shared";
 
 const ROOT = path.join(process.cwd(), "content", "life");
+const LASTFM_FILE = path.join(ROOT, "lastfm.json");
+const NOW_FILE = path.join(ROOT, "now.json");
 
 function readEntries(lang: Lang, sub: string): Array<{ slug: string; data: Record<string, unknown>; content: string }> {
   const dir = path.join(ROOT, sub, lang);
@@ -82,12 +86,22 @@ export function getCovers(lang: Lang): CoverEntry[] {
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
-/** 正在听（content/life/now.json，无文件时返回 null） */
-export function getNow(): NowPlaying | null {
-  const file = path.join(ROOT, "now.json");
-  if (!fs.existsSync(file)) return null;
+/** Last.fm 实时数据（构建前由 scripts/fetch-now.mjs 生成；不存在时返回 null） */
+export function getLastfm(): LastfmData | null {
+  if (!fs.existsSync(LASTFM_FILE)) return null;
   try {
-    const raw = JSON.parse(fs.readFileSync(file, "utf-8")) as Partial<NowPlaying>;
+    const data = JSON.parse(fs.readFileSync(LASTFM_FILE, "utf-8")) as LastfmData;
+    return data?.track?.title ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 手动兜底配置（content/life/now.json）：常驻歌单嵌入 + Last.fm 不可用时的降级 */
+function getManualNow(): NowPlaying | null {
+  if (!fs.existsSync(NOW_FILE)) return null;
+  try {
+    const raw = JSON.parse(fs.readFileSync(NOW_FILE, "utf-8")) as Partial<NowPlaying>;
     if (!raw.title) return null;
     return {
       title: raw.title,
@@ -95,10 +109,43 @@ export function getNow(): NowPlaying | null {
       note: raw.note ?? "",
       embed: raw.embed ?? "",
       link: raw.link ?? "",
+      cover: raw.cover ?? "",
+      live: false,
     };
   } catch {
     return null;
   }
+}
+
+/**
+ * 「正在听」：优先 Last.fm 实时数据（含封面与正在播放标记），回退手动 now.json。
+ */
+export function getNow(): NowPlaying | null {
+  const lf = getLastfm();
+  if (lf) {
+    return {
+      title: lf.track.title,
+      subtitle: lf.track.artist,
+      note: "",
+      embed: "",
+      link: lf.track.url,
+      cover: lf.track.cover,
+      live: lf.nowPlaying,
+    };
+  }
+  return getManualNow();
+}
+
+/** 常驻歌单嵌入（始终来自手动 now.json） */
+export function getPlaylistEmbed(): { title: string; subtitle: string; embed: string; link: string } | null {
+  const manual = getManualNow();
+  if (!manual || !manual.embed) return null;
+  return { title: manual.title, subtitle: manual.subtitle, embed: manual.embed, link: manual.link };
+}
+
+/** 最近收听列表（Last.fm） */
+export function getRecentTracks(): LastfmTrack[] {
+  return getLastfm()?.recent ?? [];
 }
 
 /** 汇总统计（构建时计算） */

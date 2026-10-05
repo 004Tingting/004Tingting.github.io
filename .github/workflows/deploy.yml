@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # 每 3 小时刷新一次「正在听」（Last.fm 拉取在 build 的前置步骤里执行）
+    - cron: "0 */3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -26,6 +29,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build static export
+        env:
+          # 未配置 Secret 时 scripts/fetch-now.mjs 会静默跳过（保留已有数据），不阻塞构建
+          LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+          LASTFM_USER: ${{ secrets.LASTFM_USER }}
         run: npm run build
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

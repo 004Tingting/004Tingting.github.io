@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getCovers, getNow } from "@/lib/life";
+import { getCovers, getNow, getPlaylistEmbed, getRecentTracks } from "@/lib/life";
+import { fmtRelative } from "@/lib/life-shared";
 import EmbedPlayer from "@/components/EmbedPlayer";
 import Kicker from "@/components/Kicker";
 
 export const metadata: Metadata = { title: "音乐" };
 
-/** 音乐：正在听（网易云嵌入）+ 乐器 cover（B站嵌入）+ 音乐随笔入口 */
+/** 音乐：正在听（Last.fm 实时）+ 最近收听 + 常驻歌单（网易云嵌入）+ 乐器 cover + 随笔入口 */
 export default function MusicPage() {
   const t = dic.zh.life;
   const now = getNow();
+  const playlist = getPlaylistEmbed();
+  const recent = getRecentTracks();
   const covers = getCovers("zh");
 
   return (
@@ -18,26 +21,77 @@ export default function MusicPage() {
       <Kicker>{t.music.kicker}</Kicker>
       <h1 className="mt-4 font-serif text-5xl font-bold">{t.music.title}</h1>
 
-      {/* 正在听 */}
+      {/* 正在听 / 最近在听（Last.fm 实时数据） */}
       {now ? (
         <section className="mt-12">
           <h2 className="font-mono text-sm tracking-widest text-muted">
-            <span className="text-accent">·</span> {t.music.nowPlayingHeading}
+            <span className="text-accent">·</span>{" "}
+            {now.live ? t.music.nowLiveHeading : t.music.recentHeading}
           </h2>
-          <p className="mt-4 font-serif text-2xl font-semibold">{now.title}</p>
-          <p className="mt-1 font-mono text-sm text-muted">
-            {[now.subtitle, now.note].filter(Boolean).join(" · ")}
-          </p>
-          {now.embed ? (
-            <EmbedPlayer
-              src={now.embed}
-              title={now.title}
-              aspect="player"
-              height={430}
-              href={now.link}
-              hrefLabel={t.music.openExternal}
-            />
-          ) : null}
+          <div className="mt-6 flex items-center gap-6">
+            {now.cover ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={now.cover}
+                alt=""
+                className="h-28 w-28 shrink-0 border border-rule object-cover"
+              />
+            ) : null}
+            <div>
+              <p className="font-serif text-2xl font-semibold">{now.title}</p>
+              {now.subtitle ? <p className="mt-1 text-muted">{now.subtitle}</p> : null}
+              {now.link ? (
+                <a
+                  href={now.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 inline-block font-mono text-xs text-accent hover:underline"
+                >
+                  ↗ Last.fm
+                </a>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* 最近收听列表 */}
+      {recent.length > 0 ? (
+        <section className="mt-16 border-t border-rule pt-10">
+          <h2 className="font-mono text-sm tracking-widest text-muted">
+            <span className="text-accent">·</span> {t.music.recentListHeading}
+          </h2>
+          <ul className="mt-6 divide-y divide-rule">
+            {recent.map((r, i) => (
+              <li key={`${r.title}-${r.playedAt ?? i}`} className="flex flex-wrap items-baseline gap-x-4 py-3">
+                <span className="font-mono text-sm text-muted">{String(i + 1).padStart(2, "0")}</span>
+                <span className="text-ink">{r.title}</span>
+                <span className="text-muted">— {r.artist}</span>
+                <span className="ml-auto font-mono text-xs text-muted">
+                  {fmtRelative(r.playedAt, "zh")}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* 常驻歌单（网易云嵌入） */}
+      {playlist ? (
+        <section className="mt-16 border-t border-rule pt-10">
+          <h2 className="font-mono text-sm tracking-widest text-muted">
+            <span className="text-accent">·</span> {t.music.playlistHeading}
+          </h2>
+          <p className="mt-4 font-serif text-2xl font-semibold">{playlist.title}</p>
+          <p className="mt-1 font-mono text-sm text-muted">{playlist.subtitle}</p>
+          <EmbedPlayer
+            src={playlist.embed}
+            title={playlist.title}
+            aspect="player"
+            height={430}
+            href={playlist.link}
+            hrefLabel={t.music.openExternal}
+          />
           <p className="mt-3 font-mono text-xs text-muted">{t.music.nowNote}</p>
         </section>
       ) : null}

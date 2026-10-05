@@ -46,6 +46,27 @@ export type NowPlaying = {
   note: string;
   embed: string;
   link: string;
+  cover: string;
+  live: boolean;
+};
+
+/** Last.fm 拉取的单条收听记录（scripts/fetch-now.mjs 生成） */
+export type LastfmTrack = {
+  title: string;
+  artist: string;
+  album: string;
+  url: string;
+  cover: string;
+  playedAt: string | null;
+};
+
+/** content/life/lastfm.json 的结构 */
+export type LastfmData = {
+  source: "lastfm";
+  generatedAt: string;
+  nowPlaying: boolean;
+  track: LastfmTrack;
+  recent: LastfmTrack[];
 };
 
 export const GAME_STATUSES: GameStatus[] = ["playing", "completed", "dropped"];
@@ -66,6 +87,20 @@ export function asScreenStatus(v: unknown): ScreenStatus {
 /** 时长显示：42 → 42h；null → — */
 export function fmtHours(h: number | null): string {
   return h === null ? "—" : `${h}h`;
+}
+
+/** 相对时间（构建时计算）：ISO → 3 小时前 / 3h ago */
+export function fmtRelative(iso: string | null, lang: Lang): string {
+  if (!iso) return "";
+  const hours = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
+  if (lang === "zh") {
+    if (hours < 1) return "刚刚";
+    if (hours < 24) return `${hours} 小时前`;
+    return `${Math.floor(hours / 24)} 天前`;
+  }
+  if (hours < 1) return "just now";
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
 /** 评分显示：8.5 → 8.5；null → — */
