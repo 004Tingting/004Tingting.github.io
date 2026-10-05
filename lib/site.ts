@@ -25,11 +25,11 @@ export const SITE = {
 
 /**
  * giscus 评论配置（基于 GitHub Discussions）。
- * 生效条件：① repoId / categoryId 已填 ✅ ② giscus GitHub App 已安装到本仓库（enabled 改 true）。
- * 安装入口：https://github.com/apps/giscus/installations/new
+ * 已启用：repoId / categoryId 已填，giscus GitHub App 已安装。
+ * 映射方式 pathname：中英文文章各成一条讨论线。
  */
 export const GISCUS = {
-  enabled: false,
+  enabled: true,
   repo: "004Tingting/004Tingting.github.io",
   repoId: "R_kgDOU9Csyg",
   category: "Announcements",

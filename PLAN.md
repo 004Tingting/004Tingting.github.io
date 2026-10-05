@@ -111,7 +111,7 @@ personal-site/
 | M2 作品集 | 项目列表 + 详情 | 4 个条目就位 |
 | M3 上线 | GitHub 仓库 + Actions + Pages | `https://<用户名>.github.io` 可访问 ✅ 已上线 https://004tingting.github.io |
 | M4 打磨 | SEO/OG 分享卡片、sitemap、双语 RSS、定制 404、giscus 评论 | ✅ 已上线（giscus 待安装 App 后启用） |
-| M5 生活板块 | 音乐 / 游戏 / 记录三个子模块 + 首页 Now Playing | 规格见 `DESIGN.md` §8；双语，一次全做 |
+| M5 生活板块 | 音乐 / 游戏 / 记录三个子模块 + 首页 Now Playing | ✅ 已上线（示例条目待替换真实记录） |
 
 每个里程碑结束站点都处于可用状态，随时可以停。
 
