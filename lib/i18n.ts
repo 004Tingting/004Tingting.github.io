@@ -1,7 +1,7 @@
 export type Lang = "zh" | "en";
 
 export const zh = {
-  nav: { about: "关于", blog: "博客", projects: "项目" },
+  nav: { about: "关于", blog: "博客", projects: "项目", life: "生活" },
   home: {
     kicker: "个人杂志",
     identity: "控制科学与工程硕士在读",
@@ -10,6 +10,47 @@ export const zh = {
     viewAll: "全部 →",
     projects: "精选项目",
     empty: "第一篇文章在路上。",
+  },
+  life: {
+    kicker: "生活",
+    title: "Life",
+    intro: "博客之外的日常切面：在玩什么、在听什么、看过什么。",
+    music: {
+      kicker: "音乐",
+      title: "Music",
+      nowPlayingLabel: "正在听：",
+      nowPlayingHeading: "正在听",
+      nowNote: "歌单嵌入由网易云音乐提供，若无法加载请走链接。",
+      openExternal: "在网易云打开",
+      covers: "乐器 cover",
+      coversEmpty: "第一首 cover 在路上。",
+      coversHint: "B 站视频嵌入，点击可直接播放。",
+      notes: "音乐随笔",
+      notesDesc: "乐评与随想，写在博客的「音乐」分类里。",
+      notesLink: "去看音乐随笔 →",
+    },
+    games: {
+      kicker: "游戏",
+      title: "Games",
+      all: "全部",
+      countLabel: "款",
+      avgLabel: "均分",
+      designStudy: "设计研究",
+      designStudyMark: "◉ 设计研究",
+      empty: "第一条游玩记录在路上。",
+      review: "测评 →",
+    },
+    log: {
+      kicker: "记录",
+      title: "Log",
+      total: "共",
+      hoursUnit: " 小时",
+      empty: "第一条记录在路上。",
+      review: "测评 →",
+    },
+    gameStatus: { playing: "在玩", completed: "通关", dropped: "弃坑" },
+    screenStatus: { watching: "在看", completed: "看完", dropped: "弃了" },
+    screenTypes: { tv: "剧", anime: "番", movie: "影", novel: "小说" },
   },
   about: {
     title: "关于",
@@ -21,7 +62,7 @@ export const zh = {
 } as const;
 
 export const en = {
-  nav: { about: "About", blog: "Blog", projects: "Work" },
+  nav: { about: "About", blog: "Blog", projects: "Work", life: "Life" },
   home: {
     kicker: "A Personal Journal",
     identity: "M.Sc. student in Control Science and Engineering",
@@ -30,6 +71,47 @@ export const en = {
     viewAll: "All →",
     projects: "Selected Projects",
     empty: "The first post is on its way.",
+  },
+  life: {
+    kicker: "Life",
+    title: "Life",
+    intro: "Everything off the research desk: what I'm playing, listening to, and watching.",
+    music: {
+      kicker: "Music",
+      title: "Music",
+      nowPlayingLabel: "Now playing: ",
+      nowPlayingHeading: "Now playing",
+      nowNote: "Playlist embed by NetEase Cloud Music — use the link below if it fails to load.",
+      openExternal: "Open on NetEase",
+      covers: "Instrumental covers",
+      coversEmpty: "The first cover is on its way.",
+      coversHint: "Bilibili embeds — click to play.",
+      notes: "Music notes",
+      notesDesc: "Reviews and thoughts, filed under the Music category on the blog.",
+      notesLink: "Read music notes →",
+    },
+    games: {
+      kicker: "Games",
+      title: "Games",
+      all: "All",
+      countLabel: "games",
+      avgLabel: "avg",
+      designStudy: "Design study",
+      designStudyMark: "◉ Design study",
+      empty: "The first play log is on its way.",
+      review: "Review →",
+    },
+    log: {
+      kicker: "Log",
+      title: "Log",
+      total: "Total",
+      hoursUnit: "h",
+      empty: "The first entry is on its way.",
+      review: "Review →",
+    },
+    gameStatus: { playing: "Playing", completed: "Beaten", dropped: "Dropped" },
+    screenStatus: { watching: "Watching", completed: "Finished", dropped: "Dropped" },
+    screenTypes: { tv: "TV", anime: "Anime", movie: "Film", novel: "Novel" },
   },
   about: {
     title: "About",

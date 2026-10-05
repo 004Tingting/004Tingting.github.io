@@ -4,6 +4,7 @@ import { getPosts, fmtDate } from "@/lib/posts";
 import { getProjects, toProjectMeta } from "@/lib/projects";
 import Kicker from "@/components/Kicker";
 import ProjectList from "@/components/ProjectList";
+import NowPlaying from "@/components/NowPlaying";
 
 /** 首页（门户型）：hero + 最新文章 + 精选项目 */
 export default function HomePage() {
@@ -19,6 +20,9 @@ export default function HomePage() {
         <h1 className="mt-4 font-serif text-7xl font-bold tracking-tight md:text-9xl">Ting</h1>
         <p className="mt-8 text-lg text-muted md:text-xl">{t.identity}</p>
         <p className="mt-3 font-mono text-sm text-muted md:text-base">{t.interests.join(" / ")}</p>
+        <div className="mt-8">
+          <NowPlaying lang="zh" />
+        </div>
       </section>
 
       {/* 最新文章 */}

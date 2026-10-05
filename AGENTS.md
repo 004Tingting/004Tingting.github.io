@@ -31,22 +31,30 @@ app/
 │   ├── page.tsx          # 首页（门户型：hero + 最新文章 + 精选项目）
 │   ├── blog/[slug]/      # 博客列表 + 详情
 │   ├── projects/[slug]/  # 作品集列表 + 详情
+│   ├── life/             # 生活板块：总览 + games / music / log
 │   └── about/
 ├── (en)/en/              # 英文站（根 layout #2，lang="en"）——目录结构与中文站镜像
 ├── globals.css           # 设计 token + prose 排版 + hljs 深浅适配
 ├── sitemap.ts / robots.ts
 ├── feed.xml/route.ts     # 中文 RSS（en 版在 (en)/en/feed.xml/route.ts）
 └── favicon.svg
-components/               # Nav / Footer / ThemeToggle / Kicker / BlogList / ProjectList / MarkdownBody / Giscus
+components/               # Nav / Footer / ThemeToggle / Kicker / BlogList / ProjectList / MarkdownBody / Giscus / NowPlaying / EmbedPlayer / LifeEntryList
 content/
 ├── blog/{zh,en}/*.md
-└── projects/{zh,en}/*.md
+├── projects/{zh,en}/*.md
+└── life/                 # 生活板块
+    ├── now.json          # 正在听（网易云外链配置）
+    ├── games/{zh,en}/*.md    # 游戏条目（状态/10分制/时长/designStudy/review）
+    ├── screen/{zh,en}/*.md   # 追剧/番/影/小说条目（type/时长/review）
+    └── covers/{zh,en}/*.md   # 乐器 cover（instrument/bilibili BV 号）
 lib/
-├── i18n.ts               # UI 文案字典（zh/en）
+├── i18n.ts               # UI 文案字典（zh/en，含 life 全部标签）
 ├── site.ts               # 站点常量：URL、SEO 默认值、giscus 配置
 ├── blog-shared.ts        # 客户端安全（无 node 依赖）的类型与纯函数
+├── life-shared.ts        # 生活板块客户端安全：类型、枚举、汇总统计
 ├── posts.ts              # 博客内容管道（fs + gray-matter，构建时执行）
-└── projects.ts           # 作品集内容管道（按 frontmatter order 排序）
+├── projects.ts           # 作品集内容管道（按 frontmatter order 排序）
+└── life.ts               # 生活板块管道（games / screen / covers / now + stats）
 scripts/
 ├── preview.py            # 本地预览（支持 clean URL，对齐 GitHub Pages）
 ├── og.mjs                # 生成 public/og.png 分享卡片（sharp 渲染 SVG）
@@ -84,6 +92,10 @@ git add -A && git commit && git push   # 发布（Actions 自动部署）
 - **渐进式双语**：重要文章双语，随笔单语；未翻译内容在另一语言不显示空壳
 - **博客分类**：科研笔记（FTSMC / CAV）/ 开发记录（OinO、本站）/ 游戏设计
 - **作品集**：CAV 滑模控制（科研）/ 故障诊断与寿命预测（工程）/ OinO（软件）/ 游戏设计探索
+- **生活板块**（/life）：音乐（Now Playing + 乐器 cover + 音乐随笔）/ 游戏（条目 + 测评双轨）/ 记录（剧番影书 + 时长自动汇总）
+  - 嵌入数据源实测：网易云 outchain ✅、B站播放器 ✅、YouTube ❌（国内不可达，已排除）
+  - 所有第三方嵌入必须走 `EmbedPlayer`（带外链降级，嵌入失败不破版）
+  - 条目状态/类型用枚举存 frontmatter，展示标签统一走 `lib/i18n.ts`
 
 ## 文档地图
 
@@ -97,6 +109,7 @@ git add -A && git commit && git push   # 发布（Actions 自动部署）
 ## 当前状态 / 待办
 
 - 全部里程碑 M0–M4 已完成，站点上线运行
+- **M5 生活板块**：已实现 /life（音乐 / 游戏 / 记录）+ 首页 Now Playing；内容为示例条目，待 Ting 替换真实记录
 - **giscus 评论**：Discussions 已开、ID 已填，等安装 giscus App 后把 `lib/site.ts` 的 `enabled` 改 `true`
 - **作品集初稿**：OinO / 游戏设计两个页面内容偏框架性，待补真实细节
 - **about 页**：仍是占位

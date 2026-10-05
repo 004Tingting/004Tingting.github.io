@@ -19,6 +19,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: Array<[string, string]> = [
     ["/", "/en/"],
     ["/blog/", "/en/blog/"],
+    ["/life/", "/en/life/"],
+    ["/life/games/", "/en/life/games/"],
+    ["/life/music/", "/en/life/music/"],
+    ["/life/log/", "/en/life/log/"],
     ["/projects/", "/en/projects/"],
     ["/about/", "/en/about/"],
   ];

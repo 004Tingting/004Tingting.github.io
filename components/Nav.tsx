@@ -19,6 +19,7 @@ export default function Nav({ lang }: { lang: Lang }) {
 
   const homeHref = lang === "zh" ? "/" : "/en";
   const blogHref = lang === "zh" ? "/blog" : "/en/blog";
+  const lifeHref = lang === "zh" ? "/life" : "/en/life";
   const projectsHref = lang === "zh" ? "/projects" : "/en/projects";
   const aboutHref = lang === "zh" ? "/about" : "/en/about";
 
@@ -31,6 +32,9 @@ export default function Nav({ lang }: { lang: Lang }) {
         <nav className="flex items-baseline gap-6 font-mono text-sm">
           <Link href={blogHref} className="hover:text-accent">
             {t.blog}
+          </Link>
+          <Link href={lifeHref} className="hover:text-accent">
+            {t.life}
           </Link>
           <Link href={projectsHref} className="hover:text-accent">
             {t.projects}
