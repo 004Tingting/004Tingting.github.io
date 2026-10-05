@@ -127,8 +127,8 @@ M0 就必须定死、避免返工的：双语路由骨架、字体加载方案�
 - 基于 GitHub Discussions，映射方式 `pathname`——中英文文章天然分成两条讨论线
 - 分类用 **Announcements**：读者只能评论，不能新建讨论（避免仓库 Discussions 被滥用）
 - 配置集中在 `lib/site.ts`；repo / category ID 已填
-- **启用条件**：安装 giscus GitHub App 后，把 `GISCUS.enabled` 改为 `true` 并推送
-  - 安装入口：https://github.com/apps/giscus/installations/new
+- **已启用（2026-10-06）**：giscus GitHub App 已安装、`GISCUS.enabled = true`
+- 脚本从 giscus.app 加载，国内访问偶慢；首条评论需 GitHub 登录
 - 主题 `preferred_color_scheme`：跟随系统深浅色
 
 ## 8. 生活板块（/life，M5 规划定稿）

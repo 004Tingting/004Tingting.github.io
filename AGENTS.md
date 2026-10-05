@@ -108,8 +108,7 @@ git add -A && git commit && git push   # 发布（Actions 自动部署）
 
 ## 当前状态 / 待办
 
-- 全部里程碑 M0–M4 已完成，站点上线运行
-- **M5 生活板块**：已实现 /life（音乐 / 游戏 / 记录）+ 首页 Now Playing；内容为示例条目，待 Ting 替换真实记录
-- **giscus 评论**：Discussions 已开、ID 已填，等安装 giscus App 后把 `lib/site.ts` 的 `enabled` 改 `true`
+- 全部里程碑 M0–M4 已完成，M5 生活板块已上线（示例条目待替换真实记录）
+- **giscus 评论已启用**（App 已装、`enabled=true`）；Discussions 分类用 Announcements
 - **作品集初稿**：OinO / 游戏设计两个页面内容偏框架性，待补真实细节
 - **about 页**：仍是占位
