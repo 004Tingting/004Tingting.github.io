@@ -5,7 +5,7 @@ import Link from "next/link";
 import { dic, type Lang } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 
-/** 构建时的快照（仅作为接口不可用时的兜底） */
+/** 构建时的快照（仅作为所有实时源都不可用时的兜底） */
 export type NowSnapshot = {
   title: string;
   subtitle: string;
@@ -21,13 +21,22 @@ type Props = {
   variant?: "bar" | "card";
 };
 
-const REFRESH_MS = 60_000;
+/** 轮询间隔：本地脚本 scripts/push-now.mjs 每 30 秒推送一次 now-data */
+const REFRESH_MS = 30_000;
 
 /**
- * 实时「正在听」：
- * - 初始状态为 null —— **SSR 不渲染构建时的旧数据**，避免「先显示旧歌再刷新」
- * - 挂载后立刻拉一次 Last.fm，之后每 60 秒刷新；接口失败才回退到构建时快照
- * - 封面查构建时生成的映射表（public/covers + covers.json），切歌即时换图；表里没有则不显示封面
+ * 本地脚本推送的实时数据（含网易云封面），经 jsDelivr 读取（CORS 可用）。
+ * 数据链路：本机脚本 → GitHub now-data 分支 → jsDelivr → 此处
+ */
+const NOW_DATA_URL =
+  "https://cdn.jsdelivr.net/gh/004Tingting/004Tingting.github.io@now-data/now.json";
+
+/**
+ * 实时「正在听」三级数据源：
+ *   ① now-data（本地脚本推送，≤30 秒新鲜度，**带封面**）—— 首选
+ *   ② Last.fm 直连（曲目实时）+ 构建时封面映射表 —— 本机脚本没在跑时
+ *   ③ 构建时快照（initial）—— 全部失败时
+ * SSR 阶段不渲染旧数据，避免「先显示过期歌曲再刷新」。
  */
 export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props) {
   const [now, setNow] = useState<NowSnapshot | null>(null);
@@ -35,21 +44,41 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
   const t = dic[lang].life.music;
 
   useEffect(() => {
-    // 封面映射（构建时生成，同源）
+    // 构建时生成的封面映射（降级路径用）
     fetch("/covers.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : {}))
       .then((m) => setCoverMap(m ?? {}))
       .catch(() => {});
 
-    const { user, apiKey } = SITE.lastfm;
-    if (!user || !apiKey) {
-      setNow(initial); // 未配置 key → 用构建时快照兜底
-      return;
-    }
-
     let cancelled = false;
 
     const load = async () => {
+      /* ① 首选：本地脚本推送的实时数据 */
+      try {
+        const res = await fetch(NOW_DATA_URL, { cache: "no-store" });
+        if (res.ok) {
+          const d = await res.json();
+          if (d?.title && !cancelled) {
+            setNow({
+              title: d.title,
+              subtitle: d.artist ?? "",
+              cover: d.cover ?? "",
+              live: !!d.live,
+              link: d.link ?? "",
+            });
+            return;
+          }
+        }
+      } catch {
+        /* 继续降级 */
+      }
+
+      /* ② 降级：直连 Last.fm（仅有曲目，封面靠映射表） */
+      const { user, apiKey } = SITE.lastfm;
+      if (!user || !apiKey) {
+        if (!cancelled) setNow((prev) => prev ?? initial);
+        return;
+      }
       try {
         const url =
           `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks` +
@@ -62,13 +91,13 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
         setNow({
           title: track.name ?? "",
           subtitle: track.artist?.["#text"] ?? "",
-          cover: "", // 由映射表决定，见下方渲染
+          cover: "",
           live: track["@attr"]?.nowplaying === "true",
           link: track.url ?? "",
         });
       } catch {
-        // 首次失败回退构建时快照；后续失败保留当前数据
-        setNow((prev) => prev ?? initial);
+        /* ③ 兜底：构建时快照 */
+        if (!cancelled) setNow((prev) => prev ?? initial);
       }
     };
 
@@ -81,10 +110,13 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // SSR / 首帧：占位（保持布局稳定，不显示过期数据）
-  if (!now) return variant === "card" ? <div className="mt-12 h-40" aria-hidden /> : <div className="h-12" aria-hidden />;
+  // SSR / 首帧：占位，保持布局稳定
+  if (!now) {
+    return variant === "card" ? <div className="mt-12 h-40" aria-hidden /> : <div className="h-12" aria-hidden />;
+  }
 
-  const cover = coverMap[`${now.title}|${now.subtitle}`] || now.cover || "";
+  // 封面：实时源自带优先；否则查构建时映射表
+  const cover = now.cover || coverMap[`${now.title}|${now.subtitle}`] || "";
   const href = lang === "zh" ? "/life/music" : "/en/life/music";
 
   if (variant === "card") {

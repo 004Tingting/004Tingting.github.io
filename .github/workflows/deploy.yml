@@ -1,11 +1,13 @@
-name: Deploy to GitHub Pages
+name: Deploy to GitHub Pages（备用通道）
+
+# ⚠️ 当前站点使用 **gh-pages 分支模式**部署（见 scripts/deploy.sh），本 workflow 平时不运行。
+# 保留原因：若日后切回 Pages 的 workflow 模式，可直接复用。
+# 切回方式：
+#   gh api -X PUT repos/004Tingting/004Tingting.github.io/pages -f build_type=workflow
+# 背景：2026-10-06 GitHub Actions 发生 major outage（runner 长时间排队/失败），
+#       遂改用分支部署以摆脱对 Actions runner 的依赖。
 
 on:
-  push:
-    branches: [main]
-  schedule:
-    # 每 3 小时刷新一次「正在听」（Last.fm 拉取在 build 的前置步骤里执行）
-    - cron: "0 */3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -18,8 +20,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
+    # 合并 build 与 deploy 为一个 job：减少一次 runner 排队机会
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,24 +36,14 @@ jobs:
         run: npm ci
       - name: Build static export
         env:
-          # 未配置 Secret 时 scripts/fetch-now.mjs 会静默跳过（保留已有数据），不阻塞构建
           LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
           LASTFM_USER: ${{ secrets.LASTFM_USER }}
-          # 注入到前端 bundle，供「正在听」每 60 秒直连 Last.fm 使用
           NEXT_PUBLIC_LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
         run: npm run build
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

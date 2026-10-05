@@ -29,7 +29,7 @@ if (!apiKey || !user) {
 
 const endpoint =
   `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks` +
-  `&user=${encodeURIComponent(user)}&api_key=${apiKey}&format=json&limit=10`;
+  `&user=${encodeURIComponent(user)}&api_key=${apiKey}&format=json&limit=50`;
 
 let payload;
 try {
@@ -83,9 +83,9 @@ async function findNetEaseCover(title, artist) {
 
 const hashName = (s) => crypto.createHash("md5").update(s).digest("hex").slice(0, 12);
 
-// ---- 封面映射表：最近 10 首，每次构建重建 ----
+// ---- 封面映射表：最近 50 首，每次构建重建 ----
 const coverMap = {};
-const all = [head, ...recent].slice(0, 10);
+const all = [head, ...recent].slice(0, 50);
 const seen = new Set();
 if (all.length) {
   fs.rmSync(coversDir, { recursive: true, force: true }); // 少量文件，避免无限累积
@@ -109,6 +109,8 @@ if (all.length) {
     } catch {
       /* 单张失败不影响整体 */
     }
+    // 轻微节流，避免网易云接口限流
+    await new Promise((r) => setTimeout(r, 60));
   }
 
   fs.writeFileSync(coversJson, `${JSON.stringify(coverMap, null, 2)}\n`);

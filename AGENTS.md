@@ -78,8 +78,18 @@ npm run dev                      # 开发（建议在普通终端跑，见环境
 npm run build                    # 构建（含 postbuild 生成 404.html）
 python scripts/preview.py 8000   # 预览构建产物（clean URL）
 npm run og                       # 重新生成分享卡片图
-git add -A && git commit && git push   # 发布（Actions 自动部署）
+npm run live                     # 启动「正在听」实时推送（本机常驻，见下）
+bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → 触发 Pages 构建）
 ```
+
+## 「正在听」的数据链路（重要）
+
+| 层 | 说明 |
+|---|---|
+| 实时源 | `now-data` 分支的 `now.json`，由**本机脚本** `scripts/push-now.mjs` 推送（读 Last.fm 曲目 + 查网易云封面），经 jsDelivr 供前端读取，≤30 秒新鲜度 |
+| 前端 | `components/NowPlayingLive.tsx` 三级降级：now-data → Last.fm 直连 + 构建映射表 → 构建快照 |
+| 构建时 | `scripts/fetch-now.mjs` 生成快照与封面映射（`public/covers.json` + `public/covers/*.jpg`，最近 50 首） |
+| 为什么这么绕 | 浏览器无法直连网易云接口（无 CORS），iTunes 等替代源对日韩文歌匹配不准，Last.fm 已停供封面 |
 
 ## 环境注意事项（WorkBuddy 会话内，详细见 PITFALLS.md）
 

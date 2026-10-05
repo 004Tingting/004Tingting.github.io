@@ -29,10 +29,41 @@ npm run og                       # 重新生成分享卡片图 public/og.png
 
 ## 发布流程
 
+**当前使用「本地构建 + gh-pages 分支」部署**（2026-10-06 起，因 GitHub Actions 故障切换）：
+
 ```bash
-git add -A && git commit -m "post: 新文章标题" && git push
-# GitHub Actions 自动构建部署，约 1 分钟后线上更新
+bash scripts/deploy.sh   # 一键：构建 → 推 gh-pages 分支 → 触发 Pages 构建
 ```
+
+> 旧的自动模式（push main 触发 Actions 构建部署）配置保留在 `.github/workflows/deploy.yml`，
+> 但已改为仅手动触发。若日后切回：`gh api -X PUT repos/004Tingting/004Tingting.github.io/pages -f build_type=workflow`
+
+**内容改动后**：改 `content/**` → 跑 `scripts/deploy.sh`（或让 Buddy 代跑）。
+**只想本地看效果**：`python scripts/preview.py 8000`
+
+## 实时「正在听」（本地脚本）
+
+网站上的「正在听」曲目与封面，由**本机脚本**实时推送（浏览器无法直连网易云接口，所以这一步必须在本机完成）：
+
+```bash
+npm run live                # 启动监听：每 30 秒检查一次，Ctrl+C 退出
+npm run live -- --interval 15   # 自定义间隔
+```
+
+**数据链路**：
+
+```
+本机脚本（每 30 秒）
+  ├─ Last.fm：当前播放曲目
+  ├─ 网易云：专辑封面（本机直连，无 CORS 限制）
+  └─ GitHub API → now-data 分支 → 清除 jsDelivr 缓存
+                    ↓
+        网站前端读取（CORS 可用）→ 切歌后 ≤30 秒封面更新
+```
+
+- 配置：`.env.local` 需有 `LASTFM_API_KEY` / `LASTFM_USER` / `GITHUB_TOKEN`（`GITHUB_TOKEN` 用 `gh auth token` 获取）
+- 脚本只在**切歌时**推送（无变化不产生提交），不会刷提交历史
+- **不开脚本时**网站自动降级：Last.fm 直连取曲目 + 构建时封面映射表（`public/covers.json`）
 
 ## 文档
 

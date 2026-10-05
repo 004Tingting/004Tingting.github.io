@@ -1,16 +1,48 @@
 {
   "source": "lastfm",
-  "generatedAt": "2026-10-05T20:29:28.340Z",
+  "generatedAt": "2026-10-05T20:33:40.716Z",
   "nowPlaying": false,
   "track": {
-    "title": "MY ALL",
-    "artist": "浜崎あゆみ",
+    "title": "One Last Kiss",
+    "artist": "宇多田ヒカル",
     "album": "",
-    "url": "https://www.last.fm/music/%E6%B5%9C%E5%B4%8E%E3%81%82%E3%82%86%E3%81%BF/_/MY+ALL",
-    "cover": "/covers/a34dc9175657.jpg",
-    "playedAt": "2026-10-05T20:24:27.000Z"
+    "url": "https://www.last.fm/music/%E5%AE%87%E5%A4%9A%E7%94%B0%E3%83%92%E3%82%AB%E3%83%AB/_/One+Last+Kiss",
+    "cover": "/covers/d8335b2779df.jpg",
+    "playedAt": "2026-10-05T20:31:48.000Z"
   },
   "recent": [
+    {
+      "title": "だんご大家族",
+      "artist": "茶太",
+      "album": "",
+      "url": "https://www.last.fm/music/%E8%8C%B6%E5%A4%AA/_/%E3%81%A0%E3%82%93%E3%81%94%E5%A4%A7%E5%AE%B6%E6%97%8F",
+      "cover": "/covers/aaef986794b1.jpg",
+      "playedAt": "2026-10-05T20:31:42.000Z"
+    },
+    {
+      "title": "心做し",
+      "artist": "majiko",
+      "album": "",
+      "url": "https://www.last.fm/music/majiko/_/%E5%BF%83%E5%81%9A%E3%81%97",
+      "cover": "/covers/1bfbb291f66c.jpg",
+      "playedAt": "2026-10-05T20:31:13.000Z"
+    },
+    {
+      "title": "光るなら",
+      "artist": "Goose house",
+      "album": "",
+      "url": "https://www.last.fm/music/Goose+house/_/%E5%85%89%E3%82%8B%E3%81%AA%E3%82%89",
+      "cover": "/covers/67e270167866.jpg",
+      "playedAt": "2026-10-05T20:29:50.000Z"
+    },
+    {
+      "title": "MY ALL",
+      "artist": "浜崎あゆみ",
+      "album": "",
+      "url": "https://www.last.fm/music/%E6%B5%9C%E5%B4%8E%E3%81%82%E3%82%86%E3%81%BF/_/MY+ALL",
+      "cover": "/covers/a34dc9175657.jpg",
+      "playedAt": "2026-10-05T20:24:27.000Z"
+    },
     {
       "title": "君が好きだと叫びたい",
       "artist": "BAAD",
@@ -42,38 +74,6 @@
       "url": "https://www.last.fm/music/ram+wire/_/%E5%83%95%E3%82%89%E3%81%AE%E6%89%8B%E3%81%AB%E3%81%AF%E4%BD%95%E3%82%82%E3%81%AA%E3%81%84%E3%81%91%E3%81%A9%E3%80%81",
       "cover": "/covers/91af1644d67a.jpg",
       "playedAt": "2026-10-05T20:09:37.000Z"
-    },
-    {
-      "title": "紅蓮華",
-      "artist": "Lisa",
-      "album": "",
-      "url": "https://www.last.fm/music/Lisa/_/%E7%B4%85%E8%93%AE%E8%8F%AF",
-      "cover": "/covers/461c69ee97e5.jpg",
-      "playedAt": "2026-10-05T20:05:41.000Z"
-    },
-    {
-      "title": "いけないボーダーライン",
-      "artist": "ワルキューレ",
-      "album": "",
-      "url": "https://www.last.fm/music/%E3%83%AF%E3%83%AB%E3%82%AD%E3%83%A5%E3%83%BC%E3%83%AC/_/%E3%81%84%E3%81%91%E3%81%AA%E3%81%84%E3%83%9C%E3%83%BC%E3%83%80%E3%83%BC%E3%83%A9%E3%82%A4%E3%83%B3",
-      "cover": "/covers/4f9a737a4a62.jpg",
-      "playedAt": "2026-10-05T20:00:57.000Z"
-    },
-    {
-      "title": "病名は愛だった",
-      "artist": "Neru",
-      "album": "",
-      "url": "https://www.last.fm/music/Neru/_/%E7%97%85%E5%90%8D%E3%81%AF%E6%84%9B%E3%81%A0%E3%81%A3%E3%81%9F",
-      "cover": "/covers/f4d1f72bdf73.jpg",
-      "playedAt": "2026-10-05T19:57:05.000Z"
-    },
-    {
-      "title": "ブルーバード",
-      "artist": "いきものがかり",
-      "album": "",
-      "url": "https://www.last.fm/music/%E3%81%84%E3%81%8D%E3%82%82%E3%81%AE%E3%81%8C%E3%81%8B%E3%82%8A/_/%E3%83%96%E3%83%AB%E3%83%BC%E3%83%90%E3%83%BC%E3%83%89",
-      "cover": "/covers/e0a2b16b4559.jpg",
-      "playedAt": "2026-10-05T19:57:04.000Z"
     }
   ]
 }

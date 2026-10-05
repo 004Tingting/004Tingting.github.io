@@ -100,6 +100,13 @@
 - **应对**：
   - 等待重试（拥堵通常几十分钟内缓解）
   - 急需上线时走应急通道：把本地 `out/` 推到 `gh-pages` 分支 + `gh api -X PUT .../pages -f build_type=legacy -f source[branch]=gh-pages`，**绕过 Actions 约 3 分钟上线**（之后再切回 workflow 模式）
+- **2026-10-06 实例（major outage）**：GitHub Actions 官方故障（`Actions: major_outage`，incident 自本地 03:11 起）。表现：免费 runner 全部排队 15 分钟后超时失败（连续 3 次），随后 **Pages 构建也 `errored`**（同一基础设施）
+  - **判断方法**（不要凭猜）：
+    ```bash
+    curl -s https://www.githubstatus.com/api/v2/components.json   # 看 Actions / Pages 组件状态
+    curl -s https://www.githubstatus.com/api/v2/incidents/unresolved.json  # 看未解决事件
+    ```
+  - **结论**：这是 GitHub 侧问题，**用户无需操作**，等待恢复即可（官方 incident 页面会更新进展）
 - **顺带**：本地 `python scripts/preview.py 8000` 随时可预览最新产物，不必等部署
 
 ## 四、内容与架构
