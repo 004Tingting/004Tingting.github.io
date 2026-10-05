@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProject, getProjects } from "@/lib/projects";
+import { SITE } from "@/lib/site";
 import MarkdownBody from "@/components/MarkdownBody";
 import Kicker from "@/components/Kicker";
 
@@ -18,7 +19,31 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const project = getProject("zh", slug);
-  return project ? { title: project.title, description: project.summary } : {};
+  if (!project) return {};
+
+  const canonical = `/projects/${slug}/`;
+  return {
+    title: project.title,
+    description: project.summary,
+    alternates: {
+      canonical,
+      languages: { "zh-CN": canonical, en: `/en/projects/${slug}/` },
+    },
+    openGraph: {
+      type: "article",
+      title: project.title,
+      description: project.summary,
+      url: canonical,
+      tags: [...project.tags],
+      images: [{ url: SITE.ogImage, width: 1200, height: 630, alt: project.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.title,
+      description: project.summary,
+      images: [SITE.ogImage],
+    },
+  };
 }
 
 export default async function ProjectPage({

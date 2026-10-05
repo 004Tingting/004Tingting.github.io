@@ -109,7 +109,7 @@ personal-site/
 | M0 地基 | 初始化 + 布局 + 导航 + 首页占位 | `npm run dev` 本地可跑 |
 | M1 博客 | 列表 + 详情 + 标签 | 发出第一篇真文章 |
 | M2 作品集 | 项目列表 + 详情 | 4 个条目就位 |
-| M3 上线 | GitHub 仓库 + Actions + Pages | `https://<用户名>.github.io` 可访问 |
+| M3 上线 | GitHub 仓库 + Actions + Pages | `https://<用户名>.github.io` 可访问 ✅ 已上线 https://004tingting.github.io |
 | M4 打磨 | 暗色模式完善、SEO/OG、RSS、giscus 评论（可选） | 分享链接有像样的预览卡片 |
 
 每个里程碑结束站点都处于可用状态，随时可以停。

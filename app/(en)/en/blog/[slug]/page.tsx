@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPost, getPosts, fmtDate } from "@/lib/posts";
+import { SITE } from "@/lib/site";
 import MarkdownBody from "@/components/MarkdownBody";
 import Kicker from "@/components/Kicker";
+import Giscus from "@/components/Giscus";
 
 export const dynamicParams = false;
 
@@ -18,7 +20,32 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = getPost("en", slug);
-  return post ? { title: post.title, description: post.summary } : {};
+  if (!post) return {};
+
+  const canonical = `/en/blog/${slug}/`;
+  return {
+    title: post.title,
+    description: post.summary,
+    alternates: {
+      canonical,
+      languages: { "zh-CN": `/blog/${slug}/`, en: canonical },
+    },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.summary,
+      url: canonical,
+      publishedTime: post.date,
+      tags: [...post.tags],
+      images: [{ url: SITE.ogImage, width: 1200, height: 630, alt: post.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.summary,
+      images: [SITE.ogImage],
+    },
+  };
 }
 
 export default async function PostPage({
@@ -43,6 +70,8 @@ export default async function PostPage({
       <div className="mt-10">
         <MarkdownBody content={post.content} />
       </div>
+
+      <Giscus lang="en" />
 
       <p className="mt-16 border-t border-rule pt-6 font-mono text-sm">
         <Link href="/en/blog" className="hover:text-accent">
