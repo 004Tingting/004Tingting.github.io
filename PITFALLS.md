@@ -93,18 +93,27 @@
 - 推送 `.github/workflows/` 下的文件严格来说需要 `workflow` scope
 - 本次 gh 默认作用域推送通过；若被拒：`gh auth refresh -h github.com -s workflow`
 
+### 14. GitHub Actions runner 排队（"The job was not acquired by Runner"）
+
+- **现象**：push 后任务长时间显示 `queued`（10 分钟以上），最终 failure，注解写着 `The job was not acquired by Runner of type hosted even after multiple attempts`
+- **原因**：GitHub **免费托管 runner 资源紧张**（高峰期），任务一直没被分配到执行机；与代码、配置无关
+- **应对**：
+  - 等待重试（拥堵通常几十分钟内缓解）
+  - 急需上线时走应急通道：把本地 `out/` 推到 `gh-pages` 分支 + `gh api -X PUT .../pages -f build_type=legacy -f source[branch]=gh-pages`，**绕过 Actions 约 3 分钟上线**（之后再切回 workflow 模式）
+- **顺带**：本地 `python scripts/preview.py 8000` 随时可预览最新产物，不必等部署
+
 ## 四、内容与架构
 
-### 14. 多根 layout 双语站
+### 15. 多根 layout 双语站
 
 - `html lang` 必须各站正确（SEO），Next 的解法是**多根 layout**：`app/(zh)/layout.tsx` 与 `app/(en)/en/layout.tsx` 各持一个 `<html>` 根
 - 纯静态站无法按浏览器语言自动跳转 → `/` 默认中文，导航放 `中/EN` 切换器
 
-### 15. 渐进式双语的维护策略
+### 16. 渐进式双语的维护策略
 
 - 不追求全量对齐翻译：重要文章双语，随笔单语；未翻译的文章在另一语言列表里直接不出现（不显示"缺翻译"空壳）
 
-### 16. giscus 评论的前置条件
+### 17. giscus 评论的前置条件
 
 - 需要三步：① 仓库开启 Discussions ② 拿到 repo ID / category ID（填 `lib/site.ts`）③ 安装 giscus GitHub App
 - 前两步可用 `gh api` 完成；**第三步必须网页授权**，装好前保持 `GISCUS.enabled = false`，否则页面会显示报错

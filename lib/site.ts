@@ -21,6 +21,15 @@ export const SITE = {
     github: "https://github.com/004Tingting",
     // TODO(Ting): 邮箱确认后填写
   },
+
+  /**
+   * Last.fm 实时「正在听」：前端每 60 秒直连 Last.fm API（该接口开放 CORS）。
+   * API key 经 NEXT_PUBLIC_LASTFM_API_KEY 注入（本地 .env.local / CI GitHub Secrets），不写在仓库里。
+   */
+  lastfm: {
+    user: "Ting04",
+    apiKey: process.env.NEXT_PUBLIC_LASTFM_API_KEY ?? "",
+  },
 } as const;
 
 /**

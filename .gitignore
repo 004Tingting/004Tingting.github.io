@@ -8,6 +8,10 @@
 # workspace memory (local only)
 /.workbuddy/
 
+# env（本地密钥，勿提交）
+.env*.local
+.env
+
 # misc
 .DS_Store
 *.pem

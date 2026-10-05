@@ -4,13 +4,15 @@ import { getPosts, fmtDate } from "@/lib/posts";
 import { getProjects, toProjectMeta } from "@/lib/projects";
 import Kicker from "@/components/Kicker";
 import ProjectList from "@/components/ProjectList";
-import NowPlaying from "@/components/NowPlaying";
+import { getNow } from "@/lib/life";
+import NowPlayingLive from "@/components/NowPlayingLive";
 
 /** Home (portal): hero + latest posts + selected projects */
 export default function EnHomePage() {
   const t = dic.en.home;
   const recent = getPosts("en").slice(0, 3);
   const projects = getProjects("en").map(toProjectMeta);
+  const now = getNow();
 
   return (
     <div className="mx-auto max-w-5xl px-6">
@@ -20,7 +22,7 @@ export default function EnHomePage() {
         <p className="mt-8 text-lg text-muted md:text-xl">{t.identity}</p>
         <p className="mt-3 font-mono text-sm text-muted md:text-base">{t.interests.join(" / ")}</p>
         <div className="mt-8">
-          <NowPlaying lang="en" />
+          <NowPlayingLive lang="en" initial={now} />
         </div>
       </section>
 

@@ -5,6 +5,7 @@ import { getCovers, getNow, getPlaylistEmbed, getRecentTracks } from "@/lib/life
 import { fmtRelative } from "@/lib/life-shared";
 import EmbedPlayer from "@/components/EmbedPlayer";
 import Kicker from "@/components/Kicker";
+import NowPlayingLive from "@/components/NowPlayingLive";
 
 export const metadata: Metadata = { title: "音乐" };
 
@@ -21,39 +22,8 @@ export default function MusicPage() {
       <Kicker>{t.music.kicker}</Kicker>
       <h1 className="mt-4 font-serif text-5xl font-bold">{t.music.title}</h1>
 
-      {/* 正在听 / 最近在听（Last.fm 实时数据） */}
-      {now ? (
-        <section className="mt-12">
-          <h2 className="font-mono text-sm tracking-widest text-muted">
-            <span className="text-accent">·</span>{" "}
-            {now.live ? t.music.nowLiveHeading : t.music.recentHeading}
-          </h2>
-          <div className="mt-6 flex items-center gap-6">
-            {now.cover ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={now.cover}
-                alt=""
-                className="h-28 w-28 shrink-0 border border-rule object-cover"
-              />
-            ) : null}
-            <div>
-              <p className="font-serif text-2xl font-semibold">{now.title}</p>
-              {now.subtitle ? <p className="mt-1 text-muted">{now.subtitle}</p> : null}
-              {now.link ? (
-                <a
-                  href={now.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 inline-block font-mono text-xs text-accent hover:underline"
-                >
-                  ↗ Last.fm
-                </a>
-              ) : null}
-            </div>
-          </div>
-        </section>
-      ) : null}
+      {/* 正在听 / 最近在听（前端每 60 秒直连 Last.fm 刷新） */}
+      <NowPlayingLive lang="zh" initial={now} variant="card" />
 
       {/* 最近收听列表 */}
       {recent.length > 0 ? (

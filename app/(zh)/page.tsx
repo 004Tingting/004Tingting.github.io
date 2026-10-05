@@ -4,13 +4,15 @@ import { getPosts, fmtDate } from "@/lib/posts";
 import { getProjects, toProjectMeta } from "@/lib/projects";
 import Kicker from "@/components/Kicker";
 import ProjectList from "@/components/ProjectList";
-import NowPlaying from "@/components/NowPlaying";
+import { getNow } from "@/lib/life";
+import NowPlayingLive from "@/components/NowPlayingLive";
 
 /** 首页（门户型）：hero + 最新文章 + 精选项目 */
 export default function HomePage() {
   const t = dic.zh.home;
   const recent = getPosts("zh").slice(0, 3);
   const projects = getProjects("zh").map(toProjectMeta);
+  const now = getNow();
 
   return (
     <div className="mx-auto max-w-5xl px-6">
@@ -21,7 +23,7 @@ export default function HomePage() {
         <p className="mt-8 text-lg text-muted md:text-xl">{t.identity}</p>
         <p className="mt-3 font-mono text-sm text-muted md:text-base">{t.interests.join(" / ")}</p>
         <div className="mt-8">
-          <NowPlaying lang="zh" />
+          <NowPlayingLive lang="zh" initial={now} />
         </div>
       </section>
 

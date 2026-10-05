@@ -33,6 +33,8 @@ jobs:
           # 未配置 Secret 时 scripts/fetch-now.mjs 会静默跳过（保留已有数据），不阻塞构建
           LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
           LASTFM_USER: ${{ secrets.LASTFM_USER }}
+          # 注入到前端 bundle，供「正在听」每 60 秒直连 Last.fm 使用
+          NEXT_PUBLIC_LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
         run: npm run build
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
