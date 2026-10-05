@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+/* class 策略的暗色模式（html.dark），切换由内联脚本 + ThemeToggle 控制 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* 字体：标题衬线（杂志核心）、正文系统无衬线、数字/日期等宽 */
+  --font-serif: "Playfair Display", "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --font-sans: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "Cascadia Mono", monospace;
+
+  /* 色板（DESIGN.md §1）：纸色底 + 近黑文字 + 朱红唯一强调色。
+     颜色全部 token 化，深浅模式 = 换变量，组件零 dark: 前缀 */
+  --color-paper: #faf8f5;
+  --color-ink: #1a1a1a;
+  --color-accent: #b4432e;
+  --color-rule: rgba(26, 26, 26, 0.15);
+  --color-muted: rgba(26, 26, 26, 0.55);
+}
+
+.dark {
+  --color-paper: #141414;
+  --color-ink: #edeae4;
+  --color-accent: #d0604a;
+  --color-rule: rgba(237, 234, 228, 0.15);
+  --color-muted: rgba(237, 234, 228, 0.55);
+}
+
+/* 基础排版：正文字号、行高偏编辑感 */
+body {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+
+/* ---------- 文章排版（typography 插件 + 杂志风覆盖） ---------- */
+@plugin "@tailwindcss/typography";
+
+.prose {
+  --tw-prose-body: var(--color-ink);
+  --tw-prose-headings: var(--color-ink);
+  --tw-prose-lead: var(--color-muted);
+  --tw-prose-links: var(--color-accent);
+  --tw-prose-bold: var(--color-ink);
+  --tw-prose-counters: var(--color-muted);
+  --tw-prose-bullets: var(--color-accent);
+  --tw-prose-hr: var(--color-rule);
+  --tw-prose-quotes: var(--color-muted);
+  --tw-prose-quote-borders: var(--color-accent);
+  --tw-prose-captions: var(--color-muted);
+  --tw-prose-code: var(--color-ink);
+  --tw-prose-th-borders: var(--color-rule);
+  --tw-prose-td-borders: var(--color-rule);
+}
+
+/* 标题用衬线，对齐杂志风 */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-family: var(--font-serif);
+  letter-spacing: 0.01em;
+}
+
+/* 行内代码：等宽 + 轻底色，去掉 typography 默认的反引号 */
+.prose :where(code):not(:where(pre code))::before,
+.prose :where(code):not(:where(pre code))::after {
+  content: none;
+}
+.prose :where(code):not(:where(pre code)) {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  padding: 0.15em 0.35em;
+  border-radius: 0.25em;
+}
+
+/* 代码块：细边框直角，随深浅模式换底 */
+.prose pre {
+  font-family: var(--font-mono);
+  background: color-mix(in srgb, var(--color-ink) 5%, transparent);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+  font-family: inherit;
+}
+.hljs {
+  background: transparent;
+}
+
+/* highlight.js 深色覆盖（亮色用 github.css 默认） */
+.dark .hljs {
+  color: #c9d1d9;
+}
+.dark .hljs-comment,
+.dark .hljs-quote {
+  color: #8b949e;
+}
+.dark .hljs-keyword,
+.dark .hljs-selector-tag,
+.dark .hljs-meta,
+.dark .hljs-doctag {
+  color: #ff7b72;
+}
+.dark .hljs-string,
+.dark .hljs-regexp,
+.dark .hljs-addition {
+  color: #a5d6ff;
+}
+.dark .hljs-title,
+.dark .hljs-name,
+.dark .hljs-type,
+.dark .hljs-class .hljs-title {
+  color: #d2a8ff;
+}
+.dark .hljs-number,
+.dark .hljs-literal,
+.dark .hljs-symbol {
+  color: #79c0ff;
+}
+.dark .hljs-attr,
+.dark .hljs-attribute,
+.dark .hljs-variable,
+.dark .hljs-template-variable {
+  color: #ffa657;
+}
+.dark .hljs-section,
+.dark .hljs-emphasis {
+  font-style: italic;
+}
+
