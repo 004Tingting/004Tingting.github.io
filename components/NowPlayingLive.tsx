@@ -58,11 +58,12 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
         const res = await fetch(NOW_DATA_URL, { cache: "no-store" });
         if (res.ok) {
           const d = await res.json();
-          // 脚本可能没在跑 —— 数据超过 5 分钟就视为过期，转用 Last.fm 直连
+          // 采用条件：数据足够新鲜（15 分钟内），**或**它带有封面
+          // （jsDelivr 可能缓存旧版本；宁可数据略旧，也好过丢掉封面）
           const fresh =
             typeof d?.updatedAt === "string" &&
-            Date.now() - new Date(d.updatedAt).getTime() < 5 * 60 * 1000;
-          if (d?.title && fresh && !cancelled) {
+            Date.now() - new Date(d.updatedAt).getTime() < 15 * 60 * 1000;
+          if (d?.title && (fresh || d.cover) && !cancelled) {
             setNow({
               title: d.title,
               subtitle: d.artist ?? "",

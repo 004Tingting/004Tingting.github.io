@@ -1,79 +1,79 @@
 {
   "source": "lastfm",
-  "generatedAt": "2026-10-06T04:59:58.821Z",
+  "generatedAt": "2026-10-06T08:33:41.137Z",
   "nowPlaying": false,
   "track": {
-    "title": "命に嫌われている。",
-    "artist": "初音ミク",
+    "title": "エガクミライ",
+    "artist": "MyGO!!!!!",
     "album": "",
-    "url": "https://www.last.fm/music/%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF/_/%E5%91%BD%E3%81%AB%E5%AB%8C%E3%82%8F%E3%82%8C%E3%81%A6%E3%81%84%E3%82%8B%E3%80%82",
-    "cover": "",
-    "playedAt": "2026-10-06T04:59:09.000Z"
+    "url": "https://www.last.fm/music/MyGO!!!!!/_/%E3%82%A8%E3%82%AC%E3%82%AF%E3%83%9F%E3%83%A9%E3%82%A4",
+    "cover": "/covers/f6d00aca8faf.jpg",
+    "playedAt": "2026-10-06T08:31:46.000Z"
   },
   "recent": [
     {
-      "title": "心做し",
-      "artist": "Gumi",
+      "title": "ミスター",
+      "artist": "YOASOBI",
       "album": "",
-      "url": "https://www.last.fm/music/Gumi/_/%E5%BF%83%E5%81%9A%E3%81%97",
-      "cover": "",
-      "playedAt": "2026-10-06T04:54:41.000Z"
+      "url": "https://www.last.fm/music/YOASOBI/_/%E3%83%9F%E3%82%B9%E3%82%BF%E3%83%BC",
+      "cover": "/covers/7efc58729fdd.jpg",
+      "playedAt": "2026-10-06T08:31:44.000Z"
     },
     {
-      "title": "Bad Apple!!",
-      "artist": "のみこ",
+      "title": "エガクミライ",
+      "artist": "MyGO!!!!!",
       "album": "",
-      "url": "https://www.last.fm/music/%E3%81%AE%E3%81%BF%E3%81%93/_/Bad+Apple!!",
-      "cover": "",
-      "playedAt": "2026-10-06T04:49:20.000Z"
+      "url": "https://www.last.fm/music/MyGO!!!!!/_/%E3%82%A8%E3%82%AC%E3%82%AF%E3%83%9F%E3%83%A9%E3%82%A4",
+      "cover": "/covers/f6d00aca8faf.jpg",
+      "playedAt": "2026-10-06T08:31:43.000Z"
     },
     {
-      "title": "ハルノユキ from polaris",
-      "artist": "リリィ、さよなら。",
+      "title": "ミスター",
+      "artist": "YOASOBI",
       "album": "",
-      "url": "https://www.last.fm/music/%E3%83%AA%E3%83%AA%E3%82%A3%E3%80%81%E3%81%95%E3%82%88%E3%81%AA%E3%82%89%E3%80%82/_/%E3%83%8F%E3%83%AB%E3%83%8E%E3%83%A6%E3%82%AD+from+polaris",
-      "cover": "",
-      "playedAt": "2026-10-06T04:42:59.000Z"
+      "url": "https://www.last.fm/music/YOASOBI/_/%E3%83%9F%E3%82%B9%E3%82%BF%E3%83%BC",
+      "cover": "/covers/7efc58729fdd.jpg",
+      "playedAt": "2026-10-06T08:31:42.000Z"
     },
     {
-      "title": "明日、僕は君に会いに行く。",
-      "artist": "ワカバ",
+      "title": "エガクミライ",
+      "artist": "MyGO!!!!!",
       "album": "",
-      "url": "https://www.last.fm/music/%E3%83%AF%E3%82%AB%E3%83%90/_/%E6%98%8E%E6%97%A5%E3%80%81%E5%83%95%E3%81%AF%E5%90%9B%E3%81%AB%E4%BC%9A%E3%81%84%E3%81%AB%E8%A1%8C%E3%81%8F%E3%80%82",
-      "cover": "",
-      "playedAt": "2026-10-06T04:42:39.000Z"
+      "url": "https://www.last.fm/music/MyGO!!!!!/_/%E3%82%A8%E3%82%AC%E3%82%AF%E3%83%9F%E3%83%A9%E3%82%A4",
+      "cover": "/covers/f6d00aca8faf.jpg",
+      "playedAt": "2026-10-06T08:19:13.000Z"
     },
     {
-      "title": "世界が終るまでは···",
-      "artist": "WANDS",
+      "title": "クレール",
+      "artist": "柿崎ユウタ",
       "album": "",
-      "url": "https://www.last.fm/music/WANDS/_/%E4%B8%96%E7%95%8C%E3%81%8C%E7%B5%82%E3%82%8B%E3%81%BE%E3%81%A7%E3%81%AF%C2%B7%C2%B7%C2%B7",
-      "cover": "",
-      "playedAt": "2026-10-06T04:37:22.000Z"
+      "url": "https://www.last.fm/music/%E6%9F%BF%E5%B4%8E%E3%83%A6%E3%82%A6%E3%82%BF/_/%E3%82%AF%E3%83%AC%E3%83%BC%E3%83%AB",
+      "cover": "/covers/bed93934ddde.jpg",
+      "playedAt": "2026-10-06T08:12:21.000Z"
     },
     {
-      "title": "カワキヲアメク",
-      "artist": "美波",
+      "title": "In Between The Lines",
+      "artist": "Tyrone Wells",
       "album": "",
-      "url": "https://www.last.fm/music/%E7%BE%8E%E6%B3%A2/_/%E3%82%AB%E3%83%AF%E3%82%AD%E3%83%B2%E3%82%A2%E3%83%A1%E3%82%AF",
-      "cover": "",
-      "playedAt": "2026-10-06T04:33:09.000Z"
+      "url": "https://www.last.fm/music/Tyrone+Wells/_/In+Between+The+Lines",
+      "cover": "/covers/ae51f861d315.jpg",
+      "playedAt": "2026-10-06T08:08:29.000Z"
     },
     {
-      "title": "アイロニ",
-      "artist": "すこっぷ",
+      "title": "辞.九门回忆",
+      "artist": "解忧草",
       "album": "",
-      "url": "https://www.last.fm/music/%E3%81%99%E3%81%93%E3%81%A3%E3%81%B7/_/%E3%82%A2%E3%82%A4%E3%83%AD%E3%83%8B",
-      "cover": "",
-      "playedAt": "2026-10-06T04:28:53.000Z"
+      "url": "https://www.last.fm/music/%E8%A7%A3%E5%BF%A7%E8%8D%89/_/%E8%BE%9E.%E4%B9%9D%E9%97%A8%E5%9B%9E%E5%BF%86",
+      "cover": "/covers/77ed950ec4cb.jpg",
+      "playedAt": "2026-10-06T08:04:27.000Z"
     },
     {
-      "title": "紅蓮の弓矢",
-      "artist": "Linked Horizon",
+      "title": "ずっとラブソング",
+      "artist": "Vaundy",
       "album": "",
-      "url": "https://www.last.fm/music/Linked+Horizon/_/%E7%B4%85%E8%93%AE%E3%81%AE%E5%BC%93%E7%9F%A2",
-      "cover": "",
-      "playedAt": "2026-10-06T04:23:42.000Z"
+      "url": "https://www.last.fm/music/Vaundy/_/%E3%81%9A%E3%81%A3%E3%81%A8%E3%83%A9%E3%83%96%E3%82%BD%E3%83%B3%E3%82%B0",
+      "cover": "/covers/aed5a3d909e7.jpg",
+      "playedAt": "2026-10-06T08:00:54.000Z"
     }
   ]
 }
