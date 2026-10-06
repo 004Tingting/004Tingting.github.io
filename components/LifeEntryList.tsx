@@ -12,7 +12,7 @@ import {
   type GameStatus,
   type ScreenEntry,
   type ScreenType,
-} from "@/lib/life-shared";
+} from "@/lib/arts-shared";
 
 type Props =
   | { variant: "games"; entries: GameEntry[]; lang: Lang }
@@ -21,7 +21,7 @@ type Props =
 /** 游戏 / 记录共用条目列表：状态与类型筛选 + 评分、时长、设计研究标记、测评链接 */
 export default function LifeEntryList(props: Props) {
   const { lang } = props;
-  const t = dic[lang].life;
+  const t = dic[lang].arts;
 
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<ScreenType | null>(null);
@@ -123,7 +123,7 @@ export default function LifeEntryList(props: Props) {
       </div>
 
       {shown.length === 0 ? (
-        <p className="text-muted">{t.log.empty}</p>
+        <p className="text-muted">{t.screen.empty}</p>
       ) : (
         <ul className="divide-y divide-rule">
           {shown.map((e, i) => (
@@ -143,7 +143,7 @@ export default function LifeEntryList(props: Props) {
                 {e.date ? <span>{e.date}</span> : null}
                 {e.review ? (
                   <Link href={e.review} className="text-accent hover:underline">
-                    {t.log.review}
+                    {t.screen.review}
                   </Link>
                 ) : null}
               </p>

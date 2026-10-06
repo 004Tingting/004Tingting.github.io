@@ -1,4 +1,4 @@
-import { getPosts } from "@/lib/posts";
+import { getArticles, SECTIONS } from "@/lib/articles";
 import { SITE } from "@/lib/site";
 
 export const dynamic = "force-static";
@@ -12,15 +12,17 @@ const esc = (s: string) =>
 
 /** English feed (statically generated to out/en/feed.xml at build time) */
 export function GET() {
-  const posts = getPosts("en");
-  const items = posts
+  const articles = SECTIONS.flatMap((section) => getArticles("en", section)).sort((a, b) =>
+    b.date.localeCompare(a.date),
+  );
+  const items = articles
     .map(
-      (p) => `    <item>
-      <title>${esc(p.title)}</title>
-      <link>${SITE.url}/en/blog/${p.slug}/</link>
-      <guid isPermaLink="true">${SITE.url}/en/blog/${p.slug}/</guid>
-      <pubDate>${new Date(`${p.date}T00:00:00Z`).toUTCString()}</pubDate>
-      <description>${esc(p.summary)}</description>
+      (a) => `    <item>
+      <title>${esc(a.title)}</title>
+      <link>${SITE.url}/en/${a.section}/${a.slug}/</link>
+      <guid isPermaLink="true">${SITE.url}/en/${a.section}/${a.slug}/</guid>
+      <pubDate>${new Date(`${a.date}T00:00:00Z`).toUTCString()}</pubDate>
+      <description>${esc(a.summary)}</description>
     </item>`,
     )
     .join("\n");

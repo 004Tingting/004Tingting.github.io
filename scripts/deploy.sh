@@ -23,6 +23,8 @@ if [ ! -d .git ]; then
   git init -b gh-pages -q
   git remote add origin "$REMOTE"
 fi
+# 关闭换行符转换：产物是部署文件，无需 CRLF 归一（也避免大量转换开销）
+git config core.autocrlf false
 git add -A
 git -c user.name="004Tingting" -c user.email="SaiKouTING004@outlook.com" \
   commit -q -m "deploy: $(date '+%Y-%m-%d %H:%M')" || echo "  （无变更）"

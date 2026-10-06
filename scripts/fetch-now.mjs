@@ -15,7 +15,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const outFile = path.join(root, "content", "life", "lastfm.json");
+const outFile = path.join(root, "content", "arts", "lastfm.json");
 const coversJson = path.join(root, "public", "covers.json");
 const coversDir = path.join(root, "public", "covers");
 

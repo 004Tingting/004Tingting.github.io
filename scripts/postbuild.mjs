@@ -46,3 +46,61 @@ const html = `<!DOCTYPE html>
 
 fs.writeFileSync(path.join(outDir, "404.html"), html);
 console.log("✓ out/404.html written");
+
+/* ---------- 旧 URL 跳转（五栏重构后的兼容） ---------- */
+
+const redirectHtml = (to) => `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta http-equiv="refresh" content="0; url=${to}"/>
+<link rel="canonical" href="${to}"/>
+<title>页面已迁移</title>
+<style>body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding:16vh 8vw;line-height:1.8}
+a{color:#b4432e}@media (prefers-color-scheme: dark){body{background:#141414;color:#edeae4}a{color:#d0604a}}</style>
+</head>
+<body>
+<p>页面已迁移 → <a href="${to}">${to}</a></p>
+<script>location.replace(${JSON.stringify(to)})</script>
+</body>
+</html>
+`;
+
+const projectSlugs = [
+  "cav-sliding-mode-control",
+  "fault-diagnosis-prognostics",
+  "oino-emoji-manager",
+  "game-design-exploration",
+];
+
+/** 旧路径 → 新路径（五栏重构：blog→research/chronicles、life→arts、projects→works） */
+const redirects = {
+  "/blog": "/chronicles/",
+  "/blog/hello-world": "/chronicles/hello-world/",
+  "/life": "/arts/",
+  "/life/music": "/arts/music/",
+  "/life/games": "/arts/games/",
+  "/life/log": "/arts/screen/",
+  "/projects": "/works/",
+  "/en/blog": "/en/chronicles/",
+  "/en/blog/hello-world": "/en/chronicles/hello-world/",
+  "/en/life": "/en/arts/",
+  "/en/life/music": "/en/arts/music/",
+  "/en/life/games": "/en/arts/games/",
+  "/en/life/log": "/en/arts/screen/",
+  "/en/projects": "/en/works/",
+};
+for (const slug of projectSlugs) {
+  redirects[`/projects/${slug}`] = `/works/${slug}/`;
+  redirects[`/en/projects/${slug}`] = `/en/works/${slug}/`;
+}
+
+let redirectCount = 0;
+for (const [from, to] of Object.entries(redirects)) {
+  const dir = path.join(outDir, from);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "index.html"), redirectHtml(to));
+  redirectCount += 1;
+}
+console.log(`✓ ${redirectCount} 个旧 URL 跳转页已生成`);

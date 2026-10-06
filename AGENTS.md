@@ -28,33 +28,36 @@ Ting 的个人网站——一本**双语（中文默认 + `/en`）的「个人�
 app/
 ├── (zh)/                 # 中文站（根 layout #1，html lang="zh-CN"）
 │   ├── layout.tsx        # 含 SEO metadata + 主题防闪脚本 + Nav/Footer
-│   ├── page.tsx          # 首页（门户型：hero + 最新文章 + 精选项目）
-│   ├── blog/[slug]/      # 博客列表 + 详情
-│   ├── projects/[slug]/  # 作品集列表 + 详情
-│   ├── life/             # 生活板块：总览 + games / music / log
+│   ├── page.tsx          # 首页（门户型：hero + 最新文章 + 精选造物）
+│   ├── research/         # 研思（列表 + [slug] 详情）
+│   ├── chronicles/       # 纪事（列表 + [slug] 详情）
+│   ├── works/            # 造物（列表 + [slug] 详情）
+│   ├── arts/             # 游艺（总览 + music / games / screen）
 │   └── about/
 ├── (en)/en/              # 英文站（根 layout #2，lang="en"）——目录结构与中文站镜像
 ├── globals.css           # 设计 token + prose 排版 + hljs 深浅适配
 ├── sitemap.ts / robots.ts
 ├── feed.xml/route.ts     # 中文 RSS（en 版在 (en)/en/feed.xml/route.ts）
 └── favicon.svg
-components/               # Nav / Footer / ThemeToggle / Kicker / BlogList / ProjectList / MarkdownBody / Giscus / NowPlaying / EmbedPlayer / LifeEntryList
+components/               # Nav / Footer / ThemeToggle / Kicker / ArticleList / ArticleDetail / WorkList / MarkdownBody / Giscus / NowPlayingLive / EmbedPlayer / LifeEntryList
 content/
-├── blog/{zh,en}/*.md
-├── projects/{zh,en}/*.md
-└── life/                 # 生活板块
-    ├── now.json          # 正在听（网易云外链配置）
-    ├── games/{zh,en}/*.md    # 游戏条目（状态/10分制/时长/designStudy/review）
-    ├── screen/{zh,en}/*.md   # 追剧/番/影/小说条目（type/时长/review）
-    └── covers/{zh,en}/*.md   # 乐器 cover（instrument/bilibili BV 号）
+├── research/{zh,en}/*.md     # 研思文章
+├── chronicles/{zh,en}/*.md   # 纪事文章
+├── works/{zh,en}/*.md        # 造物（按 frontmatter order 排序）
+└── arts/                     # 游艺
+    ├── now.json              # 常驻歌单（网易云外链配置）
+    ├── lastfm.json           # 构建时生成（实时收听快照，勿手改）
+    ├── games/{zh,en}/*.md    # 游戏条目
+    ├── screen/{zh,en}/*.md   # 影卷条目（剧 / 番 / 影 / 小说）
+    └── covers/{zh,en}/*.md   # 音律 cover
 lib/
-├── i18n.ts               # UI 文案字典（zh/en，含 life 全部标签）
-├── site.ts               # 站点常量：URL、SEO 默认值、giscus 配置
-├── blog-shared.ts        # 客户端安全（无 node 依赖）的类型与纯函数
-├── life-shared.ts        # 生活板块客户端安全：类型、枚举、汇总统计
-├── posts.ts              # 博客内容管道（fs + gray-matter，构建时执行）
-├── projects.ts           # 作品集内容管道（按 frontmatter order 排序）
-└── life.ts               # 生活板块管道（games / screen / covers / now + stats）
+├── i18n.ts               # UI 文案字典（zh/en，五栏 + 游艺内部）
+├── site.ts               # 站点常量：URL、SEO 默认值、giscus、lastfm
+├── article-shared.ts     # 客户端安全的文章类型与日期格式化
+├── articles.ts           # 文章管道（研思 / 纪事，Section 维度）
+├── works.ts              # 造物管道（order 排序）
+├── arts-shared.ts        # 游艺客户端安全：类型、枚举、汇总统计
+└── arts.ts               # 游艺管道（games / screen / covers / now + stats）
 scripts/
 ├── preview.py            # 本地预览（支持 clean URL，对齐 GitHub Pages）
 ├── og.mjs                # 生成 public/og.png 分享卡片（sharp 渲染 SVG）
@@ -70,6 +73,8 @@ scripts/
 5. **设计语言**：编辑杂志风——衬线大标题、纸色/墨色 + 唯一朱红强调色、1px hairline、kicker（`· 标签`）、条目序号。**不引入 UI 组件库**，样式用 Tailwind 原子类 + token
 6. **不装多余依赖**：静态站优先零运行时依赖；需要新依赖先说清理由
 7. **工作日志（必须）**：**每次完成实质性修改后**（建功能、改结构、修 bug、内容体系变化），往 `.workbuddy/memory/WORKLOG.md` **顶部**追加一条日志——**单文件多条目、最新在最上面**。条目格式：`## YYYY-MM-DD HH:mm · 标题`，正文含「改了什么 / 关键决策与依据 / 涉及文件 / 状态与遗留」
+8. **内容归属（按性质，不按题材）**：推导 / 方法 / 理论 / 复盘 → **研思**；过程叙事 / 感悟 / 生活切片 → **纪事**；做出来的东西（可交互 / 可下载）→ **造物**；作为消费者玩 / 看 / 听的内容 → **游艺**。同一作品可跨栏：写它的推导归研思，展示成品归造物
+9. **每个栏目至少保留一篇文章/条目**：Next 静态导出要求动态路由至少有一个页面，空栏目会导致构建失败
 
 ## 常用命令
 
@@ -101,12 +106,15 @@ bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → �
 ## 内容策略
 
 - **渐进式双语**：重要文章双语，随笔单语；未翻译内容在另一语言不显示空壳
-- **博客分类**：科研笔记（FTSMC / CAV）/ 开发记录（OinO、本站）/ 游戏设计
-- **作品集**：CAV 滑模控制（科研）/ 故障诊断与寿命预测（工程）/ OinO（软件）/ 游戏设计探索
-- **生活板块**（/life）：音乐（Now Playing + 乐器 cover + 音乐随笔）/ 游戏（条目 + 测评双轨）/ 记录（剧番影书 + 时长自动汇总）
-  - 嵌入数据源实测：网易云 outchain ✅、B站播放器 ✅、YouTube ❌（国内不可达，已排除）
-  - 所有第三方嵌入必须走 `EmbedPlayer`（带外链降级，嵌入失败不破版）
-  - 条目状态/类型用枚举存 frontmatter，展示标签统一走 `lib/i18n.ts`
+- **五栏信息架构**（2026-10-06 重构）：
+  | 栏目 | 中文 | 英文 URL | 内容 |
+  |---|---|---|---|
+  | 研思 | 研思 | `/research` | 推导、方法、文献与复盘 |
+  | 造物 | 造物 | `/works` | 软件、项目与实验成果 |
+  | 游艺 | 游艺 | `/arts` | 音律（`/arts/music`）/ 游戏（`/arts/games`）/ 影卷（`/arts/screen`）/ 看板（`/arts/stats`，待开发）|
+  | 纪事 | 纪事 | `/chronicles` | 时间切片、复盘与随笔 |
+  | 关于 | 关于 | `/about` | 履历与站务 |
+- 旧 URL（`/blog` `/life/*` `/projects/*`）由 `scripts/postbuild.mjs` 生成 meta-refresh 跳转页
 
 ## 文档地图
 

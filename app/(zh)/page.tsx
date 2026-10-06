@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getPosts, fmtDate } from "@/lib/posts";
-import { getProjects, toProjectMeta } from "@/lib/projects";
+import { getLatestArticles, fmtDate } from "@/lib/articles";
+import { getWorks, toWorkMeta } from "@/lib/works";
+import { getNow } from "@/lib/arts";
 import Kicker from "@/components/Kicker";
-import ProjectList from "@/components/ProjectList";
-import { getNow } from "@/lib/life";
+import WorkList from "@/components/WorkList";
 import NowPlayingLive from "@/components/NowPlayingLive";
 
-/** 首页（门户型）：hero + 最新文章 + 精选项目 */
+/** 首页（门户型）：hero + 最新文章（跨研思/纪事）+ 精选造物 */
 export default function HomePage() {
   const t = dic.zh.home;
-  const recent = getPosts("zh").slice(0, 3);
-  const projects = getProjects("zh").map(toProjectMeta);
+  const latest = getLatestArticles("zh", 3);
+  const works = getWorks("zh").map(toWorkMeta);
   const now = getNow();
 
   return (
@@ -27,31 +27,37 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 最新文章 */}
+      {/* 最新文章（跨栏目） */}
       <section className="border-t border-rule py-12">
-        <div className="flex items-baseline justify-between">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
           <Kicker>{t.latest}</Kicker>
-          <Link href="/blog" className="font-mono text-sm text-muted hover:text-accent">
-            {t.viewAll}
-          </Link>
+          <span className="font-mono text-sm text-muted">
+            <Link href="/research" className="hover:text-accent">
+              {dic.zh.nav.research}
+            </Link>
+            {" · "}
+            <Link href="/chronicles" className="hover:text-accent">
+              {dic.zh.nav.chronicles}
+            </Link>
+          </span>
         </div>
-        {recent.length > 0 ? (
+        {latest.length > 0 ? (
           <ul className="mt-2 divide-y divide-rule">
-            {recent.map((p, i) => (
-              <li key={p.slug} className="py-5">
-                <Link href={`/blog/${p.slug}`} className="group block">
+            {latest.map((a, i) => (
+              <li key={`${a.section}-${a.slug}`} className="py-5">
+                <Link href={`/${a.section}/${a.slug}`} className="group block">
                   <div className="flex items-baseline gap-4">
                     <span className="font-mono text-sm text-muted">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <p className="font-serif text-xl font-semibold group-hover:text-accent">
-                      {p.title}
+                      {a.title}
                     </p>
                     <span className="ml-auto shrink-0 font-mono text-xs text-muted">
-                      {fmtDate(p.date, "zh")}
+                      {fmtDate(a.date, "zh")}
                     </span>
                   </div>
-                  <p className="mt-1 pl-10 text-sm text-muted">{p.summary}</p>
+                  <p className="mt-1 pl-10 text-sm text-muted">{a.summary}</p>
                 </Link>
               </li>
             ))}
@@ -61,16 +67,16 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 精选项目 */}
+      {/* 精选造物 */}
       <section className="border-t border-rule py-12">
         <div className="flex items-baseline justify-between">
-          <Kicker>{t.projects}</Kicker>
-          <Link href="/projects" className="font-mono text-sm text-muted hover:text-accent">
+          <Kicker>{t.featured}</Kicker>
+          <Link href="/works" className="font-mono text-sm text-muted hover:text-accent">
             {t.viewAll}
           </Link>
         </div>
         <div className="mt-2">
-          <ProjectList projects={projects} lang="zh" />
+          <WorkList works={works} lang="zh" />
         </div>
       </section>
     </div>

@@ -41,7 +41,7 @@ const NOW_DATA_URL =
 export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props) {
   const [now, setNow] = useState<NowSnapshot | null>(null);
   const [coverMap, setCoverMap] = useState<Record<string, string>>({});
-  const t = dic[lang].life.music;
+  const t = dic[lang].arts.music;
 
   useEffect(() => {
     // 构建时生成的封面映射（降级路径用）
@@ -53,12 +53,16 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
     let cancelled = false;
 
     const load = async () => {
-      /* ① 首选：本地脚本推送的实时数据 */
+      /* ① 首选：本地脚本推送的实时数据（仅当足够新鲜时采用） */
       try {
         const res = await fetch(NOW_DATA_URL, { cache: "no-store" });
         if (res.ok) {
           const d = await res.json();
-          if (d?.title && !cancelled) {
+          // 脚本可能没在跑 —— 数据超过 5 分钟就视为过期，转用 Last.fm 直连
+          const fresh =
+            typeof d?.updatedAt === "string" &&
+            Date.now() - new Date(d.updatedAt).getTime() < 5 * 60 * 1000;
+          if (d?.title && fresh && !cancelled) {
             setNow({
               title: d.title,
               subtitle: d.artist ?? "",
@@ -117,7 +121,7 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
 
   // 封面：实时源自带优先；否则查构建时映射表
   const cover = now.cover || coverMap[`${now.title}|${now.subtitle}`] || "";
-  const href = lang === "zh" ? "/life/music" : "/en/life/music";
+  const href = lang === "zh" ? "/arts/music" : "/en/arts/music";
 
   if (variant === "card") {
     return (

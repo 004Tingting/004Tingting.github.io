@@ -18,14 +18,32 @@ python scripts/preview.py 8000   # 预览构建产物（支持 clean URL）
 npm run og                       # 重新生成分享卡片图 public/og.png
 ```
 
+## 站点结构（五栏）
+
+| 栏目 | URL | 内容 |
+|---|---|---|
+| **研思** | `/research` | 推导、方法、文献研读与复盘 |
+| **造物** | `/works` | 软件、项目与实验成果 |
+| **游艺** | `/arts` | 音律 `/arts/music` · 游戏 `/arts/games` · 影卷 `/arts/screen` · 看板（待开发）|
+| **纪事** | `/chronicles` | 时间切片、复盘与随笔 |
+| **关于** | `/about` | 履历与站务 |
+
+英文站镜像于 `/en/*`。旧 URL（`/blog` `/life/*` `/projects/*`）自动跳转到新路径。
+
 ## 内容
 
-- 博客：`content/blog/{zh,en}/*.md`
+- 研思 / 纪事：`content/{research,chronicles}/{zh,en}/*.md`
   - frontmatter：`title` / `date` / `tags` / `summary` / `draft`
-- 作品集：`content/projects/{zh,en}/*.md`
+- 造物：`content/works/{zh,en}/*.md`
   - frontmatter：`title` / `status` / `period` / `tags` / `order` / `summary`
+- 游艺：`content/arts/{games,screen,covers}/{zh,en}/*.md`
+  - 游戏：`status`（playing/completed/dropped）/ `rating`（10 分制）/ `hours` / `designStudy` / `review`
+  - 影卷：`type`（tv/anime/movie/novel）/ `status` / `rating` / `hours` / `review`
+  - 音律 cover：`instrument` / `bilibili`（BV 号）/ `date`
+- 常驻歌单：`content/arts/now.json`
 
 > frontmatter 注意：日期要加引号；值里含 ASCII 冒号+空格（`: `）时整段加引号。
+> 「按性质不按题材」归栏：推导/复盘→研思，叙事/随笔→纪事，产物→造物，消费文娱→游艺。
 
 ## 发布流程
 

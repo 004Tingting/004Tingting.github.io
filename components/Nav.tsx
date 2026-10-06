@@ -5,11 +5,32 @@ import { usePathname } from "next/navigation";
 import { dic, type Lang } from "@/lib/i18n";
 import ThemeToggle from "@/components/ThemeToggle";
 
+/** 五栏体系：研思 · 造物 · 游艺 · 纪事 · 关于 */
+const ORDER = ["research", "works", "arts", "chronicles", "about"] as const;
+
+const ROUTES: Record<Lang, Record<(typeof ORDER)[number], string>> = {
+  zh: {
+    research: "/research",
+    works: "/works",
+    arts: "/arts",
+    chronicles: "/chronicles",
+    about: "/about",
+  },
+  en: {
+    research: "/en/research",
+    works: "/en/works",
+    arts: "/en/arts",
+    chronicles: "/en/chronicles",
+    about: "/en/about",
+  },
+};
+
 export default function Nav({ lang }: { lang: Lang }) {
   const pathname = usePathname() ?? "/";
   const t = dic[lang].nav;
+  const routes = ROUTES[lang];
 
-  // 语言切换：zh ↔ en 对等路径（/ ↔ /en，/about ↔ /en/about）
+  // 语言切换：zh ↔ en 对等路径
   const otherHref =
     lang === "zh"
       ? pathname === "/"
@@ -18,30 +39,22 @@ export default function Nav({ lang }: { lang: Lang }) {
       : pathname.replace(/^\/en/, "") || "/";
 
   const homeHref = lang === "zh" ? "/" : "/en";
-  const blogHref = lang === "zh" ? "/blog" : "/en/blog";
-  const lifeHref = lang === "zh" ? "/life" : "/en/life";
-  const projectsHref = lang === "zh" ? "/projects" : "/en/projects";
-  const aboutHref = lang === "zh" ? "/about" : "/en/about";
 
   return (
     <header className="border-b border-rule">
-      <div className="mx-auto flex h-14 max-w-5xl items-baseline justify-between px-6">
-        <Link href={homeHref} className="font-serif text-xl font-bold tracking-wide hover:text-accent">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-baseline justify-between gap-y-2 px-6 py-4">
+        <Link
+          href={homeHref}
+          className="font-serif text-xl font-bold tracking-wide hover:text-accent"
+        >
           Ting
         </Link>
-        <nav className="flex items-baseline gap-6 font-mono text-sm">
-          <Link href={blogHref} className="hover:text-accent">
-            {t.blog}
-          </Link>
-          <Link href={lifeHref} className="hover:text-accent">
-            {t.life}
-          </Link>
-          <Link href={projectsHref} className="hover:text-accent">
-            {t.projects}
-          </Link>
-          <Link href={aboutHref} className="hover:text-accent">
-            {t.about}
-          </Link>
+        <nav className="flex flex-wrap items-baseline gap-x-5 gap-y-1 font-mono text-sm">
+          {ORDER.map((key) => (
+            <Link key={key} href={routes[key]} className="hover:text-accent">
+              {t[key]}
+            </Link>
+          ))}
           <Link href={otherHref} className="hover:text-accent" aria-label="Switch language">
             {lang === "zh" ? "EN" : "中"}
           </Link>

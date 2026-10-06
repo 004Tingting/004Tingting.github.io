@@ -1,22 +1,40 @@
 export type Lang = "zh" | "en";
 
 export const zh = {
-  nav: { about: "关于", blog: "博客", projects: "项目", life: "生活" },
+  /* 五栏体系：研思 · 造物 · 游艺 · 纪事 · 关于 */
+  nav: { research: "研思", works: "造物", arts: "游艺", chronicles: "纪事", about: "关于" },
   home: {
     kicker: "个人杂志",
     identity: "控制科学与工程硕士在读",
     interests: ["CAV 滑模控制", "故障诊断与寿命预测", "游戏设计", "独立软件"],
     latest: "最新文章",
     viewAll: "全部 →",
-    projects: "精选项目",
+    featured: "精选造物",
     empty: "第一篇文章在路上。",
   },
-  life: {
-    kicker: "生活",
-    title: "Life",
-    intro: "博客之外的日常切面：在玩什么、在听什么、看过什么。",
+  sections: {
+    research: {
+      kicker: "研思",
+      title: "Research",
+      intro: "推导、方法与复盘——控制理论、故障诊断、文献研读与工程实践。",
+    },
+    chronicles: {
+      kicker: "纪事",
+      title: "Chronicles",
+      intro: "时间切片与杂志特稿——办刊思考、阶段复盘与生活随笔。",
+    },
+    works: {
+      kicker: "造物",
+      title: "Works",
+      intro: "代码、产品与做出来的东西——可交互、可落地的成果。",
+    },
+  },
+  arts: {
+    kicker: "游艺",
+    title: "Arts",
+    intro: "六艺之余——音律、游戏与影卷，以及它们留下的数据。",
     music: {
-      kicker: "音乐",
+      kicker: "音律",
       title: "Music",
       nowPlayingLabel: "最近在听：",
       nowLiveLabel: "正在播放：",
@@ -30,12 +48,12 @@ export const zh = {
       coversEmpty: "第一首 cover 在路上。",
       coversHint: "B 站视频嵌入，点击可直接播放。",
       notes: "音乐随笔",
-      notesDesc: "乐评与随想，写在博客的「音乐」分类里。",
+      notesDesc: "乐评与随想，写在「纪事」里。",
       notesLink: "去看音乐随笔 →",
     },
     games: {
       kicker: "游戏",
-      title: "Games",
+      title: "Gaming",
       all: "全部",
       countLabel: "款",
       avgLabel: "均分",
@@ -44,13 +62,18 @@ export const zh = {
       empty: "第一条游玩记录在路上。",
       review: "测评 →",
     },
-    log: {
-      kicker: "记录",
-      title: "Log",
+    screen: {
+      kicker: "影卷",
+      title: "Screen & Books",
       total: "共",
       hoursUnit: " 小时",
       empty: "第一条记录在路上。",
       review: "测评 →",
+    },
+    stats: {
+      kicker: "看板",
+      title: "Stats",
+      empty: "统计图表筹备中。",
     },
     gameStatus: { playing: "在玩", completed: "通关", dropped: "弃坑" },
     screenStatus: { watching: "在看", completed: "看完", dropped: "弃了" },
@@ -66,20 +89,37 @@ export const zh = {
 } as const;
 
 export const en = {
-  nav: { about: "About", blog: "Blog", projects: "Work", life: "Life" },
+  nav: { research: "Research", works: "Works", arts: "Arts", chronicles: "Chronicles", about: "About" },
   home: {
     kicker: "A Personal Journal",
     identity: "M.Sc. student in Control Science and Engineering",
     interests: ["CAV & sliding mode control", "Fault diagnosis & prognostics", "Game design", "Indie software"],
     latest: "Latest Posts",
     viewAll: "All →",
-    projects: "Selected Projects",
+    featured: "Selected Works",
     empty: "The first post is on its way.",
   },
-  life: {
-    kicker: "Life",
-    title: "Life",
-    intro: "Everything off the research desk: what I'm playing, listening to, and watching.",
+  sections: {
+    research: {
+      kicker: "Research",
+      title: "Research",
+      intro: "Derivations, methods and retrospectives — control theory, fault diagnosis, literature and engineering.",
+    },
+    chronicles: {
+      kicker: "Chronicles",
+      title: "Chronicles",
+      intro: "Time slices and magazine features — journal notes, retrospectives and essays.",
+    },
+    works: {
+      kicker: "Works",
+      title: "Works",
+      intro: "Code, products and things actually made — interactive and shipped.",
+    },
+  },
+  arts: {
+    kicker: "Arts",
+    title: "Arts",
+    intro: "Beyond the desk — music, games and screen, plus the data they leave behind.",
     music: {
       kicker: "Music",
       title: "Music",
@@ -95,12 +135,12 @@ export const en = {
       coversEmpty: "The first cover is on its way.",
       coversHint: "Bilibili embeds — click to play.",
       notes: "Music notes",
-      notesDesc: "Reviews and thoughts, filed under the Music category on the blog.",
+      notesDesc: "Reviews and thoughts, filed under Chronicles.",
       notesLink: "Read music notes →",
     },
     games: {
-      kicker: "Games",
-      title: "Games",
+      kicker: "Gaming",
+      title: "Gaming",
       all: "All",
       countLabel: "games",
       avgLabel: "avg",
@@ -109,13 +149,18 @@ export const en = {
       empty: "The first play log is on its way.",
       review: "Review →",
     },
-    log: {
-      kicker: "Log",
-      title: "Log",
+    screen: {
+      kicker: "Screen & Books",
+      title: "Screen & Books",
       total: "Total",
       hoursUnit: "h",
       empty: "The first entry is on its way.",
       review: "Review →",
+    },
+    stats: {
+      kicker: "Stats",
+      title: "Stats",
+      empty: "Charts are in the works.",
     },
     gameStatus: { playing: "Playing", completed: "Beaten", dropped: "Dropped" },
     screenStatus: { watching: "Watching", completed: "Finished", dropped: "Dropped" },
