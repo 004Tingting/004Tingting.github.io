@@ -138,12 +138,19 @@ async function pushToGitHub(data) {
   return true;
 }
 
-/** 清除 jsDelivr 缓存，让前端立即拿到新数据 */
+/** 上次 purge 的时间戳 —— jsDelivr 的 purge 有 720 秒限流窗口，
+ *  过于频繁会导致之后所有 purge 全部失效（缓存永久停在旧版本）。 */
+let lastPurgeAt = 0;
+const PURGE_MIN_INTERVAL_MS = 10 * 60 * 1000;
+
+/** 清除 jsDelivr 缓存。前端主路径已改走无缓存的 GitHub 直通代理，这里只是兜底更新。 */
 async function purgeCache() {
+  if (Date.now() - lastPurgeAt < PURGE_MIN_INTERVAL_MS) return; // 避开限流窗口
   try {
-    await fetch(`https://purge.jsdelivr.net/gh/${REPO}@${BRANCH}/${FILE}`);
+    const res = await fetch(`https://purge.jsdelivr.net/gh/${REPO}@${BRANCH}/${FILE}`);
+    if (res.ok) lastPurgeAt = Date.now();
   } catch {
-    /* purge 失败不致命（缓存过期后自更新） */
+    /* purge 失败不致命（前端主路径不依赖 jsDelivr） */
   }
 }
 

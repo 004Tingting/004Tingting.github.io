@@ -25,11 +25,16 @@ type Props = {
 const REFRESH_MS = 15_000;
 
 /**
- * 本地脚本推送的实时数据（含网易云封面），经 jsDelivr 读取（CORS 可用）。
- * 数据链路：本机脚本 → GitHub now-data 分支 → jsDelivr → 此处
+ * 实时数据源（按优先级依次尝试，第一个成功即采用）：
+ *   1–2. 国内 GitHub 直通代理 —— **无缓存**，能即时反映 now-data 分支（实测支持 CORS）
+ *   3.   jsDelivr —— 仅作兜底；其 purge 会被限流（720s 重置），缓存可能滞后 10 分钟以上
+ * 数据链路：本机脚本 → GitHub now-data 分支 → 代理 / CDN → 此处
  */
-const NOW_DATA_URL =
-  "https://cdn.jsdelivr.net/gh/004Tingting/004Tingting.github.io@now-data/now.json";
+const NOW_SOURCES = [
+  "https://gh-proxy.com/https://raw.githubusercontent.com/004Tingting/004Tingting.github.io/now-data/now.json",
+  "https://gh.llkk.cc/https://raw.githubusercontent.com/004Tingting/004Tingting.github.io/now-data/now.json",
+  "https://cdn.jsdelivr.net/gh/004Tingting/004Tingting.github.io@now-data/now.json",
+];
 
 /**
  * 实时「正在听」三级数据源：
@@ -53,29 +58,36 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
     let cancelled = false;
 
     const load = async () => {
-      /* ① 首选：本地脚本推送的实时数据（仅当足够新鲜时采用） */
-      try {
-        const res = await fetch(NOW_DATA_URL, { cache: "no-store" });
-        if (res.ok) {
-          const d = await res.json();
-          // 采用条件：数据足够新鲜（15 分钟内），**或**它带有封面
-          // （jsDelivr 可能缓存旧版本；宁可数据略旧，也好过丢掉封面）
-          const fresh =
-            typeof d?.updatedAt === "string" &&
-            Date.now() - new Date(d.updatedAt).getTime() < 15 * 60 * 1000;
-          if (d?.title && (fresh || d.cover) && !cancelled) {
-            setNow({
-              title: d.title,
-              subtitle: d.artist ?? "",
-              cover: d.cover ?? "",
-              live: !!d.live,
-              link: d.link ?? "",
-            });
-            return;
+      /* ① 首选：本地脚本推送的实时数据（多源依次尝试，代理无缓存故最实时） */
+      let payload: Record<string, unknown> | null = null;
+      for (const src of NOW_SOURCES) {
+        try {
+          const res = await fetch(src, { cache: "no-store" });
+          if (!res.ok) continue;
+          const json = (await res.json()) as Record<string, unknown>;
+          if (typeof json?.title === "string" && json.title) {
+            payload = json;
+            break; // 拿到有效数据即停止尝试
           }
+        } catch {
+          /* 该源失败，试下一个 */
         }
-      } catch {
-        /* 继续降级 */
+      }
+      if (payload && !cancelled) {
+        // 采用条件：数据足够新鲜（15 分钟内），**或**它带有封面
+        const fresh =
+          typeof payload.updatedAt === "string" &&
+          Date.now() - new Date(payload.updatedAt).getTime() < 15 * 60 * 1000;
+        if (fresh || payload.cover) {
+          setNow({
+            title: String(payload.title),
+            subtitle: typeof payload.artist === "string" ? payload.artist : "",
+            cover: typeof payload.cover === "string" ? payload.cover : "",
+            live: payload.live === true,
+            link: typeof payload.link === "string" ? payload.link : "",
+          });
+          return;
+        }
       }
 
       /* ② 降级：直连 Last.fm（仅有曲目，封面靠映射表） */
