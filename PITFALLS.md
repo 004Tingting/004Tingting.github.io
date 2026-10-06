@@ -9,14 +9,28 @@
 
 - **现象**：`EPERM: operation not permitted, open 'P:\personal-site\.next\trace'`，随后导出阶段 `open 'out\404.html'` 同样被拒
 - **原因**：WorkBuddy 沙箱的 node 文件系统代理（`node-brokered-fs-shim`）拦截了 Next 构建多进程的写入方式；并非真实权限问题（手动 `touch` / `node fs.writeFileSync` 同路径均成功）
-- **精确定位**（2026-10-07 补充）：Next 15.5 的 trace 模块 `dist/trace/report/to-json.js` 在 `mkdir(distDir)` 后**立刻** `createWriteStream(file, { flags: 'a' })`——目录刚由它创建时开流会撞 EPERM。**与目录是否干净、是否绕过沙箱都无关**（试过 `dangerouslyDisableSandbox`、换目录名、Node 直测写流，全部无效）
-- **✅ 解法（一条命令搞定）**：构建前**预先创建 `.next` 目录和空的 `trace` 文件**，让 `createWriteStream` 走「打开已存在文件」路径而非「新建」路径：
+- **精确定位**：Next 15.5 的 `node_modules/next/dist/trace/report/to-json.js` 第 76 行
+  `RotatingWriteStream` 构造里 `fs.createWriteStream(file, { flags: 'a' })`。
+  **实测有效的条件组合（三条缺一不可）**：
+  1. `.next` 目录**预先存在**（`os.makedirs('.next', exist_ok=True)`）
+  2. `.next/trace` 文件**预先存在且为 0 字节**（`open('.next/trace','w').close()`）
+  3. **构建前不要删除 `.next`**（删除会撞 safe-delete 阈值，见 #2）
+- **✅ 标准构建前置（已验证可稳定成功）**：
   ```bash
-  python -c "import os; os.makedirs('.next', exist_ok=True); open('.next/trace','a').close()"
+  python -c "import os; os.makedirs('.next', exist_ok=True); open('.next/trace','w').close()"
   npm run build
   ```
-  实测：预建后一次构建成功（42s），无需绕过沙箱
-- **备选**：构建命令走非沙箱执行；先 `rm -rf .next` 清空旧产物后从零构建（仍可能随机失败）
+- **无效尝试（都试过，别再重复）**：
+
+  | 尝试 | 结果 |
+  |---|---|
+  | `dangerouslyDisableSandbox: true` | ✗ 仍 EPERM |
+  | `rm -rf .next` 完全清理 | ✗（且触发 safe-delete） |
+  | 把 `.next` 改名绕开 | ✗ |
+  | 只预建目录、不预建文件 | ✗ |
+  | 预建文件但**非空**（有旧内容） | ✗ 也可能是 EPERM |
+  | Node 直测 `createWriteStream` 同路径 | ✅ 成功（证明非真实权限问题） |
+- **注意**：如果构建中途被 safe-delete 打断，`.next` 已成半成品——**直接再跑一次**（清空 trace 为 0 字节），通常第二次能过（增量编译）
 
 ### 2. safe-delete shim 拦截批量删除，杀掉 dev server
 
