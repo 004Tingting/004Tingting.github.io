@@ -11,26 +11,29 @@
 - **原因**：WorkBuddy 沙箱的 node 文件系统代理（`node-brokered-fs-shim`）拦截了 Next 构建多进程的写入方式；并非真实权限问题（手动 `touch` / `node fs.writeFileSync` 同路径均成功）
 - **精确定位**：Next 15.5 的 `node_modules/next/dist/trace/report/to-json.js` 第 76 行
   `RotatingWriteStream` 构造里 `fs.createWriteStream(file, { flags: 'a' })`。
-  **实测有效的条件组合（三条缺一不可）**：
-  1. `.next` 目录**预先存在**（`os.makedirs('.next', exist_ok=True)`）
-  2. `.next/trace` 文件**预先存在且为 0 字节**（`open('.next/trace','w').close()`）
-  3. **构建前不要删除 `.next`**（删除会撞 safe-delete 阈值，见 #2）
-- **✅ 标准构建前置（已验证可稳定成功）**：
+- **✅ 真正有效的解法（2026-10-07 反复实测得出）**：`.next` 必须是**「已被 Next 写热过的目录」**——
+  即目录下已有 Next 自己创建的 `cache/`、`server/`、`types/` 等子目录，**且 `trace` 为空文件**
   ```bash
   python -c "import os; os.makedirs('.next', exist_ok=True); open('.next/trace','w').close()"
   npm run build
   ```
-- **无效尝试（都试过，别再重复）**：
+  - **判定标准**：构建能跑过 8 秒（迅速 EPERM）→ 说明 `.next` 是"冷"的（Next 正在首次建结构）；
+    能跑 40–60 秒 → 说明 `trace` 这一关已过，接下来只可能撞 safe-delete（见 #2），**再跑一次**即可推进
+  - **绝对不要删 `.next`**：删掉后 Next 需要重新首次创建结构 → 必然 EPERM + 撞 safe-delete，双杀
+  - **不要 `.next` 改名重建**：同理失效
+- **实测无效的做法（别再重复）**：
 
   | 尝试 | 结果 |
   |---|---|
-  | `dangerouslyDisableSandbox: true` | ✗ 仍 EPERM |
-  | `rm -rf .next` 完全清理 | ✗（且触发 safe-delete） |
-  | 把 `.next` 改名绕开 | ✗ |
-  | 只预建目录、不预建文件 | ✗ |
-  | 预建文件但**非空**（有旧内容） | ✗ 也可能是 EPERM |
-  | Node 直测 `createWriteStream` 同路径 | ✅ 成功（证明非真实权限问题） |
-- **注意**：如果构建中途被 safe-delete 打断，`.next` 已成半成品——**直接再跑一次**（清空 trace 为 0 字节），通常第二次能过（增量编译）
+  | `dangerouslyDisableSandbox: true` 绕过沙箱 | ✗ 仍 EPERM |
+  | 删除 `.next` 让 Next 自建 | ✗ 8 秒即 EPERM |
+  | `.next` 改名成 `.next-old` 后重建 | ✗ |
+  | 只建目录、不建 trace | ✗ |
+  | 建 trace 但用 `'a'`（保留旧内容非空） | ✗ |
+  | Node 直测 `createWriteStream` 同路径 | ✅ 成功（证明非真实权限问题，是时序/状态问题） |
+
+- **标准恢复流程（`.next` 已被破坏时）**：先跑一次构建让它失败（同时把目录结构建起来），
+  **再跑第二次**——此时 `.next` 已"热"，可继续推进到导出阶段
 
 ### 2. safe-delete shim 拦截批量删除，杀掉 dev server
 
