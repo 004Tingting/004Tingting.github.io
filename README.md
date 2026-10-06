@@ -1,11 +1,11 @@
 # personal-site
 
-Ting 的个人网站：主页 + 博客 + 作品集。
+Ting 的个人网站——一本双语「个人杂志」，五栏：研思 / 造物 / 游艺 / 纪事 / 关于。
 
 **线上地址：https://004tingting.github.io**
 
 - **技术栈**：Next.js（App Router + TypeScript，静态导出）+ Tailwind CSS 4
-- **部署**：GitHub Pages + GitHub Actions（push `main` 即自动发布，约 1 分钟）
+- **部署**：GitHub Pages，**gh-pages 分支模式**（`bash scripts/deploy.sh` 一键发布）
 - **双语**：中文（默认）+ `/en` 英文，内容渐进式对齐
 
 ## 本地开发
@@ -80,13 +80,16 @@ npm run live -- --interval 10   # 自定义间隔
 **数据链路**：
 
 ```
-本机脚本（每 30 秒）
+本机脚本（每 15 秒）
   ├─ Last.fm：当前播放曲目
   ├─ 网易云：专辑封面（本机直连，无 CORS 限制）
-  └─ GitHub API → now-data 分支 → 清除 jsDelivr 缓存
+  └─ GitHub API → now-data 分支（另每 ≥10 分钟 purge 一次 jsDelivr 作兜底）
                     ↓
-        网站前端读取（CORS 可用）→ 切歌后 ≤30 秒封面更新
+  前端经国内 GitHub 直通代理读取（**无缓存**）→ 切歌后 ≤30 秒更新
+  尝试顺序：gh-proxy.com → gh.llkk.cc → jsDelivr（兜底）
 ```
+
+> 为什么 jsDelivr 只作兜底：它的 purge 有 **720 秒限流窗口**，频繁 purge 会导致之后全部失效、缓存永久停在旧版本（实测数据滞后 20+ 分钟）。
 
 - 配置：`.env.local` 需有 `LASTFM_API_KEY` / `LASTFM_USER` / `GITHUB_TOKEN`（`GITHUB_TOKEN` 用 `gh auth token` 获取）
 - 脚本只在**切歌时**推送（无变化不产生提交），不会刷提交历史
@@ -96,6 +99,9 @@ npm run live -- --interval 10   # 自定义间隔
 
 | 文件 | 内容 |
 |---|---|
-| `PLAN.md` | 建站规划与里程碑（M0 地基 → M4 打磨） |
-| `DESIGN.md` | 设计规格：字体、色板、双语策略、页面线框、SEO |
+| `AGENTS.md` | **项目上下文与硬性约定（AI 助手开工先读）** |
+| `PLAN.md` | 建站规划与里程碑（M0 地基 → M6 五栏重构） |
+| `DESIGN.md` | 设计规格：字体、色板、双语策略、页面线框、SEO、五栏体系 |
 | `PITFALLS.md` | 踩坑记录：环境 / 构建 / 部署 / 内容的全部坑与解法 |
+| `.workbuddy/memory/HANDOFF.md` | **会话交接**：最新状态、待办、环境注意 |
+| `.workbuddy/memory/WORKLOG.md` | 工作日志（单文件多条目，最新在上） |

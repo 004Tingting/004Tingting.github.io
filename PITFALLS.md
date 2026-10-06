@@ -145,6 +145,28 @@
 - **辅助**：`export GIT_TERMINAL_PROMPT=0`（认证失败只报错、不弹窗）
 - `scripts/deploy.sh` 已内置全部防护（清代理 + 完整路径 gh 取 token + `-c credential.helper=` + 禁交互）
 
+### 19. jsDelivr 缓存不更新 / purge 被限流
+
+- **现象**：前端读到的数据长时间不变（实测滞后 20+ 分钟），但仓库里的文件明明是新的
+- **原因**：jsDelivr 对 `@branch` 引用**默认缓存 12 小时**；虽然提供 purge API，但它有 **720 秒限流窗口**——频繁 purge（如脚本每次切歌都调用）会触发限流，**之后所有 purge 全部失效**，缓存永久停在最后一个成功 purge 的版本
+- **诊断**：
+  ```bash
+  curl -s "https://purge.jsdelivr.net/gh/OWNER/REPO@BRANCH/FILE"
+  # 返回 {"status":"finished","paths":{...{"throttled":true,"throttlingReset":720}}}  ← 已被限流
+  ```
+- **解决**：**高频更新的数据不要用 jsDelivr**，改用无缓存的 GitHub 直通代理（2026-10-06 实测）：
+
+  | 通道 | 缓存 | CORS | 可达 |
+  |---|---|---|---|
+  | `gh-proxy.com` | 无 ✓ | ✓ `*` | ✓ |
+  | `gh.llkk.cc` | 无 ✓ | ✓ `*` | ✓ |
+  | `ghfast.top` / `ghproxy.net` | 无 ✓ | ❌ 无 CORS 头 | ✓（前端不可用）|
+  | `raw.githubusercontent.com` | 无 | — | ❌ 502 |
+  | `cdn.statically.io` / `raw.gitmirror.com` | — | — | ❌ 不可达 |
+
+  用法：`https://gh-proxy.com/https://raw.githubusercontent.com/OWNER/REPO/BRANCH/FILE`
+  若仍保留 jsDelivr 作兜底：**本地限流 purge**（≥10 分钟一次）
+
 ## 快速修复清单（下次会话遇到直接抄）
 
 ```bash

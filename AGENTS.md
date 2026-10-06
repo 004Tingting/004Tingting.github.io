@@ -5,10 +5,10 @@
 
 ## 项目是什么
 
-Ting 的个人网站——一本**双语（中文默认 + `/en`）的「个人杂志」**：博客 + 作品集。
+Ting 的个人网站——一本**双语（中文默认 + `/en`）的「个人杂志」**，五栏：研思 / 造物 / 游艺 / 纪事 / 关于。
 
 - 线上地址：https://004tingting.github.io
-- 部署方式：GitHub Pages + GitHub Actions，**push `main` 即自动发布**（约 1 分钟）
+- 部署方式：GitHub Pages，**gh-pages 分支模式**（`bash scripts/deploy.sh` 一键发布）；`.github/workflows/deploy.yml` 已降级为手动触发的备用通道
 - 身份设定：作者自称 **Ting**（不实名、无照片），第一人称叙述
 
 ## 技术栈（勿擅自更换）
@@ -61,13 +61,16 @@ lib/
 scripts/
 ├── preview.py            # 本地预览（支持 clean URL，对齐 GitHub Pages）
 ├── og.mjs                # 生成 public/og.png 分享卡片（sharp 渲染 SVG）
-└── postbuild.mjs         # 构建后写定制 out/404.html
+├── postbuild.mjs         # 构建后写定制 out/404.html + 22 个旧 URL 跳转页
+├── fetch-now.mjs         # 构建前拉 Last.fm 快照 + 生成封面映射（prebuild 链路）
+├── push-now.mjs          # 本机常驻：推送实时「正在听」到 now-data 分支（npm run live）
+└── deploy.sh             # 一键发布：构建 → 推 gh-pages → 触发 Pages 构建
 ```
 
 ## 硬性约定
 
 1. **双语架构**：UI 文案一律走 `lib/i18n.ts`；新增页面必须同时提供 `(zh)` 与 `(en)/en/` 两个版本（内容允许单语，框架必须双语）
-2. **新增内容类型**：参照 `lib/posts.ts` / `lib/projects.ts` 的模式（fs + gray-matter，构建时读取，`generateStaticParams` 预生成 + `export const dynamicParams = false`）
+2. **新增内容类型**：参照 `lib/articles.ts`（Section 维度，研思 / 纪事共用）/ `lib/works.ts` / `lib/arts.ts` 的模式（fs + gray-matter，构建时读取，`generateStaticParams` 预生成 + `export const dynamicParams = false`）
 3. **frontmatter 两个坑**：日期必须加引号（否则是 Date 实例）；值里含 ASCII 冒号+空格（`: `）必须整段加引号
 4. **客户端边界**：`"use client"` 组件不得 import 含 `node:fs` 的模块——共享逻辑放 `lib/*-shared.ts`
 5. **设计语言**：编辑杂志风——衬线大标题、纸色/墨色 + 唯一朱红强调色、1px hairline、kicker（`· 标签`）、条目序号。**不引入 UI 组件库**，样式用 Tailwind 原子类 + token
@@ -91,10 +94,12 @@ bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → �
 
 | 层 | 说明 |
 |---|---|
-| 实时源 | `now-data` 分支的 `now.json`，由**本机脚本** `scripts/push-now.mjs` 推送（读 Last.fm 曲目 + 查网易云封面），经 jsDelivr 供前端读取，≤30 秒新鲜度 |
-| 前端 | `components/NowPlayingLive.tsx` 三级降级：now-data → Last.fm 直连 + 构建映射表 → 构建快照 |
+| 实时源 | `now-data` 分支的 `now.json`，由**本机脚本** `scripts/push-now.mjs` 推送（读 Last.fm 曲目 + 查网易云封面），每 15 秒 |
+| 传输通道 | 前端**多源依次尝试**：`gh-proxy.com` → `gh.llkk.cc`（国内 GitHub 直通代理，**无缓存** + 支持 CORS）→ jsDelivr（兜底）；端到端延迟上限 ~30 秒 |
+| 前端 | `components/NowPlayingLive.tsx` 多源 + 三级降级：now-data → Last.fm 直连 + 构建映射表 → 构建快照 |
 | 构建时 | `scripts/fetch-now.mjs` 生成快照与封面映射（`public/covers.json` + `public/covers/*.jpg`，最近 50 首） |
-| 为什么这么绕 | 浏览器无法直连网易云接口（无 CORS），iTunes 等替代源对日韩文歌匹配不准，Last.fm 已停供封面 |
+| 本机启动 | Ting 侧**双击 `start-live.cmd`**（Node 装在 WorkBuddy 隔离目录，其终端里没有 `npm`） |
+| 为什么这么绕 | 浏览器无法直连网易云接口（无 CORS）、iTunes 等替代源对日韩文歌匹配不准、Last.fm 已停供封面；jsDelivr 的 purge 有 720 秒限流，不适合承载高频更新数据 |
 
 ## 环境注意事项（WorkBuddy 会话内，详细见 PITFALLS.md）
 
@@ -103,7 +108,8 @@ bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → �
 - **Node spawn 子进程受限**：`execFileSync('git')` 在沙箱内报 EBUSY → 脚本里改用 HTTP API
 - **构建前先 `rm -rf .next`**：沙箱的 safe-delete shim 在回合内累计删除 ≥50 文件会拦杀进程
 - **网络间歇性 EOF**：gh/git 操作套 3–5 次重试
-- **Pages 若被重置为 legacy**：`gh api -X PUT repos/004Tingting/004Tingting.github.io/pages -f build_type=workflow`
+- **Pages 当前为 legacy 模式**（source: `gh-pages` 分支）—— 这是刻意选择，用于绕开 Actions 排队；切回 workflow 模式：`gh api -X PUT repos/004Tingting/004Tingting.github.io/pages -f build_type=workflow`
+- **jsDelivr 的 purge 会被限流**：响应出现 `{"throttled":true,"throttlingReset":720}` 即已限流；高频更新的数据不要走 jsDelivr（详见 PITFALLS #19）
 
 ## 内容策略
 
@@ -132,7 +138,7 @@ bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → �
 
 ## 当前状态 / 待办
 
-- 全部里程碑 M0–M4 已完成，M5 生活板块已上线（示例条目待替换真实记录）
+- 里程碑 **M0–M6 全部完成**（M6 = 五栏信息架构重构）；站点已上线运行
+- **最新状态与待办以 `.workbuddy/memory/HANDOFF.md` 为准**
+- 待办主线：**内容替换**（研思示例文章、游艺 13 个示例条目、OinO / 游戏设计 项目页偏框架、about 页仍是占位）；**游艺 / 看板** `/arts/stats` 统计图表（已确认后置）
 - **giscus 评论已启用**（App 已装、`enabled=true`）；Discussions 分类用 Announcements
-- **作品集初稿**：OinO / 游戏设计两个页面内容偏框架性，待补真实细节
-- **about 页**：仍是占位
