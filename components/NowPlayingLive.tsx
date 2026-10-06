@@ -21,8 +21,8 @@ type Props = {
   variant?: "bar" | "card";
 };
 
-/** 轮询间隔：本地脚本 scripts/push-now.mjs 每 30 秒推送一次 now-data */
-const REFRESH_MS = 30_000;
+/** 轮询间隔：与本地脚本 scripts/push-now.mjs 的 15 秒推送节奏对齐 */
+const REFRESH_MS = 15_000;
 
 /**
  * 本地脚本推送的实时数据（含网易云封面），经 jsDelivr 读取（CORS 可用）。
@@ -108,9 +108,15 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
 
     load();
     const timer = setInterval(load, REFRESH_MS);
+    // 页面重新可见时立即刷新一次（避免切回标签页时看到旧数据）
+    const onVisible = () => {
+      if (!document.hidden) load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       cancelled = true;
       clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -7,8 +7,8 @@
  *   网站前端从 jsDelivr 读取（CORS 可用），实现「切歌后 ≤30 秒封面更新」。
  *
  * 用法：
- *   node scripts/push-now.mjs                 # 每 30 秒检查一次（默认）
- *   node scripts/push-now.mjs --interval 15   # 自定义间隔（秒）
+ *   node scripts/push-now.mjs                 # 每 15 秒检查一次（默认）
+ *   node scripts/push-now.mjs --interval 10   # 自定义间隔（秒）
  *   node scripts/push-now.mjs --once          # 只推一次（调试）
  *
  * 依赖：.env.local 中的 LASTFM_API_KEY / LASTFM_USER / GITHUB_TOKEN
@@ -26,7 +26,7 @@ const FILE = "now.json";
 const args = process.argv.slice(2);
 const once = args.includes("--once");
 const intervalIdx = args.indexOf("--interval");
-const INTERVAL_MS = (intervalIdx >= 0 ? Number(args[intervalIdx + 1]) : 30) * 1000;
+const INTERVAL_MS = (intervalIdx >= 0 ? Number(args[intervalIdx + 1]) : 15) * 1000;
 
 // ---- 读取 .env.local（简易解析，避免额外依赖）----
 function loadEnv() {
