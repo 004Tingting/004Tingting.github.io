@@ -99,6 +99,8 @@ bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → �
 ## 环境注意事项（WorkBuddy 会话内，详细见 PITFALLS.md）
 
 - **gh CLI 必须清代理调用**：`env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy "/c/Program Files/GitHub CLI/gh.exe" ...`（平台内部代理 127.0.0.1:15422 会掐断 GitHub POST）
+- **git push 必须禁用 credential helper**：系统级 `credential.helper=helper-selector`（PortableGit 注入）会弹 GUI 或导致卡死 → 一律用 `git -c credential.helper= push ...`（`scripts/deploy.sh` 已内置）
+- **Node spawn 子进程受限**：`execFileSync('git')` 在沙箱内报 EBUSY → 脚本里改用 HTTP API
 - **构建前先 `rm -rf .next`**：沙箱的 safe-delete shim 在回合内累计删除 ≥50 文件会拦杀进程
 - **网络间歇性 EOF**：gh/git 操作套 3–5 次重试
 - **Pages 若被重置为 legacy**：`gh api -X PUT repos/004Tingting/004Tingting.github.io/pages -f build_type=workflow`

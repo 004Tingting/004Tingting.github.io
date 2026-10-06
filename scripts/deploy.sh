@@ -49,12 +49,13 @@ if [ -z "$TOKEN" ] && command -v gh >/dev/null 2>&1; then
   TOKEN=$(gh auth token 2>/dev/null || true)
 fi
 
+# 关键：用 `-c credential.helper=` 在命令行覆盖（优先级最高），彻底禁用 credential helper。
+# 否则会被系统级 `credential.helper=helper-selector`（WorkBuddy PortableGit 注入）接管
+# → 弹 GUI 对话框 / 命令卡 1~2 分钟后被强杀（认证与保存凭据两个阶段各触发一次）。
 if [ -n "$TOKEN" ]; then
-  git push -f -q "https://x-access-token:${TOKEN}@github.com/${REPO}.git" gh-pages
+  git -c credential.helper= push -f -q "https://x-access-token:${TOKEN}@github.com/${REPO}.git" gh-pages
 else
-  # 兜底：显式指定 GCM，避免落到 helper-selector
-  git config --local credential.helper manager
-  git push -f -q origin gh-pages
+  git -c credential.helper= push -f -q origin gh-pages
 fi
 cd ..
 

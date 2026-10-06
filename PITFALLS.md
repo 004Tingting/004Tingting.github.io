@@ -127,6 +127,24 @@
 
 ---
 
+### 18. git 凭据弹窗 / push 卡死（credential-helper-selector）
+
+- **现象**：`git push` 弹出 GUI 对话框「Select a credential helper（manager / wincred / no helper）」，或**无任何输出卡住 1~2 分钟后被强杀**；一次 push 可能触发两次
+- **原因**：WorkBuddy 的 PortableGit 在**系统级**写入了 `credential.helper=helper-selector`，优先级高于全局配置（GCM）。git 在「认证」与「保存凭据」两个阶段都会调用 helper → 两次弹窗/卡顿
+- **排查方法**（一眼定位）：
+  ```bash
+  GIT_TRACE=1 git push <url> <branch>   # 会看到 run_command: 'git credential-helper-selector store'
+  ```
+- **解决**（命令行 `-c` 优先级最高，彻底禁用 helper）：
+  ```bash
+  git -c credential.helper= push <url> <branch>
+  # 配合 token 更稳：
+  TOKEN=$(gh auth token)
+  git -c credential.helper= push "https://x-access-token:$TOKEN@github.com/owner/repo.git" main
+  ```
+- **辅助**：`export GIT_TERMINAL_PROMPT=0`（认证失败只报错、不弹窗）
+- `scripts/deploy.sh` 已内置全部防护（清代理 + 完整路径 gh 取 token + `-c credential.helper=` + 禁交互）
+
 ## 快速修复清单（下次会话遇到直接抄）
 
 ```bash
