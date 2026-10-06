@@ -15,6 +15,7 @@
  *   （GITHUB_TOKEN 可用 `gh auth token` 获取）
  */
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -148,7 +149,26 @@ async function purgeCache() {
 
 /* ---------------- 主循环 ---------------- */
 
-let lastSignature = "";
+/** 上次推送的签名持久化到本地文件，避免重启脚本后重复推送同一首歌 */
+const STATE_FILE = path.join(os.tmpdir(), "personal-site-now-state.json");
+
+function readState() {
+  try {
+    return JSON.parse(fs.readFileSync(STATE_FILE, "utf-8")).signature ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeState(signature) {
+  try {
+    fs.writeFileSync(STATE_FILE, JSON.stringify({ signature, at: new Date().toISOString() }));
+  } catch {
+    /* 状态写入失败不致命 */
+  }
+}
+
+let lastSignature = readState();
 
 async function tick() {
   try {
@@ -166,6 +186,7 @@ async function tick() {
     await pushToGitHub(data);
     await purgeCache();
     lastSignature = signature;
+    writeState(signature);
     console.log(
       `✓ [${new Date().toLocaleTimeString()}] ${data.live ? "▶ 正在播放" : "· 最近播放"} ` +
         `${data.title} — ${data.artist}${cover ? "（含封面）" : "（无封面）"}`,
