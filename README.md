@@ -64,9 +64,18 @@ bash scripts/deploy.sh   # 一键：构建 → 推 gh-pages 分支 → 触发 Pa
 网站上的「正在听」曲目与封面，由**本机脚本**实时推送（浏览器无法直连网易云接口，所以这一步必须在本机完成）：
 
 ```bash
-npm run live                # 启动监听：每 30 秒检查一次，Ctrl+C 退出
+npm run live                    # 启动监听：每 30 秒检查一次，Ctrl+C 退出
 npm run live -- --interval 15   # 自定义间隔
 ```
+
+> **Windows 用户注意**：Node 装在 WorkBuddy 的隔离目录里，**你自己的终端（CMD/PowerShell）里 `npm` 不在 PATH 中**，直接跑会提示"命令未找到"。
+> **推荐做法：双击项目根目录的 `start-live.cmd`** —— 它会自动找 Node、校验配置、启动监听。
+>
+> 想用命令行也行（完整路径）：
+> ```cmd
+> cd /d P:\personal-site
+> "C:\Users\SaiKo\.workbuddy\binaries\node\versions\22.22.2-6\npm.cmd" run live
+> ```
 
 **数据链路**：
 
