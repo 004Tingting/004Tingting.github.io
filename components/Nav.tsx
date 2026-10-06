@@ -49,7 +49,7 @@ export default function Nav({ lang }: { lang: Lang }) {
         >
           Ting
         </Link>
-        <nav className="flex flex-wrap items-baseline gap-x-6 gap-y-2 font-mono text-base">
+        <nav className="flex flex-wrap items-baseline gap-x-6 gap-y-2 font-serif text-lg font-semibold">
           {ORDER.map((key) => (
             <Link key={key} href={routes[key]} className="hover:text-accent">
               {t[key]}

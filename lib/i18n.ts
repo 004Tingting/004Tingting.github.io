@@ -11,6 +11,14 @@ export const zh = {
     viewAll: "全部 →",
     featured: "精选造物",
     empty: "第一篇文章在路上。",
+    /* 首页侧栏（仅 ≥1280px 显示） */
+    aside: {
+      index: "索引",
+      indexDesc: "五个栏目",
+      latestShort: "近作",
+      colophon: "成都 · 中国",
+      est: "始于 2026",
+    },
   },
   sections: {
     research: {
@@ -98,6 +106,14 @@ export const en = {
     viewAll: "All →",
     featured: "Selected Works",
     empty: "The first post is on its way.",
+    /* Home aside (shown at ≥1280px only) */
+    aside: {
+      index: "Index",
+      indexDesc: "Five sections",
+      latestShort: "Recent",
+      colophon: "Chengdu, China",
+      est: "Est. 2026",
+    },
   },
   sections: {
     research: {
