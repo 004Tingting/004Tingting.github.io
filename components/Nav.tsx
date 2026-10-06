@@ -42,14 +42,14 @@ export default function Nav({ lang }: { lang: Lang }) {
 
   return (
     <header className="border-b border-rule">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-baseline justify-between gap-y-3 px-6 py-5">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-baseline justify-between gap-y-1.5 px-6 py-3.5">
         <Link
           href={homeHref}
           className="font-serif text-2xl font-bold tracking-wide hover:text-accent"
         >
           Ting
         </Link>
-        <nav className="flex flex-wrap items-baseline gap-x-6 gap-y-2 font-serif text-lg font-semibold">
+        <nav className="flex flex-wrap items-baseline gap-x-5 gap-y-1 font-serif text-lg font-semibold">
           {ORDER.map((key) => (
             <Link key={key} href={routes[key]} className="hover:text-accent">
               {t[key]}

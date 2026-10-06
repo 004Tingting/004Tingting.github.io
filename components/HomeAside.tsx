@@ -66,30 +66,30 @@ export default function HomeAside({
 
   return (
     <aside className="hidden xl:block">
-      <div className="sticky top-10 space-y-8">
+      <div className="sticky top-8 space-y-5">
         {/* 编辑部印记：竖排站名 + 期号，纯装饰 */}
-        <div className="border-t-2 border-accent pt-4">
+        <div className="border-t-2 border-accent pt-3">
           <p className="font-mono text-xs tracking-[0.3em] text-muted uppercase">
             {lang === "zh" ? "个人杂志" : "Personal Journal"}
           </p>
-          <p className="mt-3 font-serif text-3xl font-bold leading-tight">
+          <p className="mt-2 font-serif text-2xl font-bold leading-tight">
             Ting
             <span className="text-accent">.</span>
           </p>
-          <p className="mt-2 font-mono text-xs text-muted">
+          <p className="mt-1 font-mono text-xs text-muted">
             {t.colophon} · {t.est}
           </p>
         </div>
 
         {/* 五栏索引 */}
-        <nav className="border-t border-rule pt-4">
+        <nav className="border-t border-rule pt-3">
           <p className="font-mono text-xs tracking-widest text-muted">
             <span className="text-accent">·</span> {t.index}
           </p>
-          <ul className="mt-4 space-y-3">
+          <ul className="mt-2.5 space-y-2">
             {ORDER.map((key, i) => (
               <li key={key}>
-                <Link href={routes[key]} className="group flex items-baseline gap-3">
+                <Link href={routes[key]} className="group flex items-baseline gap-2.5">
                   <span className="font-mono text-xs text-muted">
                     {String(i + 1).padStart(2, "0")}
                   </span>
@@ -97,7 +97,7 @@ export default function HomeAside({
                     {dic[lang].nav[key]}
                   </span>
                 </Link>
-                <p className="mt-0.5 pl-8 text-xs leading-relaxed text-muted">
+                <p className="mt-0.5 pl-7 text-xs leading-snug text-muted">
                   {BLURBS[lang][key]}
                 </p>
               </li>
@@ -107,11 +107,11 @@ export default function HomeAside({
 
         {/* 近作 */}
         {latest.length > 0 ? (
-          <div className="border-t border-rule pt-4">
+          <div className="border-t border-rule pt-3">
             <p className="font-mono text-xs tracking-widest text-muted">
               <span className="text-accent">·</span> {t.latestShort}
             </p>
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-2.5 space-y-2">
               {latest.slice(0, 3).map((a) => (
                 <li key={`${a.section}/${a.slug}`}>
                   <Link href={`${base}/${a.section}/${a.slug}`} className="group block">
