@@ -1,5 +1,5 @@
 ---
-title: "Issue No.1: Why a Personal Journal"
+title: "In the Beginning: Why a Personal Journal"
 date: "2026-10-06"
 tags: [essay, meta]
 summary: Three decisions behind this site — bilingual, editorial layout, and static hosting — plus what to expect.
@@ -45,4 +45,4 @@ The site is organised into five sections: **Research** (derivations, methods, re
 - **Arts** — music, games and screen, plus the data they leave behind
 - **Chronicles** — journal notes, retrospectives and essays
 
-This is issue No.1. Come back often.
+This is where it begins. Come back often.

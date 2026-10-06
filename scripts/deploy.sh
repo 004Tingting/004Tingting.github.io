@@ -22,6 +22,10 @@ REPO="004Tingting/004Tingting.github.io"
 REMOTE="https://github.com/${REPO}.git"
 
 echo "▸ 1/3 构建静态产物…"
+# 预建 .next/trace，规避 WorkBuddy 沙箱的 EPERM（详见 PITFALLS #1）：
+# Next 15.5 在 mkdir(.next) 后立刻 createWriteStream('.next/trace')，
+# 若该文件不存在则撞上文件系统代理；预先建好可走「打开已存在文件」路径。
+python -c "import os; os.makedirs('.next', exist_ok=True); open('.next/trace','a').close()" 2>/dev/null || true
 npm run build
 
 echo "▸ 2/3 推送到 gh-pages 分支…"

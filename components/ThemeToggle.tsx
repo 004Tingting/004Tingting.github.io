@@ -28,7 +28,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      className="cursor-pointer text-base leading-none hover:text-accent"
+      className="cursor-pointer text-lg leading-none hover:text-accent"
     >
       {mounted ? (dark ? "◑" : "◐") : "◐"}
     </button>

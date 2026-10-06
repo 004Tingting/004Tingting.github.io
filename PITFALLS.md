@@ -9,7 +9,14 @@
 
 - **现象**：`EPERM: operation not permitted, open 'P:\personal-site\.next\trace'`，随后导出阶段 `open 'out\404.html'` 同样被拒
 - **原因**：WorkBuddy 沙箱的 node 文件系统代理（`node-brokered-fs-shim`）拦截了 Next 构建多进程的写入方式；并非真实权限问题（手动 `touch` / `node fs.writeFileSync` 同路径均成功）
-- **解决**：构建命令走非沙箱执行；先 `rm -rf .next` 清空旧产物后从零构建
+- **精确定位**（2026-10-07 补充）：Next 15.5 的 trace 模块 `dist/trace/report/to-json.js` 在 `mkdir(distDir)` 后**立刻** `createWriteStream(file, { flags: 'a' })`——目录刚由它创建时开流会撞 EPERM。**与目录是否干净、是否绕过沙箱都无关**（试过 `dangerouslyDisableSandbox`、换目录名、Node 直测写流，全部无效）
+- **✅ 解法（一条命令搞定）**：构建前**预先创建 `.next` 目录和空的 `trace` 文件**，让 `createWriteStream` 走「打开已存在文件」路径而非「新建」路径：
+  ```bash
+  python -c "import os; os.makedirs('.next', exist_ok=True); open('.next/trace','a').close()"
+  npm run build
+  ```
+  实测：预建后一次构建成功（42s），无需绕过沙箱
+- **备选**：构建命令走非沙箱执行；先 `rm -rf .next` 清空旧产物后从零构建（仍可能随机失败）
 
 ### 2. safe-delete shim 拦截批量删除，杀掉 dev server
 
