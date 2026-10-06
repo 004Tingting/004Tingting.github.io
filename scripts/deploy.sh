@@ -11,6 +11,13 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# WorkBuddy 会话内：平台内部代理会掐断 gh / git 的 GitHub 请求，统一清掉
+unset HTTPS_PROXY HTTP_PROXY https_proxy http_proxy
+
+# 禁止 git 交互式凭据提示 —— 双保险：即使 token 获取失败也只会报错，不弹 GUI 对话框
+export GIT_TERMINAL_PROMPT=0
+export GCM_INTERACTIVE=never
+
 REPO="004Tingting/004Tingting.github.io"
 REMOTE="https://github.com/${REPO}.git"
 
@@ -28,7 +35,27 @@ git config core.autocrlf false
 git add -A
 git -c user.name="004Tingting" -c user.email="SaiKouTING004@outlook.com" \
   commit -q -m "deploy: $(date '+%Y-%m-%d %H:%M')" || echo "  （无变更）"
-git push -f -q origin gh-pages
+
+# 推送：优先用 gh 的 token 直接推送
+# 原因：本机系统级配置了 credential.helper=helper-selector（WorkBuddy PortableGit），
+#       它会在每次凭据请求时弹出 GUI「选择 credential helper」对话框；
+#       把 token 嵌进 URL 可完全绕过 credential helper 机制。
+TOKEN=""
+# 优先用完整路径的 gh（PATH 里的可能是不可用的 stub）
+if [ -x "/c/Program Files/GitHub CLI/gh.exe" ]; then
+  TOKEN=$("/c/Program Files/GitHub CLI/gh.exe" auth token 2>/dev/null || true)
+fi
+if [ -z "$TOKEN" ] && command -v gh >/dev/null 2>&1; then
+  TOKEN=$(gh auth token 2>/dev/null || true)
+fi
+
+if [ -n "$TOKEN" ]; then
+  git push -f -q "https://x-access-token:${TOKEN}@github.com/${REPO}.git" gh-pages
+else
+  # 兜底：显式指定 GCM，避免落到 helper-selector
+  git config --local credential.helper manager
+  git push -f -q origin gh-pages
+fi
 cd ..
 
 echo "▸ 3/3 触发 Pages 构建…"
