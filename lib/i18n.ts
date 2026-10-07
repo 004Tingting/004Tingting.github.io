@@ -40,7 +40,7 @@ export const zh = {
   arts: {
     kicker: "游艺",
     title: "Arts",
-    intro: "六艺之余——音律、游戏与影卷，以及它们留下的数据。",
+    intro: "六艺之余——音律、游戏、影卷与训练，以及它们留下的数据。",
     music: {
       kicker: "音律",
       title: "Music",
@@ -82,6 +82,17 @@ export const zh = {
       kicker: "看板",
       title: "Stats",
       empty: "统计图表筹备中。",
+    },
+    training: {
+      kicker: "训练",
+      title: "Training",
+      intro: "跑步与徒手训练。不办健身卡，不做组数表——腿细一点，线条自然一点。",
+      all: "全部",
+      kinds: { run: "跑步", bodyweight: "徒手", other: "其他" },
+      countLabel: "条记录",
+      minutesUnit: " 分钟",
+      kmUnit: " 公里",
+      empty: "第一条记录在路上。",
     },
     gameStatus: { playing: "在玩", completed: "通关", dropped: "弃坑" },
     screenStatus: { watching: "在看", completed: "看完", dropped: "弃了" },
@@ -135,7 +146,7 @@ export const en = {
   arts: {
     kicker: "Arts",
     title: "Arts",
-    intro: "Beyond the desk — music, games and screen, plus the data they leave behind.",
+    intro: "Beyond the desk — music, games, screen and training, plus the data they leave behind.",
     music: {
       kicker: "Music",
       title: "Music",
@@ -177,6 +188,18 @@ export const en = {
       kicker: "Stats",
       title: "Stats",
       empty: "Charts are in the works.",
+    },
+    training: {
+      kicker: "Training",
+      title: "Training",
+      intro:
+        "Running and bodyweight work. No gym card, no set-and-rep tables — slimmer legs, natural lines.",
+      all: "All",
+      kinds: { run: "Run", bodyweight: "Bodyweight", other: "Other" },
+      countLabel: "entries",
+      minutesUnit: " min",
+      kmUnit: " km",
+      empty: "The first entry is on its way.",
     },
     gameStatus: { playing: "Playing", completed: "Beaten", dropped: "Dropped" },
     screenStatus: { watching: "Watching", completed: "Finished", dropped: "Dropped" },

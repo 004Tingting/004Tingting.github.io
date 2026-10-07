@@ -40,6 +40,18 @@ export default function ArtsPage() {
         `${t.screen.total} ${s.screenHours}${t.screen.hoursUnit}`,
       ].join(" · "),
     },
+    {
+      href: "/en/arts/training",
+      label: t.training.kicker,
+      meta: [
+        `${s.trainingCount} ${t.training.countLabel}`,
+        s.trainingMinutes > 0
+          ? `${t.screen.total} ${(s.trainingMinutes / 60).toFixed(1)}${t.screen.hoursUnit}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    },
   ];
 
   return (

@@ -6,6 +6,7 @@ import {
   asGameStatus,
   asScreenStatus,
   asScreenType,
+  asTrainingKind,
   summarize,
   type CoverEntry,
   type GameEntry,
@@ -14,9 +15,10 @@ import {
   type LifeStats,
   type NowPlaying,
   type ScreenEntry,
+  type TrainingEntry,
 } from "@/lib/arts-shared";
 
-/** 游艺（/arts）：音律（音乐）/ 游戏 / 影卷（影剧番小说） */
+/** 游艺（/arts）：音律（音乐）/ 游戏 / 影卷（影剧番小说）/ 训练（跑步 · 徒手） */
 const ROOT = path.join(process.cwd(), "content", "arts");
 const LASTFM_FILE = path.join(ROOT, "lastfm.json");
 const NOW_FILE = path.join(ROOT, "now.json");
@@ -87,6 +89,21 @@ export function getCovers(lang: Lang): CoverEntry[] {
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
+/** 训练条目：跑步 / 徒手（按 date 倒序） */
+export function getTraining(lang: Lang): TrainingEntry[] {
+  return readEntries(lang, "training")
+    .map(({ slug, data }) => ({
+      slug,
+      title: str(data.title, slug),
+      kind: asTrainingKind(data.kind),
+      date: str(data.date),
+      duration: numOrNull(data.duration),
+      distance: numOrNull(data.distance),
+      note: str(data.note, str(data.summary)),
+    }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
 /** Last.fm 实时数据（构建前由 scripts/fetch-now.mjs 生成；不存在时返回 null） */
 export function getLastfm(): LastfmData | null {
   if (!fs.existsSync(LASTFM_FILE)) return null;
@@ -149,5 +166,5 @@ export function getRecentTracks(): LastfmTrack[] {
 
 /** 汇总统计（构建时计算） */
 export function getStats(lang: Lang): LifeStats {
-  return summarize(getGames(lang), getScreen(lang), getCovers(lang));
+  return summarize(getGames(lang), getScreen(lang), getCovers(lang), getTraining(lang));
 }

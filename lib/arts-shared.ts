@@ -5,6 +5,7 @@ import type { Lang } from "@/lib/i18n";
 export type GameStatus = "playing" | "completed" | "dropped";
 export type ScreenType = "tv" | "anime" | "movie" | "novel";
 export type ScreenStatus = "watching" | "completed" | "dropped";
+export type TrainingKind = "run" | "bodyweight" | "other";
 
 export type GameEntry = {
   slug: string;
@@ -40,6 +41,19 @@ export type CoverEntry = {
   notes: string;
 };
 
+/** 训练条目（跑步 / 徒手）：kind 可缺省（如「开篇」随笔条目不计为一次训练） */
+export type TrainingEntry = {
+  slug: string;
+  title: string;
+  kind: TrainingKind | null;
+  date: string;
+  /** 分钟，可缺省 */
+  duration: number | null;
+  /** 公里，可缺省（跑步时填） */
+  distance: number | null;
+  note: string;
+};
+
 export type NowPlaying = {
   title: string;
   subtitle: string;
@@ -71,9 +85,14 @@ export type LastfmData = {
 
 export const GAME_STATUSES: GameStatus[] = ["playing", "completed", "dropped"];
 export const SCREEN_TYPES: ScreenType[] = ["tv", "anime", "movie", "novel"];
+export const TRAINING_KINDS: TrainingKind[] = ["run", "bodyweight", "other"];
 
 export function asGameStatus(v: unknown): GameStatus {
   return v === "playing" || v === "completed" || v === "dropped" ? v : "completed";
+}
+
+export function asTrainingKind(v: unknown): TrainingKind | null {
+  return v === "run" || v === "bodyweight" || v === "other" ? v : null;
 }
 
 export function asScreenType(v: unknown): ScreenType {
@@ -117,9 +136,17 @@ export type LifeStats = {
   screenByType: Record<ScreenType, number>;
   screenHours: number;
   coverCount: number;
+  trainingCount: number;
+  /** 累计训练分钟数（用于总览页换算小时） */
+  trainingMinutes: number;
 };
 
-export function summarize(games: GameEntry[], screen: ScreenEntry[], covers: CoverEntry[]): LifeStats {
+export function summarize(
+  games: GameEntry[],
+  screen: ScreenEntry[],
+  covers: CoverEntry[],
+  training: TrainingEntry[],
+): LifeStats {
   const rated = games.filter((g) => g.rating !== null);
   return {
     gameCount: games.length,
@@ -141,5 +168,7 @@ export function summarize(games: GameEntry[], screen: ScreenEntry[], covers: Cov
     },
     screenHours: screen.reduce((s, e) => s + (e.hours ?? 0), 0),
     coverCount: covers.length,
+    trainingCount: training.length,
+    trainingMinutes: training.reduce((s, e) => s + (e.duration ?? 0), 0),
   };
 }
