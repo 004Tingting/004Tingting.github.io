@@ -49,6 +49,7 @@ content/
     ├── lastfm.json           # 构建时生成（实时收听快照，勿手改）
     ├── games/{zh,en}/*.md    # 游戏条目
     ├── screen/{zh,en}/*.md   # 影卷条目（剧 / 番 / 影 / 小说）
+    ├── training/{zh,en}/*.md # 训练条目（跑步 / 徒手）
     └── covers/{zh,en}/*.md   # 音律 cover
 lib/
 ├── i18n.ts               # UI 文案字典（zh/en，五栏 + 游艺内部）
@@ -57,7 +58,7 @@ lib/
 ├── articles.ts           # 文章管道（研思 / 纪事，Section 维度）
 ├── works.ts              # 造物管道（order 排序）
 ├── arts-shared.ts        # 游艺客户端安全：类型、枚举、汇总统计
-└── arts.ts               # 游艺管道（games / screen / covers / now + stats）
+├── arts.ts               # 游艺管道（games / screen / training / covers / now + stats）
 scripts/
 ├── preview.py            # 本地预览（支持 clean URL，对齐 GitHub Pages）
 ├── og.mjs                # 生成 public/og.png 分享卡片（sharp 渲染 SVG）
@@ -119,7 +120,7 @@ bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → �
   |---|---|---|---|
   | 研思 | 研思 | `/research` | 推导、方法、文献与复盘 |
   | 造物 | 造物 | `/works` | 软件、项目与实验成果 |
-  | 游艺 | 游艺 | `/arts` | 音律（`/arts/music`）/ 游戏（`/arts/games`）/ 影卷（`/arts/screen`）/ 看板（`/arts/stats`，待开发）|
+  | 游艺 | 游艺 | `/arts` | 音律（`/arts/music`）/ 游戏（`/arts/games`）/ 影卷（`/arts/screen`）/ 训练（`/arts/training`）/ 看板（`/arts/stats`，待开发）|
   | 纪事 | 纪事 | `/chronicles` | 时间切片、复盘与随笔 |
   | 关于 | 关于 | `/about` | 履历与站务 |
 - 旧 URL（`/blog` `/life/*` `/projects/*`）由 `scripts/postbuild.mjs` 生成 meta-refresh 跳转页
