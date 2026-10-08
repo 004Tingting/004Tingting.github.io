@@ -8,6 +8,10 @@
 # workspace memory (local only)
 /.workbuddy/
 
+# working docs at root (local only, kept out of the public repo)
+/HANDOFF.md
+/WORKLOG.md
+
 # env（本地密钥，勿提交）
 .env*.local
 .env

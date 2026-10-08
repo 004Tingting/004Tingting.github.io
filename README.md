@@ -4,6 +4,19 @@ Ting 的个人网站——一本双语「个人杂志」，五栏：研思 / 造
 
 **线上地址：https://004tingting.github.io**
 
+## 文档导航
+
+| 文件 | 内容 |
+|---|---|
+| `AGENTS.md` | **项目上下文与硬性约定（AI 助手开工先读）** |
+| `STYLE.md` | **去 AI 味写作指南（活文档）——写站点内容前必读** |
+| `HANDOFF.md` | 会话交接：最新状态、待办、环境注意（本地文档，不入库） |
+| `WORKLOG.md` | 工作日志（单文件多条目，最新在上；本地文档，不入库） |
+| `PLAN.md` | 建站规划与里程碑（历史文档，信息架构已按 M6 演进） |
+| `DESIGN.md` | 设计规格：字体、色板、双语策略、页面线框、五栏体系 |
+| `PITFALLS.md` | 踩坑记录：环境 / 构建 / 部署 / 内容的全部坑与解法 |
+| `.workbuddy/memory/` | AI 会话的当日详细档案与项目长期记忆（本地） |
+
 - **技术栈**：Next.js（App Router + TypeScript，静态导出）+ Tailwind CSS 4
 - **部署**：GitHub Pages，**gh-pages 分支模式**（`bash scripts/deploy.sh` 一键发布）
 - **双语**：中文（默认）+ `/en` 英文，内容渐进式对齐
@@ -24,7 +37,7 @@ npm run og                       # 重新生成分享卡片图 public/og.png
 |---|---|---|
 | **研思** | `/research` | 推导、方法、文献研读与复盘 |
 | **造物** | `/works` | 软件、项目与实验成果 |
-| **游艺** | `/arts` | 音律 `/arts/music` · 游戏 `/arts/games` · 影卷 `/arts/screen` · 看板（待开发）|
+| **游艺** | `/arts` | 音律 `/arts/music` · 游戏 `/arts/games` · 影卷 `/arts/screen` · 训练 `/arts/training` · 看板（待开发）|
 | **纪事** | `/chronicles` | 时间切片、复盘与随笔 |
 | **关于** | `/about` | 履历与站务 |
 
@@ -36,9 +49,10 @@ npm run og                       # 重新生成分享卡片图 public/og.png
   - frontmatter：`title` / `date` / `tags` / `summary` / `draft`
 - 造物：`content/works/{zh,en}/*.md`
   - frontmatter：`title` / `status` / `period` / `tags` / `order` / `summary`
-- 游艺：`content/arts/{games,screen,covers}/{zh,en}/*.md`
+- 游艺：`content/arts/{games,screen,training,covers}/{zh,en}/*.md`
   - 游戏：`status`（playing/completed/dropped）/ `rating`（10 分制）/ `hours` / `designStudy` / `review`
   - 影卷：`type`（tv/anime/movie/novel）/ `status` / `rating` / `hours` / `review`
+  - 训练：`kind`（run/bodyweight/other）/ `duration`（分钟）/ `distance`（公里）/ `note`
   - 音律 cover：`instrument` / `bilibili`（BV 号）/ `date`
 - 常驻歌单：`content/arts/now.json`
 
@@ -94,14 +108,3 @@ npm run live -- --interval 10   # 自定义间隔
 - 配置：`.env.local` 需有 `LASTFM_API_KEY` / `LASTFM_USER` / `GITHUB_TOKEN`（`GITHUB_TOKEN` 用 `gh auth token` 获取）
 - 脚本只在**切歌时**推送（无变化不产生提交），不会刷提交历史
 - **不开脚本时**网站自动降级：Last.fm 直连取曲目 + 构建时封面映射表（`public/covers.json`）
-
-## 文档
-
-| 文件 | 内容 |
-|---|---|
-| `AGENTS.md` | **项目上下文与硬性约定（AI 助手开工先读）** |
-| `PLAN.md` | 建站规划与里程碑（M0 地基 → M6 五栏重构） |
-| `DESIGN.md` | 设计规格：字体、色板、双语策略、页面线框、SEO、五栏体系 |
-| `PITFALLS.md` | 踩坑记录：环境 / 构建 / 部署 / 内容的全部坑与解法 |
-| `.workbuddy/memory/HANDOFF.md` | **会话交接**：最新状态、待办、环境注意 |
-| `.workbuddy/memory/WORKLOG.md` | 工作日志（单文件多条目，最新在上） |
