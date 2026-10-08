@@ -40,7 +40,7 @@ export const zh = {
   arts: {
     kicker: "游艺",
     title: "Arts",
-    intro: "六艺之余——音律、游戏、影卷与训练，以及它们留下的数据。",
+    intro: "六艺之余——音律、游戏、影卷与运动，以及它们留下的数据。",
     music: {
       kicker: "音律",
       title: "Music",
@@ -84,9 +84,9 @@ export const zh = {
       empty: "统计图表筹备中。",
     },
     training: {
-      kicker: "训练",
+      kicker: "运动",
       title: "Training",
-      intro: "跑步与徒手训练。不办健身卡，不做组数表——腿细一点，线条自然一点。",
+      intro: "跑步与徒手。不办健身卡，不做组数表——腿细一点，线条自然一点。",
       all: "全部",
       kinds: { run: "跑步", bodyweight: "徒手", other: "其他" },
       countLabel: "条记录",

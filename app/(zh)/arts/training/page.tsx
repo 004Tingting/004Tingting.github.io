@@ -4,9 +4,9 @@ import { getTraining } from "@/lib/arts";
 import LifeEntryList from "@/components/LifeEntryList";
 import Kicker from "@/components/Kicker";
 
-export const metadata: Metadata = { title: "训练" };
+export const metadata: Metadata = { title: "运动" };
 
-/** 训练：跑步 / 徒手（条目制，与游戏、影卷同构） */
+/** 运动：跑步 / 徒手（条目制，与游戏、影卷同构） */
 export default function TrainingPage() {
   const t = dic.zh.arts;
   const entries = getTraining("zh");

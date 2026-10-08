@@ -18,7 +18,7 @@ import {
   type TrainingEntry,
 } from "@/lib/arts-shared";
 
-/** 游艺（/arts）：音律（音乐）/ 游戏 / 影卷（影剧番小说）/ 训练（跑步 · 徒手） */
+/** 游艺（/arts）：音律（音乐）/ 游戏 / 影卷（影剧番小说）/ 运动（跑步 · 徒手） */
 const ROOT = path.join(process.cwd(), "content", "arts");
 const LASTFM_FILE = path.join(ROOT, "lastfm.json");
 const NOW_FILE = path.join(ROOT, "now.json");
