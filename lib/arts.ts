@@ -6,7 +6,7 @@ import {
   asGameStatus,
   asScreenStatus,
   asScreenType,
-  asTrainingKind,
+  asExerciseKind,
   summarize,
   type CoverEntry,
   type GameEntry,
@@ -15,7 +15,7 @@ import {
   type LifeStats,
   type NowPlaying,
   type ScreenEntry,
-  type TrainingEntry,
+  type ExerciseEntry,
 } from "@/lib/arts-shared";
 
 /** 游艺（/arts）：音律（音乐）/ 游戏 / 影卷（影剧番小说）/ 运动（跑步 · 徒手） */
@@ -89,13 +89,13 @@ export function getCovers(lang: Lang): CoverEntry[] {
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
-/** 训练条目：跑步 / 徒手（按 date 倒序） */
-export function getTraining(lang: Lang): TrainingEntry[] {
-  return readEntries(lang, "training")
+/** 运动条目：跑步 / 徒手（按 date 倒序） */
+export function getExercise(lang: Lang): ExerciseEntry[] {
+  return readEntries(lang, "exercise")
     .map(({ slug, data }) => ({
       slug,
       title: str(data.title, slug),
-      kind: asTrainingKind(data.kind),
+      kind: asExerciseKind(data.kind),
       date: str(data.date),
       duration: numOrNull(data.duration),
       distance: numOrNull(data.distance),
@@ -166,5 +166,5 @@ export function getRecentTracks(): LastfmTrack[] {
 
 /** 汇总统计（构建时计算） */
 export function getStats(lang: Lang): LifeStats {
-  return summarize(getGames(lang), getScreen(lang), getCovers(lang), getTraining(lang));
+  return summarize(getGames(lang), getScreen(lang), getCovers(lang), getExercise(lang));
 }

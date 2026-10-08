@@ -5,7 +5,7 @@ import type { Lang } from "@/lib/i18n";
 export type GameStatus = "playing" | "completed" | "dropped";
 export type ScreenType = "tv" | "anime" | "movie" | "novel";
 export type ScreenStatus = "watching" | "completed" | "dropped";
-export type TrainingKind = "run" | "bodyweight" | "other";
+export type ExerciseKind = "run" | "bodyweight" | "other";
 
 export type GameEntry = {
   slug: string;
@@ -41,11 +41,11 @@ export type CoverEntry = {
   notes: string;
 };
 
-/** 训练条目（跑步 / 徒手）：kind 可缺省（如「开篇」随笔条目不计为一次训练） */
-export type TrainingEntry = {
+/** 运动条目（跑步 / 徒手）：kind 可缺省（如「开篇」随笔条目不计为一次运动） */
+export type ExerciseEntry = {
   slug: string;
   title: string;
-  kind: TrainingKind | null;
+  kind: ExerciseKind | null;
   date: string;
   /** 分钟，可缺省 */
   duration: number | null;
@@ -85,13 +85,13 @@ export type LastfmData = {
 
 export const GAME_STATUSES: GameStatus[] = ["playing", "completed", "dropped"];
 export const SCREEN_TYPES: ScreenType[] = ["tv", "anime", "movie", "novel"];
-export const TRAINING_KINDS: TrainingKind[] = ["run", "bodyweight", "other"];
+export const EXERCISE_KINDS: ExerciseKind[] = ["run", "bodyweight", "other"];
 
 export function asGameStatus(v: unknown): GameStatus {
   return v === "playing" || v === "completed" || v === "dropped" ? v : "completed";
 }
 
-export function asTrainingKind(v: unknown): TrainingKind | null {
+export function asExerciseKind(v: unknown): ExerciseKind | null {
   return v === "run" || v === "bodyweight" || v === "other" ? v : null;
 }
 
@@ -136,16 +136,16 @@ export type LifeStats = {
   screenByType: Record<ScreenType, number>;
   screenHours: number;
   coverCount: number;
-  trainingCount: number;
-  /** 累计训练分钟数（用于总览页换算小时） */
-  trainingMinutes: number;
+  exerciseCount: number;
+  /** 累计运动分钟数（用于总览页换算小时） */
+  exerciseMinutes: number;
 };
 
 export function summarize(
   games: GameEntry[],
   screen: ScreenEntry[],
   covers: CoverEntry[],
-  training: TrainingEntry[],
+  exercise: ExerciseEntry[],
 ): LifeStats {
   const rated = games.filter((g) => g.rating !== null);
   return {
@@ -168,7 +168,7 @@ export function summarize(
     },
     screenHours: screen.reduce((s, e) => s + (e.hours ?? 0), 0),
     coverCount: covers.length,
-    trainingCount: training.length,
-    trainingMinutes: training.reduce((s, e) => s + (e.duration ?? 0), 0),
+    exerciseCount: exercise.length,
+    exerciseMinutes: exercise.reduce((s, e) => s + (e.duration ?? 0), 0),
   };
 }

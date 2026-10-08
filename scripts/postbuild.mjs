@@ -90,6 +90,9 @@ const redirects = {
   "/en/life/games": "/en/arts/games/",
   "/en/life/log": "/en/arts/screen/",
   "/en/projects": "/en/works/",
+  /* 游艺子栏改名（2026-10-09：训练 → 运动） */
+  "/arts/training": "/arts/exercise/",
+  "/en/arts/training": "/en/arts/exercise/",
 };
 for (const slug of projectSlugs) {
   redirects[`/projects/${slug}`] = `/works/${slug}/`;

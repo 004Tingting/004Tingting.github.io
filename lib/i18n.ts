@@ -83,9 +83,9 @@ export const zh = {
       title: "Stats",
       empty: "统计图表筹备中。",
     },
-    training: {
+    exercise: {
       kicker: "运动",
-      title: "Training",
+      title: "Exercise",
       intro: "跑步与徒手。不办健身卡，不做组数表——腿细一点，线条自然一点。",
       all: "全部",
       kinds: { run: "跑步", bodyweight: "徒手", other: "其他" },
@@ -146,7 +146,7 @@ export const en = {
   arts: {
     kicker: "Arts",
     title: "Arts",
-    intro: "Beyond the desk — music, games, screen and training, plus the data they leave behind.",
+    intro: "Beyond the desk — music, games, screen and exercise, plus the data they leave behind.",
     music: {
       kicker: "Music",
       title: "Music",
@@ -189,9 +189,9 @@ export const en = {
       title: "Stats",
       empty: "Charts are in the works.",
     },
-    training: {
-      kicker: "Training",
-      title: "Training",
+    exercise: {
+      kicker: "Exercise",
+      title: "Exercise",
       intro:
         "Running and bodyweight work. No gym card, no set-and-rep tables — slimmer legs, natural lines.",
       all: "All",

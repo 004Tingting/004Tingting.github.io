@@ -37,7 +37,7 @@ npm run og                       # 重新生成分享卡片图 public/og.png
 |---|---|---|
 | **研思** | `/research` | 推导、方法、文献研读与复盘 |
 | **造物** | `/works` | 软件、项目与实验成果 |
-| **游艺** | `/arts` | 音律 `/arts/music` · 游戏 `/arts/games` · 影卷 `/arts/screen` · 运动 `/arts/training` · 看板（待开发）|
+| **游艺** | `/arts` | 音律 `/arts/music` · 游戏 `/arts/games` · 影卷 `/arts/screen` · 运动 `/arts/exercise` · 看板（待开发）|
 | **纪事** | `/chronicles` | 时间切片、复盘与随笔 |
 | **关于** | `/about` | 履历与站务 |
 
@@ -49,7 +49,7 @@ npm run og                       # 重新生成分享卡片图 public/og.png
   - frontmatter：`title` / `date` / `tags` / `summary` / `draft`
 - 造物：`content/works/{zh,en}/*.md`
   - frontmatter：`title` / `status` / `period` / `tags` / `order` / `summary`
-- 游艺：`content/arts/{games,screen,training,covers}/{zh,en}/*.md`
+- 游艺：`content/arts/{games,screen,exercise,covers}/{zh,en}/*.md`
   - 游戏：`status`（playing/completed/dropped）/ `rating`（10 分制）/ `hours` / `designStudy` / `review`
   - 影卷：`type`（tv/anime/movie/novel）/ `status` / `rating` / `hours` / `review`
   - 运动：`kind`（run/bodyweight/other）/ `duration`（分钟）/ `distance`（公里）/ `note`

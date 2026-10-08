@@ -41,12 +41,12 @@ export default function ArtsPage() {
       ].join(" · "),
     },
     {
-      href: "/arts/training",
-      label: t.training.kicker,
+      href: "/arts/exercise",
+      label: t.exercise.kicker,
       meta: [
-        `${s.trainingCount} ${t.training.countLabel}`,
-        s.trainingMinutes > 0
-          ? `${t.screen.total} ${(s.trainingMinutes / 60).toFixed(1)}${t.screen.hoursUnit}`
+        `${s.exerciseCount} ${t.exercise.countLabel}`,
+        s.exerciseMinutes > 0
+          ? `${t.screen.total} ${(s.exerciseMinutes / 60).toFixed(1)}${t.screen.hoursUnit}`
           : null,
       ]
         .filter(Boolean)

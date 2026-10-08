@@ -25,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ["/arts/music/", "/en/arts/music/"],
     ["/arts/games/", "/en/arts/games/"],
     ["/arts/screen/", "/en/arts/screen/"],
-    ["/arts/training/", "/en/arts/training/"],
+    ["/arts/exercise/", "/en/arts/exercise/"],
     ["/about/", "/en/about/"],
   ];
   for (const [zh, en] of staticPages) {

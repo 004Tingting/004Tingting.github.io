@@ -8,28 +8,28 @@ import {
   fmtRating,
   GAME_STATUSES,
   SCREEN_TYPES,
-  TRAINING_KINDS,
+  EXERCISE_KINDS,
   type GameEntry,
   type GameStatus,
   type ScreenEntry,
   type ScreenType,
-  type TrainingEntry,
-  type TrainingKind,
+  type ExerciseEntry,
+  type ExerciseKind,
 } from "@/lib/arts-shared";
 
 type Props =
   | { variant: "games"; entries: GameEntry[]; lang: Lang }
   | { variant: "screen"; entries: ScreenEntry[]; lang: Lang }
-  | { variant: "training"; entries: TrainingEntry[]; lang: Lang };
+  | { variant: "exercise"; entries: ExerciseEntry[]; lang: Lang };
 
-/** 游戏 / 影卷 / 训练共用条目列表：状态与类型筛选 + 评分、时长、距离等元信息 */
+/** 游戏 / 影卷 / 运动共用条目列表：状态与类型筛选 + 评分、时长、距离等元信息 */
 export default function LifeEntryList(props: Props) {
   const { lang } = props;
   const t = dic[lang].arts;
 
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<ScreenType | null>(null);
-  const [kindFilter, setKindFilter] = useState<TrainingKind | null>(null);
+  const [kindFilter, setKindFilter] = useState<ExerciseKind | null>(null);
   const [onlyDesign, setOnlyDesign] = useState(false);
 
   const chip = (active: boolean) =>
@@ -104,8 +104,8 @@ export default function LifeEntryList(props: Props) {
     );
   }
 
-  /* ---- 训练（跑步 / 徒手） ---- */
-  if (props.variant === "training") {
+  /* ---- 运动（跑步 / 徒手） ---- */
+  if (props.variant === "exercise") {
     const entries = props.entries;
     const shown = entries.filter((e) => kindFilter === null || e.kind === kindFilter);
     const pad = (i: number) => String(i + 1).padStart(2, "0");
@@ -114,22 +114,22 @@ export default function LifeEntryList(props: Props) {
       <div>
         <div className="mb-10 flex flex-wrap gap-4 font-mono text-sm">
           <button type="button" onClick={() => setKindFilter(null)} className={chip(kindFilter === null)}>
-            {t.training.all}
+            {t.exercise.all}
           </button>
-          {TRAINING_KINDS.map((k: TrainingKind) => (
+          {EXERCISE_KINDS.map((k: ExerciseKind) => (
             <button
               key={k}
               type="button"
               onClick={() => setKindFilter(kindFilter === k ? null : k)}
               className={chip(kindFilter === k)}
             >
-              {t.training.kinds[k]}
+              {t.exercise.kinds[k]}
             </button>
           ))}
         </div>
 
         {shown.length === 0 ? (
-          <p className="text-muted">{t.training.empty}</p>
+          <p className="text-muted">{t.exercise.empty}</p>
         ) : (
           <ul className="divide-y divide-rule">
             {shown.map((e, i) => (
@@ -140,17 +140,17 @@ export default function LifeEntryList(props: Props) {
                 </div>
                 {e.note ? <p className="mt-2 pl-10 text-muted">{e.note}</p> : null}
                 <p className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1 pl-10 font-mono text-xs text-muted">
-                  {e.kind ? <span>{t.training.kinds[e.kind]}</span> : null}
+                  {e.kind ? <span>{t.exercise.kinds[e.kind]}</span> : null}
                   {e.duration !== null ? (
                     <span>
                       {e.duration}
-                      {t.training.minutesUnit}
+                      {t.exercise.minutesUnit}
                     </span>
                   ) : null}
                   {e.distance !== null ? (
                     <span>
                       {e.distance}
-                      {t.training.kmUnit}
+                      {t.exercise.kmUnit}
                     </span>
                   ) : null}
                   {e.date ? <span>{e.date}</span> : null}
