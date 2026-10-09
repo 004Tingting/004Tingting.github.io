@@ -41,7 +41,7 @@ export default function Nav({ lang }: { lang: Lang }) {
   const homeHref = lang === "zh" ? "/" : "/en";
 
   return (
-    <header className="border-b border-rule">
+    <header className="sticky top-0 z-50 border-b border-rule bg-paper/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-5xl flex-wrap items-baseline justify-between gap-y-1.5 px-6 py-3.5">
         <Link
           href={homeHref}
