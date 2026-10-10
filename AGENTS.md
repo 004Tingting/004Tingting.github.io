@@ -62,7 +62,7 @@ lib/
 scripts/
 ├── preview.py            # 本地预览（支持 clean URL，对齐 GitHub Pages）
 ├── og.mjs                # 生成 public/og.png 分享卡片（sharp 渲染 SVG）
-├── postbuild.mjs         # 构建后写定制 out/404.html + 22 个旧 URL 跳转页
+├── postbuild.mjs         # 构建后写定制 out/404.html + 旧 URL 跳转页（数量随 redirects 表增长）
 ├── fetch-now.mjs         # 构建前拉 Last.fm 快照 + 生成封面映射（prebuild 链路）
 ├── push-now.mjs          # 本机常驻：推送实时「正在听」到 now-data 分支（npm run live）
 └── deploy.sh             # 一键发布：构建 → 推 gh-pages → 触发 Pages 构建
