@@ -17,8 +17,8 @@ export type NowSnapshot = {
 type Props = {
   lang: Lang;
   initial: NowSnapshot | null;
-  /** bar：首页状态带；card：音乐页大图区 */
-  variant?: "bar" | "card";
+  /** bar：首页状态带；card：音乐页大图区；aside：首页侧栏窄版（240px 列内） */
+  variant?: "bar" | "card" | "aside";
 };
 
 /** 轮询间隔：与本地脚本 scripts/push-now.mjs 的 15 秒推送节奏对齐 */
@@ -135,12 +135,44 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
 
   // SSR / 首帧：占位，保持布局稳定
   if (!now) {
-    return variant === "card" ? <div className="mt-12 h-40" aria-hidden /> : <div className="h-12" aria-hidden />;
+    if (variant === "card") return <div className="mt-12 h-40" aria-hidden />;
+    if (variant === "aside") return <div className="h-20" aria-hidden />;
+    return <div className="h-12" aria-hidden />;
   }
 
   // 封面：实时源自带优先；否则查构建时映射表
   const cover = now.cover || coverMap[`${now.title}|${now.subtitle}`] || "";
   const href = lang === "zh" ? "/arts/music" : "/en/arts/music";
+
+  if (variant === "aside") {
+    /* 侧栏窄版（240px 列）：标题行 + 封面 56px + 曲名/艺人，均截断 */
+    return (
+      <Link href={href} className="group block">
+        <p className="font-mono text-xs tracking-widest text-muted">
+          <span className="text-accent">·</span> {now.live ? t.nowLiveLabel : t.nowPlayingLabel}
+        </p>
+        <div className="mt-2.5 flex items-center gap-3">
+          {cover ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={cover}
+              alt=""
+              loading="lazy"
+              className="h-14 w-14 shrink-0 border border-rule object-cover"
+            />
+          ) : null}
+          <div className="min-w-0">
+            <p className="truncate font-serif text-sm font-semibold group-hover:text-accent">
+              {now.title}
+            </p>
+            {now.subtitle ? (
+              <p className="mt-0.5 truncate font-mono text-xs text-muted">{now.subtitle}</p>
+            ) : null}
+          </div>
+        </div>
+      </Link>
+    );
+  }
 
   if (variant === "card") {
     return (

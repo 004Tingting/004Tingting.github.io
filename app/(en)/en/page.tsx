@@ -27,7 +27,7 @@ export default function EnHomePage() {
             <p className="mt-3 font-mono text-sm text-muted md:text-base">
               {t.interests.join(" / ")}
             </p>
-            <div className="mt-8">
+            <div className="mt-8 xl:hidden">
               <NowPlayingLive lang="en" initial={now} />
             </div>
           </section>
@@ -87,6 +87,7 @@ export default function EnHomePage() {
         {/* Aside: ≥1280px only */}
         <HomeAside
           lang="en"
+          now={now}
           latest={latest.map((a) => ({
             slug: a.slug,
             title: a.title,

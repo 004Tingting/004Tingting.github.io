@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { dic, type Lang } from "@/lib/i18n";
 import type { Section } from "@/lib/articles";
+import NowPlayingLive, { type NowSnapshot } from "@/components/NowPlayingLive";
 
 /** 首页侧栏「近作」需要的字段（ArticleMeta + 所属栏目） */
 type RecentItem = {
@@ -50,15 +51,17 @@ const BLURBS: Record<Lang, Record<(typeof ORDER)[number], string>> = {
 
 /**
  * 首页侧栏（仅 ≥1280px 显示）。
- * 三部分：编辑部印记（装饰）→ 五栏索引（导航）→ 近作（时效）。
- * 纯服务端组件，无 JS 运行时开销。
+ * 四部分：编辑部印记（装饰）→ 正在听（实时）→ 五栏索引（导航）→ 近作（时效）。
+ * 本体为服务端组件，正在听为客户端子组件（实时轮询）。
  */
 export default function HomeAside({
   lang,
   latest,
+  now,
 }: {
   lang: Lang;
   latest: RecentItem[];
+  now: NowSnapshot | null;
 }) {
   const t = dic[lang].home.aside;
   const routes = ROUTES[lang];
@@ -79,6 +82,11 @@ export default function HomeAside({
           <p className="mt-1 font-mono text-xs text-muted">
             {t.colophon} · {t.est}
           </p>
+        </div>
+
+        {/* 正在听：实时状态（窄版，位于印记与索引之间） */}
+        <div className="border-t border-rule pt-3">
+          <NowPlayingLive lang={lang} initial={now} variant="aside" />
         </div>
 
         {/* 五栏索引 */}

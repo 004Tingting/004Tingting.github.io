@@ -28,7 +28,7 @@ export default function HomePage() {
             <p className="mt-3 font-mono text-sm text-muted md:text-base">
               {t.interests.join(" / ")}
             </p>
-            <div className="mt-8">
+            <div className="mt-8 xl:hidden">
               <NowPlayingLive lang="zh" initial={now} />
             </div>
           </section>
@@ -90,6 +90,7 @@ export default function HomePage() {
         {/* 边栏：仅 ≥1280px 显示 */}
         <HomeAside
           lang="zh"
+          now={now}
           latest={latest.map((a) => ({
             slug: a.slug,
             title: a.title,
