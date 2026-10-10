@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ting · A Personal Journal</title>
+    <link>https://004tingting.github.io/en/</link>
+    <description>Ting's personal journal at the crossing of control research, engineering and design.</description>
+    <language>en</language>
+    <atom:link href="https://004tingting.github.io/en/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Predefined-Time Sliding Mode Control: Making Settling Time a Design Variable</title>
+      <link>https://004tingting.github.io/en/research/predefined-time-sliding-mode/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/en/research/predefined-time-sliding-mode/</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Three paradigms for characterising settling time — finite time, fixed time, predefined time — and the basic approaches to avoiding singularity.</description>
+    </item>
+    <item>
+      <title>In the Beginning: Why a Personal Journal</title>
+      <link>https://004tingting.github.io/en/chronicles/hello-world/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/en/chronicles/hello-world/</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Three decisions behind this site — bilingual, editorial layout, and static hosting — plus what to expect.</description>
+    </item>
+  </channel>
+</rss>

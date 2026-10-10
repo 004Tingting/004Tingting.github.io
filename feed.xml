@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ting · 个人杂志</title>
+    <link>https://004tingting.github.io/</link>
+    <description>Ting 的个人杂志：控制科学研究、工程实践与设计的交叉地带。</description>
+    <language>zh-CN</language>
+    <atom:link href="https://004tingting.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>预定时间滑模控制：收敛时间如何变成可设计的量</title>
+      <link>https://004tingting.github.io/research/predefined-time-sliding-mode/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/research/predefined-time-sliding-mode/</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 GMT</pubDate>
+      <description>从有限时间、固定时间到预定时间，收敛时间刻画的三种范式，以及非奇异化处理的基本思路。</description>
+    </item>
+    <item>
+      <title>写在开始：为什么我要办一份「个人杂志」</title>
+      <link>https://004tingting.github.io/chronicles/hello-world/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/chronicles/hello-world/</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 GMT</pubDate>
+      <description>我是谁、五栏各是干什么的，以及办这个站的一点私心。</description>
+    </item>
+  </channel>
+</rss>
