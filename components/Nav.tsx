@@ -27,9 +27,6 @@ const ROUTES: Record<Lang, Record<(typeof ORDER)[number], string>> = {
   },
 };
 
-/** 文章详情页路径（研思 / 纪事 / 造物的 [slug]），用于挂载阅读迷你条 */
-const ARTICLE_RE = /\/(research|chronicles|works)\/[^/]+/;
-
 export default function Nav({ lang }: { lang: Lang }) {
   const pathname = usePathname() ?? "/";
   const t = dic[lang].nav;
@@ -53,7 +50,6 @@ export default function Nav({ lang }: { lang: Lang }) {
       : pathname.replace(/^\/en/, "") || "/";
 
   const homeHref = lang === "zh" ? "/" : "/en";
-  const isArticle = ARTICLE_RE.test(pathname);
 
   return (
     <header className="sticky top-0 z-50">
@@ -100,7 +96,8 @@ export default function Nav({ lang }: { lang: Lang }) {
           </nav>
         </div>
       </div>
-      {isArticle && <ReadingBar />}
+      {/* 页面快捷条：所有页面挂载；文章页显示标题+进度，其他页仅按钮组（组件内部自适应） */}
+      <ReadingBar lang={lang} pathname={pathname} />
       {/* hairline：独立 1px 色条压在毛玻璃之上——保证全页宽清晰（收紧时淡出） */}
       <div
         aria-hidden

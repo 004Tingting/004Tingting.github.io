@@ -2,7 +2,7 @@ export type Lang = "zh" | "en";
 
 export const zh = {
   /* 五栏体系：研思 · 造物 · 游艺 · 纪事 · 关于 */
-  nav: { research: "研思", works: "造物", arts: "游艺", chronicles: "纪事", about: "关于" },
+  nav: { research: "研思", works: "造物", arts: "游艺", chronicles: "纪事", about: "关于", back: "返回上一页", home: "回到主页", refresh: "刷新页面" },
   home: {
     kicker: "个人杂志",
     identity: "控制科学与工程硕士在读",
@@ -115,7 +115,7 @@ export const zh = {
 } as const;
 
 export const en = {
-  nav: { research: "Research", works: "Works", arts: "Arts", chronicles: "Chronicles", about: "About" },
+  nav: { research: "Research", works: "Works", arts: "Arts", chronicles: "Chronicles", about: "About", back: "Go back", home: "Home", refresh: "Refresh" },
   home: {
     kicker: "A Personal Journal",
     identity: "M.Sc. student in Control Science and Engineering",
