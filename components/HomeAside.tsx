@@ -2,6 +2,7 @@ import Link from "next/link";
 import { dic, type Lang } from "@/lib/i18n";
 import type { Section } from "@/lib/articles";
 import NowPlayingLive, { type NowSnapshot } from "@/components/NowPlayingLive";
+import FadeRule from "@/components/FadeRule";
 
 /** 首页侧栏「近作」需要的字段（ArticleMeta + 所属栏目） */
 type RecentItem = {
@@ -72,8 +73,9 @@ export default function HomeAside({
     <aside className="hidden xl:block">
       {/* sticky 内容可能超过视口（加入状态组件后）——超出时内部滚动兜底 */}
       <div className="sticky top-8 max-h-[calc(100vh-2.5rem)] space-y-5 overflow-y-auto">
-        {/* 编辑部印记：竖排站名 + 期号，纯装饰 */}
-        <div className="border-t-2 border-accent pt-3">
+        {/* 编辑部印记：竖排站名 + 期号，纯装饰；顶部朱红条滚动后淡出（与导航同步） */}
+        <div className="relative pt-3">
+          <FadeRule className="absolute inset-x-0 top-0 h-0.5" />
           <p className="font-mono text-xs tracking-[0.3em] text-muted uppercase">
             {lang === "zh" ? "个人杂志" : "Personal Journal"}
           </p>

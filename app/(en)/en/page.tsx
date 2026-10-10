@@ -16,7 +16,7 @@ export default function EnHomePage() {
   const now = getNow();
 
   return (
-    <div className="mx-auto max-w-5xl px-6 xl:max-w-6xl">
+    <div className="mx-auto max-w-5xl px-6">
       <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_15rem] xl:gap-16">
         {/* Main column */}
         <div className="min-w-0">
