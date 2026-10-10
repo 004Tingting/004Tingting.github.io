@@ -2,7 +2,6 @@ import Link from "next/link";
 import { dic, type Lang } from "@/lib/i18n";
 import type { Section } from "@/lib/articles";
 import NowPlayingLive, { type NowSnapshot } from "@/components/NowPlayingLive";
-import StatusWidget from "@/components/StatusWidget";
 
 /** 首页侧栏「近作」需要的字段（ArticleMeta + 所属栏目） */
 type RecentItem = {
@@ -52,8 +51,9 @@ const BLURBS: Record<Lang, Record<(typeof ORDER)[number], string>> = {
 
 /**
  * 首页侧栏（仅 ≥1280px 显示）。
- * 五部分：编辑部印记（装饰）→ 正在听（实时）→ 五栏索引（导航）→ 近作（时效）→ 系统状态（网页侧指标）。
- * 本体为服务端组件，正在听 / 系统状态为客户端子组件（实时轮询）。
+ * 四部分：编辑部印记（装饰）→ 正在听（实时）→ 五栏索引（导航）→ 近作（时效）。
+ * 本体为服务端组件，正在听为客户端子组件（实时轮询）。
+ * 注：系统级性能监控浏览器做不到（沙箱限制），不做此类组件——详见 WORKLOG 2026-10-10。
  */
 export default function HomeAside({
   lang,
@@ -137,9 +137,6 @@ export default function HomeAside({
             </ul>
           </div>
         ) : null}
-
-        {/* 系统状态：网页侧性能指标（纯 Web API） */}
-        <StatusWidget lang={lang} />
       </div>
     </aside>
   );

@@ -18,8 +18,6 @@ export const zh = {
       latestShort: "近作",
       colophon: "成都 · 中国",
       est: "始于 2026",
-      status: "系统状态",
-      statusNote: "网页沙箱内估算，非系统级占用",
     },
   },
   sections: {
@@ -126,8 +124,6 @@ export const en = {
       latestShort: "Recent",
       colophon: "Chengdu, China",
       est: "Est. 2026",
-      status: "System status",
-      statusNote: "Estimated inside the browser sandbox — not system-level",
     },
   },
   sections: {
