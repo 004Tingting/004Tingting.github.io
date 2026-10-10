@@ -5,11 +5,10 @@ import Link from "next/link";
 import { dic, type Lang } from "@/lib/i18n";
 
 /**
- * 页面快捷条（所有页面、始终渲染，sticky header 内）：
- * - 页顶：仅三个快捷按钮（透明底，融入导航下方）
- * - 下滚：卡片样式浮现，并向右展开标题区——
- *     文章详情页（<article> 含 .prose）：文章标题 + 阅读进度（按 <article> 计算）
- *     其他页面：页面标题（main 内首个 h1），无进度线
+ * 页面快捷条（所有页面、始终渲染，sticky header 内）。两个独立悬浮框：
+ * - 按钮小悬浮框（左，常驻）：返回 / 主页 / 刷新——独立于导航栏
+ * - 信息卡（右）：下滚后自右浮现——文章页=文章标题+阅读进度；其他页=页面标题
+ * 进度按 <article> 元素计算；标题取 article h1 / main h1。
  */
 export default function ReadingBar({ lang, pathname }: { lang: Lang; pathname: string }) {
   const t = dic[lang].nav;
@@ -27,7 +26,7 @@ export default function ReadingBar({ lang, pathname }: { lang: Lang; pathname: s
       const article = document.querySelector("article");
       const prose = article?.querySelector(".prose");
       if (article && prose) {
-        /* 文章详情页：标题 + 进度 */
+        /* 文章详情页：文章标题 + 进度 */
         const h1 = article.querySelector("h1");
         const rect = article.getBoundingClientRect();
         const total = article.offsetHeight - window.innerHeight;
@@ -59,7 +58,6 @@ export default function ReadingBar({ lang, pathname }: { lang: Lang; pathname: s
   useEffect(() => {
     setScrolled(false);
     setArticle(null);
-    setPageTitle("");
   }, [pathname]);
 
   const title = article ? article.title : pageTitle;
@@ -68,13 +66,9 @@ export default function ReadingBar({ lang, pathname }: { lang: Lang; pathname: s
 
   return (
     <div className="mx-auto max-w-5xl px-3 pt-2.5">
-      <div
-        className={`relative flex items-center gap-2 rounded-xl border px-3 py-1.5 backdrop-blur-md transition-all duration-300 ${
-          scrolled ? "border-rule bg-paper/90 shadow-sm" : "border-transparent bg-paper/0 shadow-none"
-        }`}
-      >
-        {/* 快捷按钮：返回 / 主页 / 刷新（页顶即显示） */}
-        <div className="flex shrink-0 items-center gap-0.5">
+      <div className="flex items-start justify-between gap-3">
+        {/* 按钮小悬浮框：独立于导航栏，常驻 */}
+        <div className="flex shrink-0 items-center gap-0.5 rounded-xl border border-rule bg-paper/90 px-2 py-1 shadow-sm backdrop-blur-md">
           <button
             type="button"
             onClick={() => history.back()}
@@ -132,33 +126,35 @@ export default function ReadingBar({ lang, pathname }: { lang: Lang; pathname: s
           </button>
         </div>
 
-        {/* 标题区：下滚后向右展开（文章=文章标题+进度，其他=页面标题） */}
+        {/* 信息卡：下滚后自右浮现（文章页=标题+进度；其他页=页面标题） */}
         <div
-          className={`min-w-0 flex-1 overflow-hidden transition-all duration-300 ${
-            scrolled ? "max-w-[40rem] opacity-100" : "max-w-0 opacity-0"
+          className={`min-w-0 flex-1 transition-all duration-300 ${
+            scrolled ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"
           }`}
           aria-hidden={!scrolled}
         >
-          <div className="flex items-baseline gap-2.5">
-            <span className="h-3.5 w-px shrink-0 bg-rule" aria-hidden />
-            <span className="truncate font-serif text-sm font-semibold">{title}</span>
+          <div className="relative rounded-xl border border-rule bg-paper/90 px-3 py-1.5 shadow-sm backdrop-blur-md">
+            <div className="flex items-center gap-2.5">
+              <span className="truncate font-serif text-sm font-semibold">{title}</span>
+              {article ? (
+                <span className="ml-auto shrink-0 font-mono text-[11px] text-muted">
+                  {Math.round(article.pct * 100)}%
+                </span>
+              ) : null}
+            </div>
             {article ? (
-              <span className="ml-auto shrink-0 font-mono text-[11px] text-muted">
-                {Math.round(article.pct * 100)}%
-              </span>
+              <div
+                className="absolute inset-x-3 bottom-0 h-0.5 overflow-hidden rounded-full bg-rule"
+                aria-hidden
+              >
+                <div
+                  className="h-full bg-accent transition-[width] duration-150"
+                  style={{ width: `${Math.round(article.pct * 100)}%` }}
+                />
+              </div>
             ) : null}
           </div>
         </div>
-
-        {/* 进度线：仅文章页 */}
-        {scrolled && article ? (
-          <div className="absolute inset-x-3 bottom-0 h-0.5 overflow-hidden rounded-full bg-rule" aria-hidden>
-            <div
-              className="h-full bg-accent transition-[width] duration-150"
-              style={{ width: `${Math.round(article.pct * 100)}%` }}
-            />
-          </div>
-        ) : null}
       </div>
     </div>
   );
