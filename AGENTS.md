@@ -121,7 +121,7 @@ bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → �
   |---|---|---|---|
   | 研思 | 研思 | `/research` | 推导、方法、文献与复盘 |
   | 造物 | 造物 | `/works` | 软件、项目与实验成果 |
-  | 游艺 | 游艺 | `/arts` | 音律（`/arts/music`）/ 游戏（`/arts/games`）/ 影卷（`/arts/screen`）/ 运动（`/arts/exercise`）/ 看板（`/arts/stats`，待开发）|
+  | 游艺 | 游艺 | `/arts` | 音律（`/arts/music`）/ 游戏（`/arts/games`）/ 影卷（`/arts/screen`）/ 运动（`/arts/exercise`）/ 看板（`/arts/stats`，基础版）|
   | 纪事 | 纪事 | `/chronicles` | 时间切片、复盘与随笔 |
   | 关于 | 关于 | `/about` | 履历与站务 |
 - 旧 URL（`/blog` `/life/*` `/projects/*`）由 `scripts/postbuild.mjs` 生成 meta-refresh 跳转页
@@ -144,5 +144,5 @@ bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → �
 
 - 里程碑 **M0–M6 全部完成**（M6 = 五栏信息架构重构）；站点已上线运行
 - **最新状态与待办以根目录 `HANDOFF.md` 为准**
-- 待办主线：**内容替换**（研思示例文章、游艺示例条目（影卷/cover 8 个待替换；游戏已换真实记录）、OinO / 游戏设计 项目页偏框架、about 页仍是占位）；**开篇《写在开始》en 版重写待做**；**游艺 / 看板** `/arts/stats` 统计图表（已确认后置）
+- 待办主线：**内容替换**（研思示例文章、游艺示例条目（影卷/cover 8 个待替换；游戏已换真实记录）、OinO / 游戏设计 项目页偏框架、about 页仍是占位）；**开篇 en 版按 zh 重写待做**；**看板基础版已上线**，升级方案（SVG/图表库/数据源）与月度趋势待 Ting 敲定（详见根目录 `HANDOFF.md` 开场提示）
 - **giscus 评论已启用**（App 已装、`enabled=true`）；Discussions 分类用 Announcements
