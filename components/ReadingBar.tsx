@@ -126,33 +126,35 @@ export default function ReadingBar({ lang, pathname }: { lang: Lang; pathname: s
           </button>
         </div>
 
-        {/* 信息卡：下滚后自右浮现（文章页=标题+进度；其他页=页面标题） */}
+        {/* 信息卡：下滚后从按钮小框右缘向右侧生长浮现（grid 0fr→1fr 过渡） */}
         <div
-          className={`min-w-0 flex-1 transition-all duration-300 ${
-            scrolled ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"
+          className={`grid min-w-0 flex-1 transition-[grid-template-columns,opacity] duration-300 ${
+            scrolled ? "grid-cols-[1fr] opacity-100" : "grid-cols-[0fr] opacity-0"
           }`}
           aria-hidden={!scrolled}
         >
-          <div className="relative rounded-xl border border-rule bg-paper/90 px-3 py-1.5 shadow-sm backdrop-blur-md">
-            <div className="flex items-center gap-2.5">
-              <span className="truncate font-serif text-sm font-semibold">{title}</span>
+          <div className="min-w-0 overflow-hidden">
+            <div className="relative rounded-xl border border-rule bg-paper/90 px-3 py-1.5 shadow-sm backdrop-blur-md">
+              <div className="flex items-center gap-2.5">
+                <span className="truncate font-serif text-sm font-semibold">{title}</span>
+                {article ? (
+                  <span className="ml-auto shrink-0 font-mono text-[11px] text-muted">
+                    {Math.round(article.pct * 100)}%
+                  </span>
+                ) : null}
+              </div>
               {article ? (
-                <span className="ml-auto shrink-0 font-mono text-[11px] text-muted">
-                  {Math.round(article.pct * 100)}%
-                </span>
+                <div
+                  className="absolute inset-x-3 bottom-0 h-0.5 overflow-hidden rounded-full bg-rule"
+                  aria-hidden
+                >
+                  <div
+                    className="h-full bg-accent transition-[width] duration-150"
+                    style={{ width: `${Math.round(article.pct * 100)}%` }}
+                  />
+                </div>
               ) : null}
             </div>
-            {article ? (
-              <div
-                className="absolute inset-x-3 bottom-0 h-0.5 overflow-hidden rounded-full bg-rule"
-                aria-hidden
-              >
-                <div
-                  className="h-full bg-accent transition-[width] duration-150"
-                  style={{ width: `${Math.round(article.pct * 100)}%` }}
-                />
-              </div>
-            ) : null}
           </div>
         </div>
       </div>
