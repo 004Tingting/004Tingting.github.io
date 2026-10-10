@@ -57,10 +57,10 @@ export default function Nav({ lang }: { lang: Lang }) {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* 全宽底衬：页顶态的纸色底 + 底部 hairline；收紧时只做 opacity 淡出（不动画几何，避免缝线） */}
+      {/* 全宽底衬：纸色 + 毛玻璃；不放 hairline——会被卡片的毛玻璃糊掉（只在两侧残留） */}
       <div
         aria-hidden
-        className={`absolute inset-0 border-b border-rule bg-paper/95 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-paper/95 backdrop-blur-sm transition-opacity duration-300 ${
           compact ? "opacity-0" : "opacity-100"
         }`}
       />
@@ -101,6 +101,13 @@ export default function Nav({ lang }: { lang: Lang }) {
         </div>
       </div>
       {isArticle && <ReadingBar />}
+      {/* hairline：独立 1px 色条压在毛玻璃之上——保证全页宽清晰（收紧时淡出） */}
+      <div
+        aria-hidden
+        className={`absolute inset-x-0 bottom-0 h-px bg-rule transition-opacity duration-300 ${
+          compact ? "opacity-0" : "opacity-100"
+        }`}
+      />
     </header>
   );
 }
