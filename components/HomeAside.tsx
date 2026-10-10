@@ -2,6 +2,7 @@ import Link from "next/link";
 import { dic, type Lang } from "@/lib/i18n";
 import type { Section } from "@/lib/articles";
 import NowPlayingLive, { type NowSnapshot } from "@/components/NowPlayingLive";
+import StatusWidget from "@/components/StatusWidget";
 
 /** 首页侧栏「近作」需要的字段（ArticleMeta + 所属栏目） */
 type RecentItem = {
@@ -51,8 +52,8 @@ const BLURBS: Record<Lang, Record<(typeof ORDER)[number], string>> = {
 
 /**
  * 首页侧栏（仅 ≥1280px 显示）。
- * 四部分：编辑部印记（装饰）→ 正在听（实时）→ 五栏索引（导航）→ 近作（时效）。
- * 本体为服务端组件，正在听为客户端子组件（实时轮询）。
+ * 五部分：编辑部印记（装饰）→ 正在听（实时）→ 五栏索引（导航）→ 近作（时效）→ 系统状态（网页侧指标）。
+ * 本体为服务端组件，正在听 / 系统状态为客户端子组件（实时轮询）。
  */
 export default function HomeAside({
   lang,
@@ -69,7 +70,8 @@ export default function HomeAside({
 
   return (
     <aside className="hidden xl:block">
-      <div className="sticky top-8 space-y-5">
+      {/* sticky 内容可能超过视口（加入状态组件后）——超出时内部滚动兜底 */}
+      <div className="sticky top-8 max-h-[calc(100vh-2.5rem)] space-y-5 overflow-y-auto">
         {/* 编辑部印记：竖排站名 + 期号，纯装饰 */}
         <div className="border-t-2 border-accent pt-3">
           <p className="font-mono text-xs tracking-[0.3em] text-muted uppercase">
@@ -135,6 +137,9 @@ export default function HomeAside({
             </ul>
           </div>
         ) : null}
+
+        {/* 系统状态：网页侧性能指标（纯 Web API） */}
+        <StatusWidget lang={lang} />
       </div>
     </aside>
   );
