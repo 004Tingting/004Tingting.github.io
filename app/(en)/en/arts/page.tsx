@@ -52,6 +52,13 @@ export default function ArtsPage() {
         .filter(Boolean)
         .join(" · "),
     },
+    {
+      href: "/en/arts/stats",
+      label: t.stats.kicker,
+      meta: `${s.gameCount + s.screenCount + s.exerciseCount} ${t.stats.entries} · ${
+        s.gameHours + s.screenHours + Math.round(s.exerciseMinutes / 60)
+      } ${t.stats.hours}`,
+    },
   ];
 
   return (

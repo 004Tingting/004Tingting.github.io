@@ -139,6 +139,8 @@ export type LifeStats = {
   exerciseCount: number;
   /** 累计运动分钟数（用于总览页换算小时） */
   exerciseMinutes: number;
+  /** 累计运动公里数（看板用） */
+  exerciseKm: number;
 };
 
 export function summarize(
@@ -170,5 +172,6 @@ export function summarize(
     coverCount: covers.length,
     exerciseCount: exercise.length,
     exerciseMinutes: exercise.reduce((s, e) => s + (e.duration ?? 0), 0),
+    exerciseKm: exercise.reduce((s, e) => s + (e.distance ?? 0), 0),
   };
 }
