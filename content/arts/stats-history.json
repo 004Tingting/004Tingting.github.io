@@ -1,6 +1,6 @@
 {
   "source": "stats-history",
-  "updatedAt": "2026-10-10T13:55:29.367Z",
+  "updatedAt": "2026-10-10T14:29:58.522Z",
   "snapshots": {
     "2026-10": {
       "games": {
@@ -370,7 +370,16 @@
         "洛克王国：世界": 0.1,
         "全境封锁2": 0.1
       },
-      "epic": {}
+      "epic": {
+        "霍格沃茨之遗": 12.3,
+        "Melvor Idle": 8.6,
+        "Sifu": 2.8,
+        "火之石 – 放置点击英雄RPG": 0.9,
+        "Vampire Survivors": 0.6,
+        "Shadow Tactics Blades of the Shogun": 0.1,
+        "纪念碑谷": 0.1,
+        "Idle Champions of the Forgotten Realms": 0.1
+      }
     }
   }
 }
