@@ -56,17 +56,23 @@ export default function Nav({ lang }: { lang: Lang }) {
   const isArticle = ARTICLE_RE.test(pathname);
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        compact ? "px-3 pt-2.5" : "border-b border-rule bg-paper/95 backdrop-blur-sm"
-      }`}
-    >
-      <div className="mx-auto max-w-5xl transition-all duration-300">
+    <header className="sticky top-0 z-50">
+      {/* 全宽底衬：页顶态的纸色底 + 底部 hairline；收紧时只做 opacity 淡出（不动画几何，避免缝线） */}
+      <div
+        aria-hidden
+        className={`absolute inset-0 border-b border-rule bg-paper/95 backdrop-blur-sm transition-opacity duration-300 ${
+          compact ? "opacity-0" : "opacity-100"
+        }`}
+      />
+      <div
+        className={`relative mx-auto max-w-5xl transition-all duration-300 ${
+          compact ? "px-3 pt-2.5" : "px-0 pt-0"
+        }`}
+      >
+        {/* 卡片：边框恒为 1px（透明 ↔ rule），圆角与 blur 恒定——只过渡颜色 / 阴影 / 内边距 */}
         <div
-          className={`flex flex-wrap items-baseline justify-between gap-y-1 px-6 transition-all duration-300 ${
-            compact
-              ? "rounded-2xl border border-rule bg-paper/90 py-2 shadow-sm backdrop-blur-md"
-              : "py-3.5"
+          className={`flex flex-wrap items-baseline justify-between gap-y-1 rounded-2xl border bg-paper/0 px-6 backdrop-blur-md transition-all duration-300 ${
+            compact ? "border-rule bg-paper/90 py-2 shadow-sm" : "border-transparent py-3.5"
           }`}
         >
           <Link
