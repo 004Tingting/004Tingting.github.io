@@ -96,8 +96,10 @@ export default function Nav({ lang }: { lang: Lang }) {
           </nav>
         </div>
       </div>
-      {/* 页面快捷条：所有页面挂载；文章页显示标题+进度，其他页仅按钮组（组件内部自适应） */}
-      <ReadingBar lang={lang} pathname={pathname} />
+      {/* 页面快捷条：悬挂在导航栏下方 2~3px（绝对定位，不占导航高度） */}
+      <div className="absolute inset-x-0 top-full z-10 mt-[3px]">
+        <ReadingBar lang={lang} pathname={pathname} />
+      </div>
       {/* hairline：独立 1px 色条压在毛玻璃之上——保证全页宽清晰（收紧时淡出） */}
       <div
         aria-hidden

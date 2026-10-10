@@ -65,7 +65,7 @@ export default function ReadingBar({ lang, pathname }: { lang: Lang; pathname: s
     "flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted transition-colors hover:text-accent";
 
   return (
-    <div className="mx-auto max-w-5xl px-3 pt-2.5">
+    <div className="mx-auto max-w-5xl px-3">
       <div className="flex items-start justify-between gap-3">
         {/* 按钮小悬浮框：独立于导航栏，常驻 */}
         <div className="flex shrink-0 items-center gap-0.5 rounded-xl border border-rule bg-paper/90 px-2 py-1 shadow-sm backdrop-blur-md">
