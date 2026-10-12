@@ -23,3 +23,6 @@
 
 # debug
 npm-debug.log*
+
+# epic oauth credentials (local only)
+/.epic-auth.json

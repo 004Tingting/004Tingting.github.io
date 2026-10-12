@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getNow, getStats } from "@/lib/arts";
+import { getMonthlyTrends, getNow, getStats } from "@/lib/arts";
 import Kicker from "@/components/Kicker";
 
 export const metadata: Metadata = { title: "游艺" };
@@ -10,6 +10,8 @@ export const metadata: Metadata = { title: "游艺" };
 export default function ArtsPage() {
   const t = dic.zh.arts;
   const s = getStats("zh");
+  // 游戏总时长统一口径：人工 frontmatter + Steam + WeGame + Epic（快照合并）
+  const gameTotalH = getMonthlyTrends("zh").baselines.games ?? s.gameHours;
   const now = getNow();
 
   const rows = [
@@ -37,7 +39,7 @@ export default function ArtsPage() {
         `${t.screenTypes.anime} ${s.screenByType.anime}`,
         `${t.screenTypes.movie} ${s.screenByType.movie}`,
         `${t.screenTypes.novel} ${s.screenByType.novel}`,
-        `${t.screen.total} ${s.screenHours}${t.screen.hoursUnit}`,
+        `${t.screen.total} ${s.screenHours.toFixed(2)}${t.screen.hoursUnit}`,
       ].join(" · "),
     },
     {
@@ -56,7 +58,7 @@ export default function ArtsPage() {
       href: "/arts/stats",
       label: t.stats.kicker,
       meta: `${s.gameCount + s.screenCount + s.exerciseCount} ${t.stats.entries} · ${
-        s.gameHours + s.screenHours + Math.round(s.exerciseMinutes / 60)
+        (gameTotalH + s.screenHours + Math.round(s.exerciseMinutes / 60)).toFixed(2)
       } ${t.stats.hours}`,
     },
   ];

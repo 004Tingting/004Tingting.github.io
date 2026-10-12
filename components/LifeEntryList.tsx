@@ -6,6 +6,7 @@ import { dic, type Lang } from "@/lib/i18n";
 import {
   fmtHours,
   fmtRating,
+  fmtScreenHours,
   GAME_STATUSES,
   SCREEN_TYPES,
   EXERCISE_KINDS,
@@ -203,7 +204,7 @@ export default function LifeEntryList(props: Props) {
               <p className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1 pl-10 font-mono text-xs text-muted">
                 <span>{t.screenTypes[e.type]}</span>
                 <span>{t.screenStatus[e.status]}</span>
-                <span>{fmtHours(e.hours)}</span>
+                <span>{fmtScreenHours(e.hours)}</span>
                 {e.date ? <span>{e.date}</span> : null}
                 {e.review ? (
                   <Link href={e.review} className="text-accent hover:underline">

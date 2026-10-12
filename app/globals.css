@@ -4,10 +4,11 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* 字体：标题衬线（杂志核心）、正文系统无衬线、数字/日期等宽 */
+  /* 字体：标题衬线（杂志核心）、正文系统无衬线、数字/日期等宽、楷体（点缀） */
   --font-serif: "Playfair Display", "Noto Serif SC", "Songti SC", "SimSun", serif;
   --font-sans: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, "Cascadia Mono", monospace;
+  --font-kai: "Kaiti SC", "STKaiti", "KaiTi", "楷体", serif;
 
   /* 色板（DESIGN.md §1）：纸色底 + 近黑文字 + 朱红唯一强调色。
      颜色全部 token 化，深浅模式 = 换变量，组件零 dark: 前缀 */

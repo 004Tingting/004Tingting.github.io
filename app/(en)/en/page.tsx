@@ -21,7 +21,9 @@ export default function EnHomePage() {
         {/* Main column */}
         <div className="min-w-0">
           <section className="py-24 md:py-32">
-            <Kicker>{t.kicker}</Kicker>
+            <Kicker accent className="text-[21px]">
+              {t.kicker}
+            </Kicker>
             <h1 className="mt-4 font-serif text-7xl font-bold tracking-tight md:text-9xl">Ting</h1>
             <p className="mt-8 text-lg text-muted md:text-xl">{t.identity}</p>
             <p className="mt-3 font-mono text-sm text-muted md:text-base">

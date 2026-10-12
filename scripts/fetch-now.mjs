@@ -19,6 +19,17 @@ const outFile = path.join(root, "content", "arts", "lastfm.json");
 const coversJson = path.join(root, "public", "covers.json");
 const coversDir = path.join(root, "public", "covers");
 
+// .env.local 手动加载：Node 脚本不会自动读它（只有 Next 读）。
+// 只填充未设置的字段——CI 里 GitHub Secrets 注入的环境变量优先。
+try {
+  for (const line of fs.readFileSync(path.join(root, ".env.local"), "utf-8").split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*?)\s*$/);
+    if (m && process.env[m[1]] === undefined) {
+      process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+    }
+  }
+} catch {}
+
 const apiKey = process.env.LASTFM_API_KEY;
 const user = process.env.LASTFM_USER;
 

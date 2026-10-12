@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getStats } from "@/lib/arts";
+import { getMonthlyTrends, getStats } from "@/lib/arts";
 
 export const metadata: Metadata = { title: "关于" };
 
@@ -9,11 +9,20 @@ export const metadata: Metadata = { title: "关于" };
 export default function AboutPage() {
   const t = dic.zh.about;
   const s = getStats("zh");
+  const mt = getMonthlyTrends("zh");
+  // 游戏总时长统一口径：人工 frontmatter + Steam + WeGame + Epic（快照合并）
+  const gameTotalH = mt.baselines.games ?? s.gameHours;
 
   const data = [
-    { label: "游戏", value: `${s.gameHours}`, unit: "h" },
-    { label: "影卷", value: `${s.screenHours}`, unit: "h" },
+    { label: "游戏", value: Number(gameTotalH.toFixed(1)).toString(), unit: "h" },
+    { label: "影卷", value: s.screenHours.toFixed(2), unit: "h" },
     { label: "运动", value: (s.exerciseMinutes / 60).toFixed(1), unit: "h" },
+    // 音乐：网易云官方总收听时长（与看板口径一致）
+    {
+      label: "音乐",
+      value: mt.neteaseTotalHours !== null ? mt.neteaseTotalHours.toFixed(1) : "—",
+      unit: "h",
+    },
     { label: "cover", value: `${s.coverCount}`, unit: "支" },
   ];
 
@@ -26,7 +35,7 @@ export default function AboutPage() {
         <p className="font-mono text-xs tracking-widest text-muted">
           <span className="text-accent">·</span> 站点数据
         </p>
-        <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-5">
           {data.map((d) => (
             <div key={d.label}>
               <p className="font-serif text-2xl font-bold">

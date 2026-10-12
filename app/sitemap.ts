@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/site";
 import { getArticles, SECTIONS } from "@/lib/articles";
 import { getWorks } from "@/lib/works";
+import { getCovers } from "@/lib/arts";
 
 export const dynamic = "force-static";
 
@@ -27,6 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ["/arts/screen/", "/en/arts/screen/"],
     ["/arts/exercise/", "/en/arts/exercise/"],
     ["/arts/stats/", "/en/arts/stats/"],
+    ["/arts/stats/games/", "/en/arts/stats/games/"],
     ["/about/", "/en/about/"],
   ];
   for (const [zh, en] of staticPages) {
@@ -58,6 +60,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const zh = `/works/${w.slug}/`;
     const en = `/en/works/${w.slug}/`;
     entries.push({ url: u(en), lastModified: now, alternates: langs(zh, en) });
+  }
+
+  // 乐器 cover 详情（音律；按 slug 双语对齐，缺镜像的一侧单独收录）
+  const coversZh = new Set(getCovers("zh").map((c) => c.slug));
+  const coversEn = new Set(getCovers("en").map((c) => c.slug));
+  for (const slug of new Set([...coversZh, ...coversEn])) {
+    const zh = `/arts/music/${slug}/`;
+    const en = `/en/arts/music/${slug}/`;
+    if (coversZh.has(slug)) {
+      entries.push({ url: u(zh), lastModified: now, alternates: coversEn.has(slug) ? langs(zh, en) : undefined });
+    }
+    if (coversEn.has(slug)) {
+      entries.push({ url: u(en), lastModified: now, alternates: coversZh.has(slug) ? langs(zh, en) : undefined });
+    }
   }
 
   return entries;

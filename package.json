@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/fetch-now.mjs && next build && node scripts/postbuild.mjs",
+    "build": "node scripts/fetch-now.mjs && node scripts/fetch-monthly.mjs && next build && node scripts/postbuild.mjs",
     "start": "next start",
     "og": "node scripts/og.mjs",
     "now": "node scripts/fetch-now.mjs",

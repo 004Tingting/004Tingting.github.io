@@ -77,7 +77,11 @@ export default function MusicPage() {
                   <span className="font-mono text-sm text-muted">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <h3 className="font-serif text-xl font-semibold">{c.title}</h3>
+                  <h3 className="font-serif text-xl font-semibold">
+                    <Link href={`/en/arts/music/${c.slug}`} className="hover:text-accent">
+                      {c.title}
+                    </Link>
+                  </h3>
                   <span className="ml-auto shrink-0 font-mono text-xs text-muted">
                     {[c.instrument, c.date].filter(Boolean).join(" · ")}
                   </span>

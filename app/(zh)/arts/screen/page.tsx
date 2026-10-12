@@ -21,7 +21,7 @@ export default function ScreenPage() {
           `${t.screenTypes.anime} ${s.screenByType.anime}`,
           `${t.screenTypes.movie} ${s.screenByType.movie}`,
           `${t.screenTypes.novel} ${s.screenByType.novel}`,
-          `${t.screen.total} ${s.screenHours}${t.screen.hoursUnit}`,
+          `${t.screen.total} ${s.screenHours.toFixed(2)}${t.screen.hoursUnit}`,
         ].join(" · ")}
       </p>
       <div className="mt-10">

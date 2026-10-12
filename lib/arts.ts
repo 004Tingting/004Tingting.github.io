@@ -13,9 +13,12 @@ import {
   type LastfmData,
   type LastfmTrack,
   type LifeStats,
+  type MonthlyTrends,
+  type NetEaseMonthly,
   type NowPlaying,
   type ScreenEntry,
   type ExerciseEntry,
+  type StatsHistory,
 } from "@/lib/arts-shared";
 
 /** 游艺（/arts）：音律（音乐）/ 游戏 / 影卷（影剧番小说）/ 运动（跑步 · 徒手） */
@@ -58,6 +61,31 @@ export function getGames(lang: Lang): GameEntry[] {
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
+/** 游戏时长全榜：人工 frontmatter 条目 + Steam 全库 + WeGame 周更快照，同名去重（人工标记保留、时长取大），按小时倒序 */
+export function getGameHoursFull(lang: Lang): Array<{ name: string; hours: number; manual: boolean }> {
+  const byName = new Map<string, { hours: number; manual: boolean }>();
+  for (const g of getGames(lang)) {
+    if ((g.hours ?? 0) > 0) byName.set(g.title, { hours: g.hours as number, manual: true });
+  }
+  try {
+    const history = JSON.parse(fs.readFileSync(STATS_HISTORY_FILE, "utf-8")) as StatsHistory;
+    const months = Object.keys(history.snapshots).sort();
+    const last = history.snapshots[months[months.length - 1]];
+    for (const source of ["steam", "wegame", "epic"] as const) {
+      for (const [name, hours] of Object.entries(last?.[source] ?? {})) {
+        const prev = byName.get(name);
+        if (!prev) byName.set(name, { hours, manual: false });
+        else byName.set(name, { hours: Math.max(prev.hours, hours), manual: true });
+      }
+    }
+  } catch {
+    /* 快照缺失/损坏时仅用人工条目 */
+  }
+  return [...byName.entries()]
+    .map(([name, v]) => ({ name, hours: v.hours, manual: v.manual }))
+    .sort((a, b) => b.hours - a.hours);
+}
+
 /** 影卷条目：剧 / 番 / 影 / 小说（按 date 倒序） */
 export function getScreen(lang: Lang): ScreenEntry[] {
   return readEntries(lang, "screen")
@@ -85,8 +113,17 @@ export function getCovers(lang: Lang): CoverEntry[] {
       date: str(data.date),
       bilibili: str(data.bilibili),
       notes: str(data.notes),
+      tempo: numOrNull(data.tempo),
+      sheet: typeof data.sheet === "string" && data.sheet ? data.sheet : null,
+      accompaniment:
+        typeof data.accompaniment === "string" && data.accompaniment ? data.accompaniment : null,
     }))
     .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/** 音律：单条 cover（详情页；lang 内按 slug 查找，找不到返回 null） */
+export function getCover(lang: Lang, slug: string): CoverEntry | null {
+  return getCovers(lang).find((c) => c.slug === slug) ?? null;
 }
 
 /** 运动条目：跑步 / 徒手（按 date 倒序） */
@@ -167,4 +204,117 @@ export function getRecentTracks(): LastfmTrack[] {
 /** 汇总统计（构建时计算） */
 export function getStats(lang: Lang): LifeStats {
   return summarize(getGames(lang), getScreen(lang), getCovers(lang), getExercise(lang));
+}
+
+/* ---------- 月度趋势（看板，构建时聚合；月轴 = 近 8 个月，本地时区；想改 6/12 只动这一个数） ---------- */
+
+const STATS_HISTORY_FILE = path.join(ROOT, "stats-history.json");
+const NETEASE_MONTHLY_FILE = path.join(ROOT, "netease-monthly.json");
+
+const MONTH_COUNT = 8;
+
+const pad2 = (n: number): string => String(n).padStart(2, "0");
+
+function lastMonths(count = MONTH_COUNT): string[] {
+  const now = new Date();
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (count - 1 - i), 1);
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+  });
+}
+
+/** 快照差分：逐月对键并集求 max(0, 当月 − 上月) 之和（首月无基线计 0） */
+function diffSnapshots(
+  history: StatsHistory,
+  months: string[],
+  key: "games" | "screen" | "netease" | "steam" | "wegame" | "epic",
+): number[] {
+  return months.map((m, i) => {
+    const cur = history.snapshots[m]?.[key] ?? null;
+    const prev = i > 0 ? (history.snapshots[months[i - 1]]?.[key] ?? null) : null;
+    if (!cur) return 0;
+    if (!prev) return 0;
+    const titles = new Set([...Object.keys(cur), ...Object.keys(prev)]);
+    let sum = 0;
+    for (const t of titles) sum += Math.max(0, (cur[t] ?? 0) - (prev[t] ?? 0));
+    return sum;
+  });
+}
+
+/** 月度趋势：运动（逐次聚合）/ 音律（网易云听歌时长差分）/ 游戏·影卷（快照差分） */
+export function getMonthlyTrends(lang: Lang): MonthlyTrends {
+  const months = lastMonths();
+
+  /* 运动：条目按月聚合（kind 存在且有时长才计，开篇随笔类不计） */
+  const exByMonth = Object.fromEntries(months.map((m) => [m, 0]));
+  for (const e of getExercise(lang)) {
+    if (e.kind === null || e.duration === null) continue;
+    const m = e.date.slice(0, 7);
+    if (m in exByMonth) exByMonth[m] += e.duration;
+  }
+
+  /* 游戏 / 影卷 / 网易云：累计值的追加式快照，月度增量 = 邻月差分 */
+  let history: StatsHistory = { source: "stats-history", updatedAt: "", snapshots: {} };
+  try {
+    if (fs.existsSync(STATS_HISTORY_FILE)) {
+      history = { ...history, ...(JSON.parse(fs.readFileSync(STATS_HISTORY_FILE, "utf-8")) as StatsHistory) };
+    }
+  } catch {
+    /* 损坏按空快照处理 */
+  }
+
+  /* 音律：网易云官方月度收听时长（分钟；2026-01~09 官方截图人工回填、当月起 realtime 自动覆盖） */
+  let netease: NetEaseMonthly | null = null;
+  try {
+    if (fs.existsSync(NETEASE_MONTHLY_FILE)) {
+      netease = JSON.parse(fs.readFileSync(NETEASE_MONTHLY_FILE, "utf-8")) as NetEaseMonthly;
+    }
+  } catch {
+    netease = null;
+  }
+
+  /* 基线月（末月）的当前累计——差分首月无上月起，展示单点而非空态 */
+  const lastSnap = history.snapshots[months[months.length - 1]];
+  const sumOf = (rec: Record<string, number> | undefined): number | null =>
+    rec && Object.keys(rec).length ? Object.values(rec).reduce((s, v) => s + v, 0) : null;
+
+  /* 游戏：人工 frontmatter + Steam + WeGame + Epic，四源差分逐月相加 */
+  const gamesDiff = diffSnapshots(history, months, "games");
+  const steamDiff = diffSnapshots(history, months, "steam");
+  const wegameDiff = diffSnapshots(history, months, "wegame");
+  const epicDiff = diffSnapshots(history, months, "epic");
+  const manualGamesTotal = sumOf(lastSnap?.games);
+  const steamTotal = sumOf(lastSnap?.steam);
+  const wegameTotal = sumOf(lastSnap?.wegame);
+  const epicTotal = sumOf(lastSnap?.epic);
+
+  return {
+    months,
+    exercise: months.map((m) => Math.round((exByMonth[m] / 60) * 10) / 10),
+    // 音律走官方全量口径（分钟 → 小时）；top100 快照差分仅作备份，不再用于折线
+    music: months.map((m) => {
+      const min = netease?.monthly?.[m];
+      return typeof min === "number" ? Math.round((min / 60) * 10) / 10 : 0;
+    }),
+    neteaseTotalHours: netease?.totalHours ?? null,
+    gamesDelta: gamesDiff.map(
+      (v, i) => Math.round((v + steamDiff[i] + wegameDiff[i] + epicDiff[i]) * 10) / 10,
+    ),
+    steamTotalHours: steamTotal,
+    wegameTotalHours: wegameTotal,
+    screenDelta: diffSnapshots(history, months, "screen"),
+    baselines: {
+      // 音乐已切换官方全量口径（回填后有历史数据，不再需要基线视图）
+      music: null,
+      // 游戏 = 人工精选记录 + Steam 全库 + WeGame + Epic
+      games:
+        manualGamesTotal === null &&
+        steamTotal === null &&
+        wegameTotal === null &&
+        epicTotal === null
+          ? null
+          : (manualGamesTotal ?? 0) + (steamTotal ?? 0) + (wegameTotal ?? 0) + (epicTotal ?? 0),
+      screen: sumOf(lastSnap?.screen),
+    },
+  };
 }

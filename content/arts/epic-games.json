@@ -1,0 +1,15 @@
+{
+  "source": "epic",
+  "note": "Epic 无可用 API（时长锁在启动器私有会话，设备授权/authorizationCode 均被权限墙拒绝，详见 HANDOFF）。此文件为人工数据：Ting 报数后改 games 里的数字（单位小时），fetch-monthly 读入 stats-history 的 epic 快照。首期数据来自 Epic 客户端库页（2026-10-10 截图，「5 分钟以内」按 0.1h 记）。",
+  "updatedAt": "2026-10-10",
+  "games": {
+    "霍格沃茨之遗": 12.3,
+    "Melvor Idle": 8.6,
+    "Sifu": 2.8,
+    "火之石 – 放置点击英雄RPG": 0.9,
+    "Vampire Survivors": 0.6,
+    "Shadow Tactics Blades of the Shogun": 0.1,
+    "纪念碑谷": 0.1,
+    "Idle Champions of the Forgotten Realms": 0.1
+  }
+}

@@ -4,9 +4,9 @@ import { getScreen, getStats } from "@/lib/arts";
 import LifeEntryList from "@/components/LifeEntryList";
 import Kicker from "@/components/Kicker";
 
-export const metadata: Metadata = { title: "Screen & Books" };
+export const metadata: Metadata = { title: "Watch & Read" };
 
-/** Screen & Books: film / anime / TV / novel with build-time computed hours */
+/** Watch & Read: film / anime / TV / novel with build-time computed hours */
 export default function ScreenPage() {
   const t = dic.en.arts;
   const s = getStats("en");
@@ -21,7 +21,7 @@ export default function ScreenPage() {
           `${t.screenTypes.anime} ${s.screenByType.anime}`,
           `${t.screenTypes.movie} ${s.screenByType.movie}`,
           `${t.screenTypes.novel} ${s.screenByType.novel}`,
-          `${t.screen.total} ${s.screenHours}${t.screen.hoursUnit}`,
+          `${t.screen.total} ${s.screenHours.toFixed(2)}${t.screen.hoursUnit}`,
         ].join(" · ")}
       </p>
       <div className="mt-10">

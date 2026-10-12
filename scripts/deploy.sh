@@ -72,6 +72,27 @@ else
 fi
 cd ..
 
+echo "▸ 2.5/3 回提交数据快照（若有变更）…"
+# fetch-monthly.mjs 写入的快照必须回到源分支，游戏/影卷的月度差分才能跨月积累
+SNAPSHOT_FILES="content/arts/stats-history.json content/arts/lastfm-monthly.json"
+if [ -n "$(git status --porcelain $SNAPSHOT_FILES 2>/dev/null)" ]; then
+  git add $SNAPSHOT_FILES
+  git -c user.name="004Tingting" -c user.email="SaiKouTING004@outlook.com" \
+    commit -q -m "stats: monthly snapshot $(date '+%Y-%m-%d %H:%M')"
+  BRANCH=$(git rev-parse --abbrev-ref HEAD)
+  if [ -n "$TOKEN" ]; then
+    git -c credential.helper= push -q "https://x-access-token:${TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/${BRANCH}" \
+      && echo "  ✓ 快照已回提交并推送（${BRANCH}）" \
+      || echo "  ⚠ 快照推送失败，可稍后手动 git push"
+  else
+    git -c credential.helper= push -q origin HEAD \
+      && echo "  ✓ 快照已回提交并推送（${BRANCH}）" \
+      || echo "  ⚠ 快照推送失败，可稍后手动 git push"
+  fi
+else
+  echo "  （快照无变更）"
+fi
+
 echo "▸ 3/3 触发 Pages 构建…"
 # 注意：WorkBuddy 会话内需清代理（平台内部代理会掐断 GitHub 请求）
 if command -v gh >/dev/null 2>&1; then

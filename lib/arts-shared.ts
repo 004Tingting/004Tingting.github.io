@@ -39,6 +39,12 @@ export type CoverEntry = {
   date: string;
   bilibili: string;
   notes: string;
+  /** 原速 BPM（节拍器占位展示；插件接入后启用） */
+  tempo: number | null;
+  /** 曲谱链接 / 文件路径（占位） */
+  sheet: string | null;
+  /** 伴奏音频链接 / 文件路径（占位） */
+  accompaniment: string | null;
 };
 
 /** 运动条目（跑步 / 徒手）：kind 可缺省（如「开篇」随笔条目不计为一次运动） */
@@ -108,6 +114,11 @@ export function fmtHours(h: number | null): string {
   return h === null ? "—" : `${h}h`;
 }
 
+/** 影卷时长显示：分钟折算小时除不尽，统一保留两位小数（22.5 → 22.50h；null → —） */
+export function fmtScreenHours(h: number | null): string {
+  return h === null ? "—" : `${h.toFixed(2)}h`;
+}
+
 /** 相对时间（构建时计算）：ISO → 3 小时前 / 3h ago */
 export function fmtRelative(iso: string | null, lang: Lang): string {
   if (!iso) return "";
@@ -141,6 +152,74 @@ export type LifeStats = {
   exerciseMinutes: number;
   /** 累计运动公里数（看板用） */
   exerciseKm: number;
+};
+
+/* ---------- 月度趋势（看板，构建时聚合） ---------- */
+
+/** content/arts/lastfm-monthly.json 的结构（scripts/fetch-monthly.mjs 生成） */
+export type LastfmMonthly = {
+  source: "lastfm-monthly";
+  generatedAt: string;
+  unit: "scrobbles";
+  monthly: Record<string, number>;
+};
+
+/** content/arts/stats-history.json 的结构（追加式快照，同月覆盖） */
+export type StatsHistory = {
+  source: "stats-history";
+  updatedAt: string;
+  snapshots: Record<
+    string,
+    {
+      games: Record<string, number>; // 人工记录累计小时（精选条目）
+      screen: Record<string, number>; // 累计小时
+      /** 网易云听歌：键「歌名|歌手」→ 累计分钟（playCount × dt 折算） */
+      netease?: Record<string, number>;
+      /** Steam 全库游玩：键「游戏名」→ 累计小时（playtime_forever 折算） */
+      steam?: Record<string, number>;
+      /** WeGame 游玩：键「游戏名」→ 累计小时（Ting 每周人工报数，wegame-games.json） */
+      wegame?: Record<string, number>;
+      /** Epic 游玩：键「游戏名」→ 累计小时（Ting 人工报数，epic-games.json；无可用 API） */
+      epic?: Record<string, number>;
+    }
+  >;
+};
+
+/** content/arts/netease-monthly.json 的结构（人工回填历史月 + 脚本自动抓当月） */
+export type NetEaseMonthly = {
+  source: "netease-monthly";
+  note: string;
+  updatedAt: string;
+  /** 账号总收听时长（小时，total 接口折算） */
+  totalHours: number | null;
+  /** 月度收听时长（分钟）：2026-01~09 官方截图人工回填，当月起 realtime/report 自动覆盖 */
+  monthly: Record<string, number>;
+};
+
+/** 月度趋势：统一月轴（构建时本地时区），四系列对齐 */
+export type MonthlyTrends = {
+  /** ["2026-03", …, "2026-10"] */
+  months: string[];
+  /** 运动：每月小时（条目逐次聚合） */
+  exercise: number[];
+  /** 音律：每月听歌小时（网易云官方全量口径；早于回填起点的月份为 0） */
+  music: number[];
+  /** 网易云账号总收听时长（小时）——总览大数字用 */
+  neteaseTotalHours: number | null;
+  /** 游戏：每月新增小时（人工 frontmatter 快照 + Steam 全库快照，两源差分相加） */
+  gamesDelta: number[];
+  /** Steam 全库累计小时——游戏总览大数字用 */
+  steamTotalHours: number | null;
+  /** WeGame 累计小时（周更）——游戏总览大数字用 */
+  wegameTotalHours: number | null;
+  /** 影卷：每月新增小时（快照差分，积累自 2026-10） */
+  screenDelta: number[];
+  /** 基线月（2026-10）的当前累计（小时）——差分首月无上月起，展示单点而非空态；null = 无数据 */
+  baselines: {
+    music: number | null;
+    games: number | null;
+    screen: number | null;
+  };
 };
 
 export function summarize(

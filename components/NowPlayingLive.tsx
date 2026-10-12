@@ -49,8 +49,8 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
   const t = dic[lang].arts.music;
 
   useEffect(() => {
-    // 构建时生成的封面映射（降级路径用）
-    fetch("/covers.json", { cache: "no-store" })
+    // 构建时生成的封面映射（降级路径用）——静态产物，按构建版本缓存即可，不必每次 no-store
+    fetch("/covers.json")
       .then((r) => (r.ok ? r.json() : {}))
       .then((m) => setCoverMap(m ?? {}))
       .catch(() => {});
@@ -119,7 +119,12 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
     };
 
     load();
-    const timer = setInterval(load, REFRESH_MS);
+    const timer = setInterval(() => {
+      // 标签页不可见时暂停轮询：后台空转只会白烧 CPU 与请求；切回可见时由
+      // visibilitychange 立即刷新（见下方 onVisible），数据新鲜度不受影响
+      if (document.hidden) return;
+      load();
+    }, REFRESH_MS);
     // 页面重新可见时立即刷新一次（避免切回标签页时看到旧数据）
     const onVisible = () => {
       if (!document.hidden) load();

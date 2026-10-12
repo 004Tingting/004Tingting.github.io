@@ -1,12 +1,10 @@
 ---
-title: The Three-Body Problem
-type: novel
+title: "Three-Body"
+type: tv
 status: completed
-rating: 8.0
-hours: 30
-date: "2026-05-12"
-review:
-summary: Astonishing density of ideas; characters are thin, but the cosmic-scale imagination carries it.
+hours: 22.5
+date: "2026-10-12"
+summary: "A 30-episode TV adaptation of Liu Cixin's novel, from the Red Coast Base to Operation Guzheng."
 ---
 
-(Sample entry — replace with your real records.)
+(Hours derived from public sources (30 episodes x 45 min = 1350 min); rating and review to come.)

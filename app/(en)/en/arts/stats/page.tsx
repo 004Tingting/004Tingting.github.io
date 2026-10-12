@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getCovers, getExercise, getGames, getScreen, getStats } from "@/lib/arts";
+import { getGameHoursFull, getCovers, getExercise, getGames, getMonthlyTrends, getScreen, getStats } from "@/lib/arts";
+import { fmtScreenHours } from "@/lib/arts-shared";
 import Kicker from "@/components/Kicker";
+import MonthlyTrend from "@/components/MonthlyTrend";
 
 export const metadata: Metadata = { title: "Stats" };
 
 type BarItem = { title: string; hours: number };
 
 /** Hours ranking: pure CSS bars (relative to the max), zero dependencies */
-function Bars({ items, max, unit }: { items: BarItem[]; max: number; unit: string }) {
+function Bars({ items, max, unit, format }: { items: BarItem[]; max: number; unit: string; format?: (h: number) => string }) {
   return (
     <div className="mt-4 space-y-2.5">
       {items.map((it) => (
@@ -23,7 +26,7 @@ function Bars({ items, max, unit }: { items: BarItem[]; max: number; unit: strin
             />
           </span>
           <span className="w-16 shrink-0 text-right font-mono text-xs text-muted">
-            {it.hours} {unit}
+            {format ? format(it.hours) : it.hours} {unit}
           </span>
         </div>
       ))}
@@ -36,23 +39,37 @@ export default function StatsPage() {
   const t = dic.en.arts;
   const st = t.stats;
   const s = getStats("en");
+  const m = getMonthlyTrends("en");
 
-  const games = getGames("en")
-    .filter((g) => (g.hours ?? 0) > 0)
-    .sort((a, b) => (b.hours ?? 0) - (a.hours ?? 0));
+  // Games ranking: manual entries + full Steam library merged, top 6 (full list at /en/arts/stats/games)
+  const gameFull = getGameHoursFull("en");
+  const topGames = gameFull.slice(0, 6);
+
   const screen = getScreen("en")
     .filter((sc) => (sc.hours ?? 0) > 0)
     .sort((a, b) => (b.hours ?? 0) - (a.hours ?? 0));
-  const maxGame = Math.max(games[0]?.hours ?? 1, 1);
   const maxScreen = Math.max(screen[0]?.hours ?? 1, 1);
   const exerciseH = (s.exerciseMinutes / 60).toFixed(1);
   const km = s.exerciseKm.toFixed(1);
 
+  // Unified game-hours scope: manual frontmatter + Steam + WeGame + Epic (snapshot merge, see getMonthlyTrends)
+  const gameTotal = m.baselines.games ?? s.gameHours;
+
   const big = [
-    { label: t.games.kicker, value: `${s.gameHours}`, unit: st.hours },
-    { label: t.screen.kicker, value: `${s.screenHours}`, unit: st.hours },
+    // Games: curated manual entries + full Steam library (auto)
+    {
+      label: t.games.kicker,
+      value: Number(gameTotal.toFixed(1)).toString(),
+      unit: st.hours,
+    },
+    { label: t.screen.kicker, value: fmtScreenHours(s.screenHours), unit: st.hours },
     { label: t.exercise.kicker, value: exerciseH, unit: st.hours },
-    { label: t.music.kicker, value: `${s.coverCount}`, unit: "covers" },
+    // Music: account total listening hours (NetEase official total API)
+    {
+      label: t.music.kicker,
+      value: m.neteaseTotalHours !== null ? m.neteaseTotalHours.toFixed(1) : "—",
+      unit: st.hours,
+    },
   ];
 
   return (
@@ -76,7 +93,54 @@ export default function StatsPage() {
         ))}
       </div>
 
-      {/* Games: by hours */}
+      {/* Monthly trends: last 12 months (SVG lines, rendered at build time) */}
+      <section className="mt-14 border-t border-rule pt-10">
+        <Kicker>{st.monthlyKicker}</Kicker>
+        <p className="mt-3 max-w-2xl text-sm text-muted">{st.monthlyIntro}</p>
+        <div className="mt-8 grid gap-x-10 gap-y-10 sm:grid-cols-2">
+          <MonthlyTrend
+            months={m.months}
+            values={m.gamesDelta}
+            label={t.games.kicker}
+            unit={st.unitHoursMonth}
+            lang="en"
+            emptyNote={st.accumulating}
+            baseline={m.baselines.games}
+            baselineLabel={st.baseline}
+          />
+          <MonthlyTrend
+            months={m.months}
+            values={m.screenDelta}
+            label={t.screen.kicker}
+            unit={st.unitHoursMonth}
+            lang="en"
+            emptyNote={st.accumulating}
+            baseline={m.baselines.screen}
+            baselineLabel={st.baseline}
+            fmtValue={(v) => v.toFixed(2)}
+          />
+          <MonthlyTrend
+            months={m.months}
+            values={m.exercise}
+            label={t.exercise.kicker}
+            unit={st.unitHoursMonth}
+            lang="en"
+            emptyNote={st.accumulating}
+          />
+          <MonthlyTrend
+            months={m.months}
+            values={m.music}
+            label={t.music.kicker}
+            unit={st.unitHoursMonth}
+            lang="en"
+            emptyNote={st.accumulating}
+            baseline={m.baselines.music}
+            baselineLabel={st.baseline}
+          />
+        </div>
+      </section>
+
+      {/* Games: hours ranking (top 6, full list via link) */}
       <section className="mt-14 border-t border-rule pt-10">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <Kicker>
@@ -86,9 +150,18 @@ export default function StatsPage() {
             {s.gameCount} {st.entries} · {s.gameHours} {st.hours}
           </span>
         </div>
-        {games.length > 0 ? (
-          <Bars items={games.map((g) => ({ title: g.title, hours: g.hours ?? 0 }))} max={maxGame} unit={st.hours} />
+        {topGames.length > 0 ? (
+          <Bars
+            items={topGames.map((g) => ({ title: g.name, hours: g.hours }))}
+            max={topGames[0].hours}
+            unit={st.hours}
+          />
         ) : null}
+        <p className="mt-5">
+          <Link href="/en/arts/stats/games" className="text-sm text-accent hover:underline">
+            {st.gameFullLink}
+          </Link>
+        </p>
       </section>
 
       {/* Screen: by hours */}
@@ -98,11 +171,16 @@ export default function StatsPage() {
             {t.screen.kicker} · {st.byHours}
           </Kicker>
           <span className="font-mono text-sm text-muted">
-            {s.screenCount} {st.entries} · {s.screenHours} {st.hours}
+            {s.screenCount} {st.entries} · {fmtScreenHours(s.screenHours)}
           </span>
         </div>
         {screen.length > 0 ? (
-          <Bars items={screen.map((sc) => ({ title: sc.title, hours: sc.hours ?? 0 }))} max={maxScreen} unit={st.hours} />
+          <Bars
+            items={screen.map((sc) => ({ title: sc.title, hours: sc.hours ?? 0 }))}
+            max={maxScreen}
+            unit={st.hours}
+            format={(h) => h.toFixed(2)}
+          />
         ) : null}
       </section>
 
@@ -116,13 +194,32 @@ export default function StatsPage() {
         </div>
       </section>
 
-      {/* Music: data source note */}
+      {/* Music: listening & covers (official NetEase stats + personal covers) */}
       <section className="mt-12 border-t border-rule pt-10">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <Kicker>{t.music.kicker}</Kicker>
-          <span className="font-mono text-sm text-muted">{s.coverCount} covers</span>
         </div>
-        <p className="mt-3 max-w-2xl text-sm text-muted">{st.musicNote}</p>
+        <div className="mt-4 max-w-2xl">
+          <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
+            <span className="font-serif text-sm">{st.totalListen}</span>
+            <span className="font-mono text-sm text-muted">
+              {m.neteaseTotalHours !== null ? m.neteaseTotalHours.toFixed(1) : "—"} {st.hours}
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
+            <span className="font-serif text-sm">{st.recentListen}</span>
+            <span className="font-mono text-sm text-muted">
+              {m.music.reduce((sum, v) => sum + v, 0).toFixed(1)} {st.hours}
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between gap-3 py-2.5">
+            <span className="font-serif text-sm">{st.coversLabel}</span>
+            <span className="font-mono text-sm text-muted">
+              {s.coverCount}
+            </span>
+          </div>
+        </div>
+        <p className="mt-4 max-w-2xl text-xs text-muted">{st.musicNote}</p>
       </section>
     </div>
   );

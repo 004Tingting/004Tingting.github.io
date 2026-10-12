@@ -1,48 +1,43 @@
 ---
-title: "In the Beginning: Why a Personal Journal"
+title: "In the Beginning: Why I'm Starting a Personal Journal"
 date: "2026-10-06"
 tags: [essay, meta]
-summary: Three decisions behind this site — bilingual, editorial layout, and static hosting — plus what to expect.
+summary: "Who I am, what the five sections hold, and why I'm building this site."
 draft: false
 ---
 
-It's 2026. Why build a personal website at all?
+It's 2026, and I'm only now getting around to building a personal website. I know it sounds a little dated. I want to build one anyway.
 
-Social platforms handle distribution — but the layout belongs to the platform, the algorithm belongs to the platform, and so does the account. A site of your own is one of the few places that is entirely yours: **what gets written, how it is set, and how long it stays.**
+I've wanted to since 2019 or 2020, and I've been putting it off for six or seven years. I started a few times in between, got stuck on something each time, and left it there. Nothing special happened this time; I just figured that if I don't start now, I may never start.
 
-## Three Decisions
+A bit about me: I'm a master's student at UESTC, majoring in control. My research area is cyber-physical systems. On the theory side I work on robust control; right now I'm looking at sliding mode control for vehicle platoons. Every day is papers, derivations, and simulations, and I regularly suspect that I haven't actually understood any of it.
 
-### Bilingual
+What I want to record is basically my own input and output: half-finished derivations in memos, projects sitting on my drive, listening and watching logs scattered across a few apps. They're spread out, easy to forget, and a pain to find. Gathered in one place, they show how far I've come.
 
-Chinese is where I write fastest; English is the lingua franca of my field. I chose both over either — a bilingual frame with per-post flexibility: important pieces go out in both languages, quick notes start in Chinese. Perfect symmetry isn't the goal; shipping is.
+Calling this a "personal journal" is a bit much. It's less a magazine than a website typeset to look like one: paper-toned background, serif type, a single vermillion rule. No editorial department, no issue schedule. I write it and I set it myself.
 
-### Editorial Layout
+Here are the five sections.
 
-This site reads less like a blog and more like a journal: serif headlines, a paper-toned background, one vermillion accent running through the page. No thumbnails, no card shadows — hierarchy comes from type scale, whitespace, and hairline rules. The text is the protagonist; the typesetting is the design.
+### Research
 
-### Static
+Reading papers, taking notes, working through derivations, and revisiting them.
 
-The whole site compiles down to plain HTML via Next.js, hosted on GitHub Pages:
+What I find most useful is that it forces me to say things clearly. I've always known that deriving something and writing it down are two different jobs. You can muddle through a derivation, but not through an explanation; wherever the writing gets stuck, that's the part I didn't actually understand. So this section is a tool to keep myself honest, and a reference library for my research on the side.
 
-```ts
-import type { NextConfig } from "next";
+### Works
 
-const nextConfig: NextConfig = {
-  output: "export",
-};
+Software, projects, experiments, and finished things.
 
-export default nextConfig;
-```
+Finished work needs somewhere to sit, or it sinks. Honestly, this section and Research both work as a calling card for me: sometimes sending a link beats sending a resume, because whoever opens it can see clearly what I've built and what I can do. And it's genuinely thrilling when something you made gets used, gets seen and appreciated by strangers. You improve through that exchange too.
 
-No database, no server bill, and the build output deploys anywhere static hosting exists.
+### Arts
 
-## Five Sections
+Music, games, films and books, and exercise logs.
 
-The site is organised into five sections: **Research** (derivations, methods, retrospectives), **Works** (things actually made), **Arts** (what I'm listening to, playing, watching), **Chronicles** (time slices and essays), and **About**. The split follows *nature* rather than *subject* — the same project appears in Research when I write up its derivation, and in Works when the finished thing is shown.
+I'm a sucker for big numbers. I love watching them pile up, and I'm a firm believer in the ten-thousand-hour rule. This part holds my listening, gaming, anime, drama, and movie data, plus exercise records. On the music side there's what I like, what moves me, even my own output, though I'm still very much a beginner on both bamboo flute and electric guitar. Games are mostly reviews and stats. This section also reminds me: all work and no play makes Jack a dull boy.
 
-- **Research** — control theory and fault diagnosis: derivations, reading notes
-- **Works** — software, projects and experiments you can open and run
-- **Arts** — music, games and screen, plus the data they leave behind
-- **Chronicles** — journal notes, retrospectives and essays
+The remaining two: **Chronicles** holds time slices and essays. No serious purpose, but some things only fit there, like this piece. **About** holds a resume and site notes, for the curious.
 
-This is where it begins. Come back often.
+One honest word to close: after dragging my feet for this long, I can't promise what the writing will look like from here on.
+
+Comments are open — you're welcome to come talk to me. This site is open source, and the code is on GitHub.
