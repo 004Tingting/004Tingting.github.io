@@ -9,14 +9,14 @@ summary: "Close reading of Deng et al., IEEE TAC 2024: a nonsingular predefined-
 
 ## 1. What the paper is after
 
-Terminal sliding mode control (TSMC) sells two things: invariance to matched disturbances once on the sliding surface, and finite-time convergence. The field has moved past "finite" to fixed-time: a settling-time bound independent of initial conditions (Polyakov, 2012). But fixed-time TSMC carries an old defect, singularity: on classical terminal sliding surfaces the control blows up as the state approaches the origin. The existing nonsingular fixed-time TSMC literature (a long line starting with Zuo, 2015) has two common weaknesses:
+Terminal sliding mode control (TSMC) is usually credited with two things: invariance to matched disturbances once on the sliding surface, and finite-time convergence. The field has moved past "finite" to fixed-time: a settling-time bound independent of initial conditions (Polyakov, 2012). But fixed-time TSMC carries an old defect, singularity: on classical terminal sliding surfaces the control blows up as the state approaches the origin. The existing nonsingular fixed-time TSMC literature (a long line starting with Zuo, 2015) has two common weaknesses:
 
 1. singularity is handled by switching, either between sliding surfaces or between control laws;
 2. almost all of it covers double integrators or second-order systems only; high-order chains of integrators are left out.
 
 Pal et al. (2022) and Chen et al. (2022) used time scaling and variable gains to avoid switching altogether, delivering nonsingular predefined-time TSMC, but only for matched disturbances. A separate line is the smooth periodic delayed feedback of Zhou, Michiels and Chen (2021): artificial delays buy fixed-time convergence in a smooth form, at the cost of the robustness defect stated in their Remark 4, namely that controllers built that way do not preserve robust predefined-time stability under perturbations or model uncertainties.
 
-This paper welds the two lines together: keep the *form* of delayed feedback for the sliding surface, and leave robustness to sliding mode theory. The result does four things at once: nonsingular, switching-free, matched and mismatched disturbances, and the extension from double integrators to n-th order chains of integrators.
+This paper welds the two lines together: keep the *form* of delayed feedback for the sliding surface, and leave robustness to sliding mode theory. The resulting control law is nonsingular and switching-free; it covers matched disturbances and mismatched ones; and it extends from double integrators all the way to n-th order chains of integrators.
 
 Terminology first. Predefined-time means the user picks the settling instant T_c up front and tunes the controller for it; convergence happens no later than T_c. Fixed-time only promises a bound independent of initial conditions, indirectly set by parameters. The paper also uses a stricter notion, all nonzero initial conditions converging exactly at T_c, which it calls prescribed-time; I keep the English.
 
@@ -53,7 +53,7 @@ Three observations:
 2. the claim holds for any a ∈ R; the sign of a shapes the transient but not the settling instant;
 3. the delay h is a tuning parameter of the sliding surface, not a physical delay of the plant, and the paper says so explicitly. Implementation needs a buffer of state history over [0, 2h], but h is a small design parameter (0.5 s and 0.75 s in the simulations), so the cost is negligible.
 
-Where does robustness come from? This is the neatest cut in the paper: the delayed feedback lives only in the sliding surface. A sliding surface is a chosen geometry, unaffected by perturbations and independent of the model; disturbances can only enter through the reaching phase, which is handled by the robust fixed-time term of Moulay et al. (2022). Clean separation of duties: the surface decides *when*, the reaching term makes sure it gets there *despite disturbances*, and neither vouches for the other. The robustness defect of Zhou et al.'s delayed feedback is sidestepped this way.
+Where does robustness come from? The key move is that the delayed feedback lives only in the sliding surface. A sliding surface is a chosen geometry, unaffected by perturbations and independent of the model; disturbances can only enter through the reaching phase, which is handled by the robust fixed-time term of Moulay et al. (2022). The duties are split: the surface decides *when*, the reaching term makes sure it gets there *despite disturbances*. The robustness defect of Zhou et al.'s delayed feedback is sidestepped this way.
 
 ## 3. The mathematical structure
 
@@ -66,7 +66,7 @@ Where does robustness come from? This is the neatest cut in the paper: the delay
 | Predefined time | user fixes T_c, convergence by T_c | no | yes |
 | Prescribed time | every nonzero initial state converges exactly at T_c | no | yes |
 
-The distinction between the last two is the quiet thread of the paper: the main theorems deliver "by T_c", and Proposition 1 is what upgrades to "exactly at T_c".
+The distinction between the last two runs through the paper: the main theorems deliver "by T_c", and Proposition 1 is what strengthens them to "exactly at T_c".
 
 ### 3.2 The double integrator: a three-phase timeline
 
@@ -91,7 +91,7 @@ ueq(t) = a·x2(t) − K̇'(t)·x1(t−h) − K'(t)·x2(t−h)
 uF(t)  = −k·|s|^(λ·s²/(1+μ·s²))·sgn(s)
 ```
 
-uF comes from Moulay et al. (2022): the exponent λ·s²/(1+μ·s²) rises monotonically from 0 to λ/μ as |s| grows, so the term is bounded by k near the origin (no blow-up) and grows like |s|^(λ/μ) far away (strong). Nonsingularity and robust reaching are its job; λ, μ > 0 and k is taken large enough per (6) of the paper so that s is driven to zero before the prescribed instant h.
+uF comes from Moulay et al. (2022): the exponent λ·s²/(1+μ·s²) rises monotonically from 0 to λ/μ as |s| grows, so the term is bounded by k near the origin (no blow-up) and grows like |s|^(λ/μ) far away. Nonsingularity and robust reaching are its job; λ, μ > 0 and k is taken large enough per (6) of the paper so that s is driven to zero before the prescribed instant h.
 
 Plotting when K'(t) is on gives a three-phase closed loop, with h = T_c/3:
 
@@ -108,7 +108,7 @@ Plotting when K'(t) is on gives a three-phase closed loop, with h = T_c/3:
 
 Theorem 1: robust predefined-time stability of the closed loop at t = 3h; shrink h to shorten convergence.
 
-Two snags. First, if the trajectory reaches the surface *at the origin* (Case 1 of the paper), then x1(h) = 0, the delayed phase starts from a zero initial condition, and Lemma 3's exact instant is out of reach; only "by 3h" survives. Proposition 1 patches this: pick a from the initial conditions, a = x2(0)/x1(0) when x1(0) ≠ 0 and a = 0 otherwise, which guarantees x1(h) ≠ 0 and upgrades to prescribed-time. Second, Remark 3 warns that a > 0 makes the steady surface x2 − a·x1 = 0 itself unstable (the sliding phase x1' = a·x1 diverges); harmless in theory since the state is already at the origin, but numerically it is advised to switch a to a negative value after 3h.
+Two snags. First, if the trajectory reaches the surface *at the origin* (Case 1 of the paper), then x1(h) = 0, the delayed phase starts from a zero initial condition, and Lemma 3's exact instant is out of reach; only "by 3h" survives. Proposition 1 patches this: pick a from the initial conditions, a = x2(0)/x1(0) when x1(0) ≠ 0 and a = 0 otherwise, which guarantees x1(h) ≠ 0 and strengthens the result to prescribed-time. Second, Remark 3 warns that a > 0 makes the steady surface x2 − a·x1 = 0 itself unstable (the sliding phase x1' = a·x1 diverges); harmless in theory since the state is already at the origin, but numerically it is advised to switch a to a negative value after 3h.
 
 Nonsingularity is proved in two halves: boundedness of uF from Moulay (2022); boundedness of ueq, which contains K̇', from Lemma 4 guaranteeing that K' and all its derivatives are globally bounded. No switching, no fractional-power singularity anywhere.
 
