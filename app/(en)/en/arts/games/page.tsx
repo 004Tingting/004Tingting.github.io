@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { dic } from "@/lib/i18n";
-import { getGames } from "@/lib/arts";
+import { getGameSources, getGames } from "@/lib/arts";
 import LifeEntryList from "@/components/LifeEntryList";
+import GameSourceList from "@/components/GameSourceList";
 import Kicker from "@/components/Kicker";
 
 export const metadata: Metadata = { title: "Gaming" };
@@ -9,6 +10,7 @@ export const metadata: Metadata = { title: "Gaming" };
 export default function GamesPage() {
   const t = dic.en.arts;
   const games = getGames("en");
+  const sourceGames = getGameSources("en");
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
@@ -17,6 +19,7 @@ export default function GamesPage() {
       <div className="mt-10">
         <LifeEntryList variant="games" entries={games} lang="en" />
       </div>
+      <GameSourceList games={sourceGames} lang="en" />
     </div>
   );
 }

@@ -20,6 +20,13 @@ export type GameEntry = {
   summary: string;
 };
 
+/** 自动源游戏条目（Steam / WeGame / Epic 快照）：游戏页「平台时长记录」分组列表用 */
+export type GameSourceItem = {
+  name: string;
+  hours: number;
+  source: "steam" | "wegame" | "epic";
+};
+
 export type ScreenEntry = {
   slug: string;
   title: string;

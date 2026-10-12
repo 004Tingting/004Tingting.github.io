@@ -45,9 +45,10 @@ export default function StatsPage() {
   const gameFull = getGameHoursFull("en");
   const topGames = gameFull.slice(0, 6);
 
+  // Screen: only the latest 6 (date descending), rest via the link to /en/arts/screen
   const screen = getScreen("en")
     .filter((sc) => (sc.hours ?? 0) > 0)
-    .sort((a, b) => (b.hours ?? 0) - (a.hours ?? 0));
+    .slice(0, 6);
   const maxScreen = Math.max(screen[0]?.hours ?? 1, 1);
   const exerciseH = (s.exerciseMinutes / 60).toFixed(1);
   const km = s.exerciseKm.toFixed(1);
@@ -182,6 +183,11 @@ export default function StatsPage() {
             format={(h) => h.toFixed(2)}
           />
         ) : null}
+        <p className="mt-5">
+          <Link href="/en/arts/screen" className="text-sm text-accent hover:underline">
+            {st.screenFullLink}
+          </Link>
+        </p>
       </section>
 
       {/* Exercise: totals */}

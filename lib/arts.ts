@@ -10,6 +10,7 @@ import {
   summarize,
   type CoverEntry,
   type GameEntry,
+  type GameSourceItem,
   type LastfmData,
   type LastfmTrack,
   type LifeStats,
@@ -83,6 +84,32 @@ export function getGameHoursFull(lang: Lang): Array<{ name: string; hours: numbe
   }
   return [...byName.entries()]
     .map(([name, v]) => ({ name, hours: v.hours, manual: v.manual }))
+    .sort((a, b) => b.hours - a.hours);
+}
+
+/**
+ * 自动源游戏（Steam / WeGame / Epic 最新快照）：跨源按名合并取大、剔除人工条目同名，按小时倒序。
+ * 供游戏页「平台时长记录」分组列表使用；快照缺失/损坏时返回空数组（页面自动隐藏该区）。
+ */
+export function getGameSources(lang: Lang): GameSourceItem[] {
+  const manualNames = new Set(getGames(lang).map((g) => g.title));
+  const merged = new Map<string, { hours: number; source: GameSourceItem["source"] }>();
+  try {
+    const history = JSON.parse(fs.readFileSync(STATS_HISTORY_FILE, "utf-8")) as StatsHistory;
+    const months = Object.keys(history.snapshots).sort();
+    const last = history.snapshots[months[months.length - 1]];
+    for (const source of ["steam", "wegame", "epic"] as const) {
+      for (const [name, hours] of Object.entries(last?.[source] ?? {})) {
+        const prev = merged.get(name);
+        if (!prev || hours > prev.hours) merged.set(name, { hours, source });
+      }
+    }
+  } catch {
+    /* 快照缺失/损坏时仅返回空列表 */
+  }
+  return [...merged.entries()]
+    .filter(([name]) => !manualNames.has(name))
+    .map(([name, v]) => ({ name, ...v }))
     .sort((a, b) => b.hours - a.hours);
 }
 

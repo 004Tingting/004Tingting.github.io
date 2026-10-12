@@ -80,6 +80,10 @@ export const zh = {
       designStudyMark: "◉ 设计研究",
       empty: "第一条游玩记录在路上。",
       review: "测评 →",
+      platformKicker: "平台时长记录",
+      platformNote:
+        "Steam 全库经官方接口在构建时自动同步，WeGame 与 Epic 为定期人工报数；与上方精选记录同名去重，按时长倒序。",
+      sources: { steam: "Steam", wegame: "WeGame", epic: "Epic" },
     },
     screen: {
       kicker: "影卷",
@@ -112,6 +116,7 @@ export const zh = {
       gameFullTitle: "游戏时长全榜",
       gameFullNote:
         "含 Steam 全库（官方接口，构建时自动同步）与人工记录的精选条目（手机 / WeGame 等）；时长生成于站点构建时。",
+      screenFullLink: "查看全部影卷 →",
       musicNote: "听歌数据来自网易云官方（含手机与电脑）；Last.fm 仅记录本机播放，暂不入图。",
     },
     exercise: {
@@ -217,6 +222,10 @@ export const en = {
       designStudyMark: "◉ Design study",
       empty: "The first play log is on its way.",
       review: "Review →",
+      platformKicker: "Platform Hours",
+      platformNote:
+        "Steam library synced via the official API at build time; WeGame and Epic are periodic manual reports. Deduplicated against the curated entries above, sorted by hours.",
+      sources: { steam: "Steam", wegame: "WeGame", epic: "Epic" },
     },
     screen: {
       kicker: "Watch & Read",
@@ -249,6 +258,7 @@ export const en = {
       gameFullTitle: "Game Hours",
       gameFullNote:
         "Includes the full Steam library (synced via the official API at build time) and manually logged titles (mobile / WeGame, etc.).",
+      screenFullLink: "View all Watch & Read →",
       musicNote: "Listening data comes from official NetEase stats (phone & desktop); Last.fm only captures desktop playback and stays off the chart.",
     },
     exercise: {
