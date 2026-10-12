@@ -93,6 +93,9 @@ const redirects = {
   /* 游艺子栏改名（2026-10-09：训练 → 运动） */
   "/arts/training": "/arts/exercise/",
   "/en/arts/training": "/en/arts/exercise/",
+  /* 研思首篇占位示例 → Deng et al. 2024 论文精读笔记（2026-10-12） */
+  "/research/predefined-time-sliding-mode": "/research/deng-2024-predefined-time-tsmc/",
+  "/en/research/predefined-time-sliding-mode": "/en/research/deng-2024-predefined-time-tsmc/",
 };
 for (const slug of projectSlugs) {
   redirects[`/projects/${slug}`] = `/works/${slug}/`;
