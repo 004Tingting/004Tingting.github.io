@@ -1,6 +1,6 @@
 {
   "source": "stats-history",
-  "updatedAt": "2026-10-13T09:30:49.385Z",
+  "updatedAt": "2026-10-13T10:53:55.561Z",
   "snapshots": {
     "2026-10": {
       "games": {
@@ -105,7 +105,7 @@
         "MOM|蜡笔小心（灵柯）": 396.2,
         "非花|锦零": 390,
         "最美中国戏|张曦匀": 412.8,
-        "星降る海|Aqu3ra": 557.6,
+        "星降る海|Aqu3ra": 561.8,
         "心予報|Eve": 436.7,
         "極楽浄土|GARNiDELiA": 466.8,
         "Re:Re:|ASIAN KUNG-FU GENERATION": 484.3,
@@ -135,6 +135,7 @@
         "小人间|双笙（陈元汐）": 422.9,
         "5:20AM|刀酱": 293,
         "Look At Me Now|Charlie Puth": 352.3,
+        "IVORY TOWER (龙族动画OP)|如释鸟Birdiee": 314.1,
         "I Really Want to Stay at Your House|Rosa Walton": 431.6,
         "绝世舞姬|张曦匀": 324.9,
         "ヒッチコック|ヨルシカ": 386.2,
@@ -144,8 +145,7 @@
         "都落ち|ヨルシカ": 429.4,
         "Lion|Hearts & Colors": 371.5,
         "月並みに輝け|結束バンド": 416.5,
-        "All My Friends|Madeon": 344.5,
-        "扬旗鸣鼓|闹闹丶": 354.6
+        "All My Friends|Madeon": 344.5
       },
       "steam": {
         "Left 4 Dead": 19.8,
