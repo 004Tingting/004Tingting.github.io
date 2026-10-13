@@ -26,7 +26,7 @@ Ting 的个人网站——一本双语「个人杂志」，五栏：研思 / 造
 ```bash
 npm install
 npm run dev                      # 开发服务器 http://localhost:3000
-npm run build                    # 静态导出到 out/（含 sitemap/robots/RSS/404 生成）
+npm run build                    # 静态导出到 out/（fetch-now → fetch-monthly → fetch-playlist → next build → postbuild；含 sitemap/robots/RSS/404 生成）
 python scripts/preview.py 8000   # 预览构建产物（支持 clean URL）
 npm run og                       # 重新生成分享卡片图 public/og.png
 ```
@@ -53,8 +53,8 @@ npm run og                       # 重新生成分享卡片图 public/og.png
   - 游戏：`status`（playing/completed/dropped）/ `rating`（10 分制）/ `hours` / `designStudy` / `review`
   - 影卷：`type`（tv/anime/movie/novel）/ `status` / `rating` / `hours` / `review`
   - 运动：`kind`（run/bodyweight/other）/ `duration`（分钟）/ `distance`（公里）/ `note`
-  - 音律 cover：`instrument` / `bilibili`（BV 号）/ `date`
-- 常驻歌单：`content/arts/now.json`
+  - 音律 cover：`instrument` / `bilibili`（BV 号）/ `date` / `order`（展示顺序，升序）
+- 常驻歌单：`content/arts/now.json`（分区标签与外链配置）+ `content/arts/playlist.json`（全量曲目，`scripts/fetch-playlist.mjs` 构建时拉取，勿手改）
 
 > frontmatter 注意：日期要加引号；值里含 ASCII 冒号+空格（`: `）时整段加引号。
 > 「按性质不按题材」归栏：推导/复盘→研思，叙事/随笔→纪事，产物→造物，消费文娱→游艺。
@@ -105,6 +105,6 @@ npm run live -- --interval 10   # 自定义间隔
 
 > 为什么 jsDelivr 只作兜底：它的 purge 有 **720 秒限流窗口**，频繁 purge 会导致之后全部失效、缓存永久停在旧版本（实测数据滞后 20+ 分钟）。
 
-- 配置：`.env.local` 需有 `LASTFM_API_KEY` / `LASTFM_USER` / `GITHUB_TOKEN`（`GITHUB_TOKEN` 用 `gh auth token` 获取）
+- 配置：`.env.local` 需有 `LASTFM_API_KEY` / `LASTFM_USER` / `GITHUB_TOKEN`（`GITHUB_TOKEN` 用 `gh auth token` 获取）；另含 `NETEASE_MUSIC_U`（听歌统计）、`STEAM_API_KEY` / `STEAM_ID`（游戏时长）
 - 脚本只在**切歌时**推送（无变化不产生提交），不会刷提交历史
 - **不开脚本时**网站自动降级：Last.fm 直连取曲目 + 构建时封面映射表（`public/covers.json`）

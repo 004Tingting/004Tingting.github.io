@@ -21,6 +21,7 @@
 |---|---|---|
 | 大标题 | Noto Serif SC（思源宋体） | Playfair Display |
 | 正文 | 系统黑体栈 | Inter |
+| 研思文章正文 | 中文回落 Noto Serif SC | **Times New Roman**（2026-10-13 定，`.article-body`，仅研思正文；标题/代码块/KaTeX 不受影响）|
 | 数字/日期/代码 | 等宽（JetBrains Mono） | 同左 |
 
 - 标题衬线、正文无衬线：经典杂志排法
@@ -37,7 +38,7 @@
 | 规则线 | `#1A1A1A` 15% 透明 | `#EDEAE4` 15% 透明 |
 
 - 朱红是唯一的彩色，用在链接、hover、kicker 圆点、选中态——克制才有效
-- 深浅模式切换按钮放导航，默认跟随系统
+- 深浅模式切换按钮放导航，默认跟随系统；**切换动效（2026-10-13）**：整页 View Transitions 擦除变色（0.75s，黑→白从左到右、白→黑从右到左），图标本身不旋转；`prefers-reduced-motion` 或不支持 VT 时直接切换
 
 ### 排版规则
 
@@ -258,7 +259,7 @@ Life
 
 ### 9.4 迁移策略
 
-- 旧 URL（`/blog`、`/life/*`、`/projects/*`）由 `scripts/postbuild.mjs` 生成 **22 个 meta-refresh 跳转页**
+- 旧 URL（`/blog`、`/life/*`、`/projects/*`）由 `scripts/postbuild.mjs` 生成 **meta-refresh 跳转页**（当前 26 个，随 redirects 表增长）
 - 内容目录同步重命名：`blog → research/chronicles`、`projects → works`、`life → arts`
 - **构建约束**：Next 静态导出要求每个动态路由至少一个页面 → 每个栏目须保留至少一篇文章，否则构建失败
 

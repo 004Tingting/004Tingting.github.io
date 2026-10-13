@@ -18,7 +18,7 @@ Ting 的个人网站——一本**双语（中文默认 + `/en`）的「个人�
 | 框架 | Next.js 15 App Router + TypeScript strict | 静态导出 `output: 'export'` + `trailingSlash: true` |
 | 样式 | Tailwind CSS 4 | CSS-first：token 全在 `app/globals.css` 的 `@theme`，颜色变量化、组件零 `dark:` 前缀 |
 | 字体 | fontsource 自托管 | Noto Serif SC 700（中文衬线）/ Playfair Display 600 / JetBrains Mono Variable |
-| 内容 | Markdown + gray-matter | 构建时（fs）读取；渲染用 react-markdown + rehype-highlight |
+| 内容 | Markdown + gray-matter | 构建时（fs）读取；渲染用 react-markdown + remark-gfm（表格）+ remark-math / rehype-katex（公式）+ rehype-highlight |
 | 排版 | @tailwindcss/typography | 用 `.prose` + globals.css 里的杂志风覆盖 |
 | 部署 | GitHub Pages + Actions | workflow 模式（`build_type=workflow`），`public/.nojekyll` 必须在 |
 
@@ -39,31 +39,37 @@ app/
 ├── sitemap.ts / robots.ts
 ├── feed.xml/route.ts     # 中文 RSS（en 版在 (en)/en/feed.xml/route.ts）
 └── favicon.svg
-components/               # Nav / Footer / ThemeToggle / Kicker / ArticleList / ArticleDetail / WorkList / MarkdownBody / Giscus / NowPlayingLive / EmbedPlayer / LifeEntryList
+components/               # Nav / Footer / ThemeToggle / Kicker / ArticleList / ArticleDetail / WorkList / MarkdownBody / Giscus / NowPlayingLive / EmbedPlayer / LifeEntryList / GameSourceList / Analytics
 content/
 ├── research/{zh,en}/*.md     # 研思文章
 ├── chronicles/{zh,en}/*.md   # 纪事文章
 ├── works/{zh,en}/*.md        # 造物（按 frontmatter order 排序）
 └── arts/                     # 游艺
-    ├── now.json              # 常驻歌单（网易云外链配置）
+    ├── now.json              # 常驻歌单（分区标签 + 网易云外链配置）
+    ├── playlist.json         # 构建时生成（歌单全量曲目，fetch-playlist.mjs，勿手改）
     ├── lastfm.json           # 构建时生成（实时收听快照，勿手改）
-    ├── games/{zh,en}/*.md    # 游戏条目
+    ├── stats-history.json    # 构建时生成（月度快照：games/steam/wegame/epic/screen，勿手改）
+    ├── lastfm-monthly.json / netease-monthly.json  # 构建时生成（听歌月度，勿手改）
+    ├── wegame-games.json / epic-games.json          # 人工报数（Ting 周更，Buddy 改数字）
+    ├── games/{zh,en}/*.md    # 游戏条目（手动精选）
     ├── screen/{zh,en}/*.md   # 影卷条目（剧 / 番 / 影 / 小说）
     ├── exercise/{zh,en}/*.md # 运动条目（跑步 / 徒手）
-    └── covers/{zh,en}/*.md   # 音律 cover
+    └── covers/{zh,en}/*.md   # 音律 cover（order 字段控制展示顺序）
 lib/
 ├── i18n.ts               # UI 文案字典（zh/en，五栏 + 游艺内部）
-├── site.ts               # 站点常量：URL、SEO 默认值、giscus、lastfm
+├── site.ts               # 站点常量：URL、SEO 默认值、giscus、lastfm、CLARITY
 ├── article-shared.ts     # 客户端安全的文章类型与日期格式化
 ├── articles.ts           # 文章管道（研思 / 纪事，Section 维度）
 ├── works.ts              # 造物管道（order 排序）
 ├── arts-shared.ts        # 游艺客户端安全：类型、枚举、汇总统计
-├── arts.ts               # 游艺管道（games / screen / exercise / covers / now + stats）
+├── arts.ts               # 游艺管道（games / screen / exercise / covers / now / playlist + stats）
 scripts/
 ├── preview.py            # 本地预览（支持 clean URL，对齐 GitHub Pages）
 ├── og.mjs                # 生成 public/og.png 分享卡片（sharp 渲染 SVG）
 ├── postbuild.mjs         # 构建后写定制 out/404.html + 旧 URL 跳转页（数量随 redirects 表增长）
 ├── fetch-now.mjs         # 构建前拉 Last.fm 快照 + 生成封面映射（prebuild 链路）
+├── fetch-monthly.mjs     # 构建前拉月度快照（Steam/WeGame/Epic/网易云听歌 → stats-history 等）
+├── fetch-playlist.mjs    # 构建前拉网易云歌单全量曲目（v6 playlist detail + v3 song detail）
 ├── push-now.mjs          # 本机常驻：推送实时「正在听」到 now-data 分支（npm run live）
 └── deploy.sh             # 一键发布：构建 → 推 gh-pages → 触发 Pages 构建
 ```
@@ -85,7 +91,7 @@ scripts/
 
 ```bash
 npm run dev                      # 开发（建议在普通终端跑，见环境注意）
-npm run build                    # 构建（含 postbuild 生成 404.html）
+npm run build                    # 构建（fetch-now → fetch-monthly → fetch-playlist → next build → postbuild 生成 404.html）
 python scripts/preview.py 8000   # 预览构建产物（clean URL）
 npm run og                       # 重新生成分享卡片图
 npm run live                     # 启动「正在听」实时推送（本机常驻，见下）

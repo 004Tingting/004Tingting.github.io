@@ -196,6 +196,53 @@
   用法：`https://gh-proxy.com/https://raw.githubusercontent.com/OWNER/REPO/BRANCH/FILE`
   若仍保留 jsDelivr 作兜底：**本地限流 purge**（≥10 分钟一次）
 
+## 五、视图过渡 / 第三方接口 / 部署管道（2026-10-13 新增）
+
+### 20. View Transitions 伪元素：祖先选择器失效，改用自定义属性
+
+- **现象**：`html.wipe-rtl ::view-transition-new(root) { animation-name: theme-wipe-rtl }` 完全不生效——类确实加在了 `<html>` 上（过渡中 `document.documentElement.className` 能看到），但伪元素计算出的 `animation-name` 纹丝不动
+- **根因（CDP 实证）**：Chrome 里**祖先选择器匹配不到视图过渡伪元素树**（伪树虽由根元素生成，但选择器匹配不走这条链路）；而**自定义属性可以正常继承进伪元素树**（`--theme-fx-duration` 一直生效即为佐证）
+- **解决**：需要按状态切换伪元素样式时，一律用「类改 var + 伪元素读 var」模式：
+  ```css
+  :root { --theme-wipe-anim: theme-wipe-ltr; }
+  :root.wipe-rtl { --theme-wipe-anim: theme-wipe-rtl; }
+  ::view-transition-new(root) { animation-name: var(--theme-wipe-anim); }
+  ```
+- **实证方法**（无头 Chrome + CDP，Node 22 自带 WebSocket 可直连）：
+  ```js
+  // 点击后立即读伪元素计算样式，确认 animation-name / class 是否同步
+  getComputedStyle(document.documentElement, "::view-transition-new(root)").animationName
+  ```
+- **教训**：删测试依赖的类名前，先确认没有自动化脚本还在按旧类名选择元素（本次误报一次「方向坏了」，实为 `querySelector(".theme-toggle-btn")` 失效、点击没发生）
+
+### 21. 网易云 playlist 接口截断数据且谎报总数
+
+- **现象**：`/api/playlist/detail?id=X` 返回 `tracks` 只有 **10 条**，且 `trackCount` 也谎报为 10——歌单实际 315 首
+- **正确姿势**（2026-10-13 实测）：
+  1. `/api/v6/playlist/detail?id=X&n=1000&s=0` → `playlist.trackIds`（全量 id 数组）
+  2. `/api/v3/song/detail?c=[{"id":…},…]` 分批取详情（**旧的 `?ids=` 参数已失效，返回 `{"code":400}`**；v3 格式字段是 `ar`/`al`/`dt`，不是 `artists`/`album`/`duration`）
+- 公开歌单**无需 Cookie**；拉取失败时脚本保留旧文件、不阻断构建
+- **同理**：网易云 outchain 播放器（`music.163.com/outchain/player?type=0&id=X`）**写死只渲染前 10 首**（CDP 实证：`size`/`height` 参数均无效）→ 要全量只能自建 iframe（`lib/arts.ts` 的 `buildPlaylistFrame`，srcdoc + 内部滚动 + 每曲链 `song?id=id`）
+
+### 22. deploy.sh 管道吞退出码 + github.com 持续不通时的 SSH 备用通道
+
+- **管道吞码**：`git push ... | tail -1` 会让失败看起来成功（shell 管道退出码取末位）——deploy.sh 步骤 2 的 push 若接管道，失败后**后续步骤（快照回提交、触发 Pages）仍会继续跑**，造成「本地先提交、后补推」的中间态。手动补推勿照抄此写法；失败先看原始报错（Connection reset = 网络；Authentication failed = 凭据）
+- **github.com HTTPS 持续不通时**（2026-10-13 实测：`git push` 连续 Connection reset / auth failed，而 **`api.github.com` 经 gh CLI 可用**、`ssh.github.com:443` 可达）：
+  ```bash
+  # ① 生成临时 ed25519 密钥并注册为部署密钥（gh api 走 api.github.com，不受影响）
+  ssh-keygen -t ed25519 -f /tmp/wb_k -N "" -q
+  KID=$(env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy \
+    "/c/Program Files/GitHub CLI/gh.exe" api -X POST repos/{owner}/{repo}/keys \
+    -f key="$(cat /tmp/wb_k.pub)" -F read_only=false | grep -o '"id": *[0-9]*' | head -1 | grep -o '[0-9]*')
+  # ② SSH over 443 推送 main / gh-pages
+  export GIT_SSH_COMMAND="ssh -i /tmp/wb_k -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -p 443"
+  git -c credential.helper= push git@ssh.github.com:{owner}/{repo}.git main
+  # ③ 用完立即删密钥 + 删本地私钥
+  env -u ... gh.exe api -X DELETE repos/{owner}/{repo}/keys/$KID
+  ```
+- **注意**：按 URL（非 origin 名）推送后本地 `origin/main` 跟踪引用不更新，会误显示 ahead——用 `gh api repos/.../commits/main` 核对远端真实 tip
+- **教训**：`git add`/`git add -A` 前先 `git status` 审阅——曾把另一并行会话的未提交改动一并卷入，也漏过 `scripts/` 目录导致功能缺行
+
 ## 快速修复清单（下次会话遇到直接抄）
 
 ```bash
