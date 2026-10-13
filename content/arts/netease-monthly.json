@@ -1,7 +1,7 @@
 {
   "source": "netease-monthly",
   "note": "monthly 单位=分钟。2026-01~09 为官方「云村听歌足迹」截图人工回填（全量口径）；当月起由 scripts/fetch-monthly.mjs 抓 realtime/report 自动更新（仅覆盖当月键）。totalHours 来自 /api/content/activity/listen/data/total（秒→小时）。",
-  "updatedAt": "2026-10-13T11:44:54.825Z",
+  "updatedAt": "2026-10-13T12:35:52.542Z",
   "totalHours": 5974.6,
   "monthly": {
     "2026-01": 12104,
@@ -13,6 +13,6 @@
     "2026-07": 8535,
     "2026-08": 19108,
     "2026-09": 23071,
-    "2026-10": 13298
+    "2026-10": 13315
   }
 }
