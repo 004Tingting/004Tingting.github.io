@@ -1,6 +1,7 @@
 ---
 title: "Do You Want to Dance?"
 instrument: "Electric Guitar"
+order: 1
 date: "2026-10-12"
 bilibili: ""
 tempo: 150

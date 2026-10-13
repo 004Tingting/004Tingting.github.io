@@ -1,6 +1,7 @@
 ---
 title: "你要跳舞吗"
 instrument: "电吉他"
+order: 1
 date: "2026-10-12"
 bilibili: ""
 tempo: 150

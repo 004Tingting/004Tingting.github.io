@@ -71,6 +71,19 @@ body {
   letter-spacing: 0.01em;
 }
 
+/* 研思文章正文：西文固定 Times New Roman，中文回落 Noto Serif SC。
+   仅正文（标题仍用杂志衬线、代码块仍用等宽、KaTeX 用自带字体） */
+.article-body {
+  font-family: "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+}
+
+/* KaTeX 显示公式：与杂志排版对齐的间距 */
+.prose .katex-display {
+  margin: 1.25em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 /* 行内代码：等宽 + 轻底色，去掉 typography 默认的反引号 */
 .prose :where(code):not(:where(pre code))::before,
 .prose :where(code):not(:where(pre code))::after {
@@ -144,7 +157,13 @@ body {
 
 /* ---------- 主题切换动效 ---------- */
 
-/* 切换按钮图标：旋入（配合 ThemeToggle 的 key 重挂载，每次切换播放一次） */
+/* 擦除与旋转共用一个时长/缓动，保证「擦除开始时开始旋转、擦除结束时旋转完成」 */
+:root {
+  --theme-fx-duration: 0.55s;
+  --theme-fx-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 切换按钮图标：旋入（VT 不支持时由 ThemeToggle 的 key 重挂载触发） */
 @keyframes theme-icon-in {
   from {
     transform: rotate(-90deg) scale(0.55);
@@ -156,23 +175,47 @@ body {
   }
 }
 .theme-icon-in {
-  animation: theme-icon-in 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: theme-icon-in var(--theme-fx-duration) var(--theme-fx-ease);
 }
 
-/* 整页从左到右擦除式变色（View Transitions API）。
-   不支持的浏览器走 ThemeToggle 的直接切换分支，无动画但功能不变。 */
+/* 整页擦除式变色（View Transitions API）。
+   方向约定：黑 → 白（切日间）从左到右；白 → 黑（切夜间）从右到左，
+   由 ThemeToggle 按目标主题切换 html.wipe-rtl。
+   不支持的浏览器走直接切换分支，无动画但功能不变。 */
 ::view-transition-old(root) {
   animation: none;
 }
 ::view-transition-new(root) {
-  animation: theme-wipe 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: theme-wipe-ltr var(--theme-fx-duration) var(--theme-fx-ease);
 }
-@keyframes theme-wipe {
+html.wipe-rtl ::view-transition-new(root) {
+  animation-name: theme-wipe-rtl;
+}
+@keyframes theme-wipe-ltr {
   from {
     clip-path: inset(0 100% 0 0);
   }
   to {
     clip-path: inset(0 0 0 0);
   }
+}
+@keyframes theme-wipe-rtl {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* 切换按钮单独捕获：与擦除同时长旋转换接（旧快照原停住，新快照旋入盖上） */
+::view-transition-old(theme-toggle) {
+  animation: none;
+}
+::view-transition-new(theme-toggle) {
+  animation: theme-icon-in var(--theme-fx-duration) var(--theme-fx-ease);
+}
+.theme-toggle-btn {
+  view-transition-name: theme-toggle;
 }
 

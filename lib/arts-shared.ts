@@ -43,6 +43,8 @@ export type CoverEntry = {
   slug: string;
   title: string;
   instrument: string;
+  /** 展示顺序（升序；缺省按 date 倒序）——同日期多条目时保证顺序稳定 */
+  order: number | null;
   date: string;
   bilibili: string;
   notes: string;
@@ -124,6 +126,13 @@ export function fmtHours(h: number | null): string {
 /** 影卷时长显示：分钟折算小时除不尽，统一保留两位小数（22.5 → 22.50h；null → —） */
 export function fmtScreenHours(h: number | null): string {
   return h === null ? "—" : `${h.toFixed(2)}h`;
+}
+
+/** 歌单曲目时长：毫秒 → m:ss（221400 → 3:41；0 或负值 → —） */
+export function fmtTrackDuration(ms: number): string {
+  if (!Number.isFinite(ms) || ms <= 0) return "—";
+  const total = Math.round(ms / 1000);
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
 }
 
 /** 相对时间（构建时计算）：ISO → 3 小时前 / 3h ago */

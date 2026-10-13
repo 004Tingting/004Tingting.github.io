@@ -33,7 +33,10 @@ export default function ArticleDetail({
       </header>
 
       <div className="mt-10">
-        <MarkdownBody content={article.content} />
+        <MarkdownBody
+          content={article.content}
+          className={section === "research" ? "article-body" : undefined}
+        />
       </div>
 
       <Giscus lang={lang} />

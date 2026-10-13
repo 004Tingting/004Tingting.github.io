@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getCovers, getNow, getPlaylistEmbed, getRecentTracks } from "@/lib/arts";
-import { fmtRelative } from "@/lib/arts-shared";
+import { getCovers, getNow, getPlaylist, getPlaylistEmbed, getRecentTracks } from "@/lib/arts";
+import { fmtRelative, fmtTrackDuration } from "@/lib/arts-shared";
 import EmbedPlayer from "@/components/EmbedPlayer";
 import Kicker from "@/components/Kicker";
 import NowPlayingLive from "@/components/NowPlayingLive";
 
 export const metadata: Metadata = { title: "音律" };
 
-/** 音律：正在听（Last.fm 实时）+ 最近收听 + 常驻歌单 + 乐器 cover + 随笔入口 */
+/** 音律：正在听（Last.fm 实时）+ 最近收听 + 常驻歌单（全量曲目）+ 乐器 cover + 随笔入口 */
 export default function MusicPage() {
   const t = dic.zh.arts;
   const now = getNow();
   const playlist = getPlaylistEmbed();
+  const tracks = getPlaylist();
   const recent = getRecentTracks();
   const covers = getCovers("zh");
 
@@ -46,23 +47,55 @@ export default function MusicPage() {
         </section>
       ) : null}
 
-      {/* 常驻歌单（网易云嵌入） */}
-      {playlist ? (
+      {/* 常驻歌单（网易云嵌入）+ 全量曲目 */}
+      {playlist || tracks ? (
         <section className="mt-16 border-t border-rule pt-10">
           <h2 className="font-mono text-sm tracking-widest text-muted">
             <span className="text-accent">·</span> {t.music.playlistHeading}
           </h2>
-          <p className="mt-4 font-serif text-2xl font-semibold">{playlist.title}</p>
-          <p className="mt-1 font-mono text-sm text-muted">{playlist.subtitle}</p>
-          <EmbedPlayer
-            src={playlist.embed}
-            title={playlist.title}
-            aspect="player"
-            height={430}
-            href={playlist.link}
-            hrefLabel={t.music.openExternal}
-          />
-          <p className="mt-3 font-mono text-xs text-muted">{t.music.nowNote}</p>
+          {playlist ? (
+            <>
+              <p className="mt-4 font-serif text-2xl font-semibold">{playlist.title}</p>
+              <p className="mt-1 font-mono text-sm text-muted">{playlist.subtitle}</p>
+              <EmbedPlayer
+                src={playlist.embed}
+                title={playlist.title}
+                aspect="player"
+                height={430}
+                href={playlist.link}
+                hrefLabel={t.music.openExternal}
+              />
+              <p className="mt-3 font-mono text-xs text-muted">{t.music.nowNote}</p>
+            </>
+          ) : null}
+
+          {tracks ? (
+            <div className="mt-10">
+              <p className="font-mono text-xs tracking-widest text-muted">
+                <span className="text-accent">·</span> {t.music.tracksHeading}
+                <span className="ml-2 normal-case tracking-normal">
+                  {tracks.trackCount} {t.music.tracksUnit}
+                </span>
+              </p>
+              <ol className="mt-4 divide-y divide-rule">
+                {tracks.tracks.map((tr, i) => (
+                  <li key={`${tr.name}-${i}`} className="flex items-baseline gap-4 py-1.5">
+                    <span className="w-8 shrink-0 text-right font-mono text-xs text-muted">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="min-w-0 flex-1 text-sm">
+                      {tr.name}
+                      {tr.artist ? <span className="text-muted"> — {tr.artist}</span> : null}
+                    </span>
+                    <span className="shrink-0 font-mono text-xs text-muted">
+                      {fmtTrackDuration(tr.duration)}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-4 text-xs text-muted">{t.music.tracksNote}</p>
+            </div>
+          ) : null}
         </section>
       ) : null}
 

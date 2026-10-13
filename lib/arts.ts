@@ -130,13 +130,14 @@ export function getScreen(lang: Lang): ScreenEntry[] {
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
-/** 音律：乐器 cover（按 date 倒序） */
+/** 音律：乐器 cover（order 升序，缺省按 date 倒序） */
 export function getCovers(lang: Lang): CoverEntry[] {
   return readEntries(lang, "covers")
     .map(({ slug, data }) => ({
       slug,
       title: str(data.title, slug),
       instrument: str(data.instrument),
+      order: numOrNull(data.order),
       date: str(data.date),
       bilibili: str(data.bilibili),
       notes: str(data.notes),
@@ -145,7 +146,12 @@ export function getCovers(lang: Lang): CoverEntry[] {
       accompaniment:
         typeof data.accompaniment === "string" && data.accompaniment ? data.accompaniment : null,
     }))
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .sort((a, b) => {
+      const oa = a.order ?? Number.MAX_SAFE_INTEGER;
+      const ob = b.order ?? Number.MAX_SAFE_INTEGER;
+      if (oa !== ob) return oa - ob;
+      return b.date.localeCompare(a.date);
+    });
 }
 
 /** 音律：单条 cover（详情页；lang 内按 slug 查找，找不到返回 null） */
@@ -221,6 +227,20 @@ export function getPlaylistEmbed(): { title: string; subtitle: string; embed: st
   const manual = getManualNow();
   if (!manual || !manual.embed) return null;
   return { title: manual.title, subtitle: manual.subtitle, embed: manual.embed, link: manual.link };
+}
+
+/** 常驻歌单全量曲目（scripts/fetch-playlist.mjs 构建时生成；不存在或损坏时返回 null） */
+export type PlaylistTrack = { name: string; artist: string; album: string; duration: number };
+export type Playlist = { name: string; trackCount: number; tracks: PlaylistTrack[] };
+export function getPlaylist(): Playlist | null {
+  const file = path.join(ROOT, "playlist.json");
+  if (!fs.existsSync(file)) return null;
+  try {
+    const d = JSON.parse(fs.readFileSync(file, "utf-8")) as Playlist;
+    return d?.tracks?.length ? d : null;
+  } catch {
+    return null;
+  }
 }
 
 /** 最近收听列表（Last.fm） */
