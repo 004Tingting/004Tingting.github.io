@@ -52,5 +52,5 @@ export const GISCUS = {
  */
 export const CLARITY = {
   enabled: true,
-  projectId: "", // TODO(Ting): 填入 Clarity Project ID 后即可发布
+  projectId: "yx0nnrlyns",
 } as const;
