@@ -51,6 +51,7 @@ async function main() {
   const tracks = ids.map((id) => {
     const s = byId.get(id);
     return {
+      id,
       name: s?.name ?? `（已下架 #${id}）`,
       artist: (s?.ar ?? []).map((a) => a.name).join(" / "),
       album: s?.al?.name ?? "",
