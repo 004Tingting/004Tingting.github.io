@@ -44,3 +44,13 @@ export const GISCUS = {
   category: "Announcements",
   categoryId: "DIC_kwDOU9Csys4DHHG9",
 };
+
+/**
+ * Microsoft Clarity 访客统计（不在站点上呈现，仅后台可见）。
+ * projectId 为公开值（会出现在页面源码中），非密钥；留空则不埋点。
+ * 获取：https://clarity.microsoft.com → 新建项目 → Settings → 复制 Project ID。
+ */
+export const CLARITY = {
+  enabled: true,
+  projectId: "", // TODO(Ting): 填入 Clarity Project ID 后即可发布
+} as const;

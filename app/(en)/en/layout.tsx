@@ -6,6 +6,7 @@ import "@fontsource/playfair-display/600.css";
 import "@fontsource-variable/jetbrains-mono";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import Analytics from "@/components/Analytics";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -48,6 +49,7 @@ export default function EnLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+        <Analytics />
       </head>
       <body className="bg-paper font-sans text-ink antialiased">
         <Nav lang="en" />

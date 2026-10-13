@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
 import { getMonthlyTrends, getStats } from "@/lib/arts";
+import Kicker from "@/components/Kicker";
 
 export const metadata: Metadata = { title: "关于" };
 
-/** 关于：占位正文 + 站点数据摘要（完整看板在 /arts/stats） */
+/** 关于：占位正文 + 站点数据摘要（完整看板在 /arts/stats）；版式与其余栏目页一致 */
 export default function AboutPage() {
   const t = dic.zh.about;
   const s = getStats("zh");
@@ -27,15 +28,16 @@ export default function AboutPage() {
   ];
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-16">
-      <h1 className="font-serif text-4xl font-bold">{t.title}</h1>
-      <p className="mt-6 text-muted">{t.placeholder}</p>
+    <article className="mx-auto max-w-5xl px-6 py-16">
+      <Kicker>{t.kicker}</Kicker>
+      <h1 className="mt-4 font-serif text-5xl font-bold">{t.title}</h1>
+      <p className="mt-6 max-w-2xl text-muted">{t.placeholder}</p>
 
-      <section className="mt-12 border-t border-rule pt-8">
-        <p className="font-mono text-xs tracking-widest text-muted">
+      <section className="mt-14 border-t border-rule pt-10">
+        <h2 className="font-mono text-sm tracking-widest text-muted">
           <span className="text-accent">·</span> 站点数据
-        </p>
-        <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-5">
+        </h2>
+        <div className="mt-6 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-5">
           {data.map((d) => (
             <div key={d.label}>
               <p className="font-serif text-2xl font-bold">
@@ -48,7 +50,7 @@ export default function AboutPage() {
         </div>
         <Link
           href="/arts/stats"
-          className="mt-5 inline-block font-mono text-xs text-accent hover:underline"
+          className="mt-6 inline-block font-mono text-sm text-accent hover:underline"
         >
           完整看板 →
         </Link>

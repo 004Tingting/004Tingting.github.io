@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
 import { getMonthlyTrends, getStats } from "@/lib/arts";
+import Kicker from "@/components/Kicker";
 
 export const metadata: Metadata = { title: "About" };
 
-/** About: placeholder body + site data summary (full dashboard at /en/arts/stats) */
+/** About: placeholder body + site data summary (full dashboard at /en/arts/stats); same shell as the other section pages */
 export default function AboutPage() {
   const t = dic.en.about;
   const s = getStats("en");
@@ -27,15 +28,16 @@ export default function AboutPage() {
   ];
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-16">
-      <h1 className="font-serif text-4xl font-bold">{t.title}</h1>
-      <p className="mt-6 text-muted">{t.placeholder}</p>
+    <article className="mx-auto max-w-5xl px-6 py-16">
+      <Kicker>{t.kicker}</Kicker>
+      <h1 className="mt-4 font-serif text-5xl font-bold">{t.title}</h1>
+      <p className="mt-6 max-w-2xl text-muted">{t.placeholder}</p>
 
-      <section className="mt-12 border-t border-rule pt-8">
-        <p className="font-mono text-xs tracking-widest text-muted">
+      <section className="mt-14 border-t border-rule pt-10">
+        <h2 className="font-mono text-sm tracking-widest text-muted">
           <span className="text-accent">·</span> Site data
-        </p>
-        <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-5">
+        </h2>
+        <div className="mt-6 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-5">
           {data.map((d) => (
             <div key={d.label}>
               <p className="font-serif text-2xl font-bold">
@@ -48,7 +50,7 @@ export default function AboutPage() {
         </div>
         <Link
           href="/en/arts/stats"
-          className="mt-5 inline-block font-mono text-xs text-accent hover:underline"
+          className="mt-6 inline-block font-mono text-sm text-accent hover:underline"
         >
           Full dashboard →
         </Link>

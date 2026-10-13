@@ -47,7 +47,7 @@ export const zh = {
       nowPlayingLabel: "最近在听：",
       nowLiveLabel: "正在播放：",
       nowLiveHeading: "正在播放",
-      recentHeading: "最近在听",
+      recentHeading: "正在播放",
       recentListHeading: "最近收听",
       playlistHeading: "常驻歌单",
       nowNote: "歌单嵌入由网易云音乐提供，若无法加载请走链接。",
@@ -135,6 +135,7 @@ export const zh = {
     screenTypes: { tv: "剧", anime: "番", movie: "影", novel: "小说" },
   },
   about: {
+    kicker: "关于",
     title: "关于",
     placeholder: "Ting。这一页在等它的内容——稍后再来。",
   },
@@ -189,7 +190,7 @@ export const en = {
       nowPlayingLabel: "Recently played: ",
       nowLiveLabel: "Now playing: ",
       nowLiveHeading: "Now playing",
-      recentHeading: "Recently played",
+      recentHeading: "Now playing",
       recentListHeading: "Recent tracks",
       playlistHeading: "Standing playlist",
       nowNote: "Playlist embed by NetEase Cloud Music — use the link below if it fails to load.",
@@ -278,6 +279,7 @@ export const en = {
     screenTypes: { tv: "TV", anime: "Anime", movie: "Film", novel: "Novel" },
   },
   about: {
+    kicker: "About",
     title: "About",
     placeholder: "Ting. This page is waiting for its content — check back later.",
   },

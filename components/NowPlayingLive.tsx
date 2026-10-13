@@ -197,16 +197,6 @@ export default function NowPlayingLive({ lang, initial, variant = "bar" }: Props
           <div>
             <p className="font-serif text-2xl font-semibold">{now.title}</p>
             {now.subtitle ? <p className="mt-1 text-muted">{now.subtitle}</p> : null}
-            {now.link ? (
-              <a
-                href={now.link}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-block font-mono text-xs text-accent hover:underline"
-              >
-                ↗ Last.fm
-              </a>
-            ) : null}
           </div>
         </div>
       </section>

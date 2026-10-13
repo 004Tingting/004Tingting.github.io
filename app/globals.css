@@ -54,6 +54,10 @@ body {
   --tw-prose-quote-borders: var(--color-accent);
   --tw-prose-captions: var(--color-muted);
   --tw-prose-code: var(--color-ink);
+  /* 代码块文字/底色：覆盖 typography 默认的「深底浅字」固定值，否则日间模式下
+     我们的浅色 pre 底会配上固定浅色文字，白-on-白看不见 */
+  --tw-prose-pre-code: var(--color-ink);
+  --tw-prose-pre-bg: transparent;
   --tw-prose-th-borders: var(--color-rule);
   --tw-prose-td-borders: var(--color-rule);
 }
@@ -83,6 +87,7 @@ body {
 /* 代码块：细边框直角，随深浅模式换底 */
 .prose pre {
   font-family: var(--font-mono);
+  color: var(--color-ink);
   background: color-mix(in srgb, var(--color-ink) 5%, transparent);
   border: 1px solid var(--color-rule);
   border-radius: 4px;
@@ -135,5 +140,39 @@ body {
 .dark .hljs-section,
 .dark .hljs-emphasis {
   font-style: italic;
+}
+
+/* ---------- 主题切换动效 ---------- */
+
+/* 切换按钮图标：旋入（配合 ThemeToggle 的 key 重挂载，每次切换播放一次） */
+@keyframes theme-icon-in {
+  from {
+    transform: rotate(-90deg) scale(0.55);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+.theme-icon-in {
+  animation: theme-icon-in 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 整页从左到右擦除式变色（View Transitions API）。
+   不支持的浏览器走 ThemeToggle 的直接切换分支，无动画但功能不变。 */
+::view-transition-old(root) {
+  animation: none;
+}
+::view-transition-new(root) {
+  animation: theme-wipe 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes theme-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }
 
