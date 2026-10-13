@@ -159,8 +159,16 @@ body {
 
 /* 擦除与旋转共用一个时长/缓动，保证「擦除开始时开始旋转、擦除结束时旋转完成」 */
 :root {
-  --theme-fx-duration: 0.55s;
+  --theme-fx-duration: 1s;
   --theme-fx-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  /* 擦除方向动画名。默认从左到右（黑 → 白）；:root.wipe-rtl 覆盖为从右到左（白 → 黑）。
+     注意：不能写 html.wipe-rtl ::view-transition-new(root) 这种祖先选择器——
+     Chrome 实测类加上了但匹配不到视图过渡伪元素（选择器失效），故用自定义属性继承
+     （变量可正常继承进伪元素树，--theme-fx-duration 即如此生效）。 */
+  --theme-wipe-anim: theme-wipe-ltr;
+}
+:root.wipe-rtl {
+  --theme-wipe-anim: theme-wipe-rtl;
 }
 
 /* 切换按钮图标：旋入（VT 不支持时由 ThemeToggle 的 key 重挂载触发） */
@@ -179,17 +187,16 @@ body {
 }
 
 /* 整页擦除式变色（View Transitions API）。
-   方向约定：黑 → 白（切日间）从左到右；白 → 黑（切夜间）从右到左，
-   由 ThemeToggle 按目标主题切换 html.wipe-rtl。
+   方向：黑 → 白（切日间）从左到右；白 → 黑（切夜间）从右到左，
+   由 ThemeToggle 按目标主题切换 html 上的 wipe-rtl 类（经变量生效）。
    不支持的浏览器走直接切换分支，无动画但功能不变。 */
 ::view-transition-old(root) {
   animation: none;
 }
 ::view-transition-new(root) {
-  animation: theme-wipe-ltr var(--theme-fx-duration) var(--theme-fx-ease);
-}
-html.wipe-rtl ::view-transition-new(root) {
-  animation-name: theme-wipe-rtl;
+  animation-name: var(--theme-wipe-anim);
+  animation-duration: var(--theme-fx-duration);
+  animation-timing-function: var(--theme-fx-ease);
 }
 @keyframes theme-wipe-ltr {
   from {
@@ -217,5 +224,13 @@ html.wipe-rtl ::view-transition-new(root) {
 }
 .theme-toggle-btn {
   view-transition-name: theme-toggle;
+}
+
+/* 歌单 iframe（srcdoc）：深色模式经 color-scheme 传播进 iframe 文档 */
+.playlist-frame {
+  color-scheme: light;
+}
+.dark .playlist-frame {
+  color-scheme: dark;
 }
 

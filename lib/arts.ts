@@ -230,7 +230,7 @@ export function getPlaylistEmbed(): { title: string; subtitle: string; embed: st
 }
 
 /** 常驻歌单全量曲目（scripts/fetch-playlist.mjs 构建时生成；不存在或损坏时返回 null） */
-export type PlaylistTrack = { name: string; artist: string; album: string; duration: number };
+export type PlaylistTrack = { id: number; name: string; artist: string; album: string; duration: number };
 export type Playlist = { name: string; trackCount: number; tracks: PlaylistTrack[] };
 export function getPlaylist(): Playlist | null {
   const file = path.join(ROOT, "playlist.json");
@@ -241,6 +241,72 @@ export function getPlaylist(): Playlist | null {
   } catch {
     return null;
   }
+}
+
+const escHtml = (s: string): string =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+/**
+ * 歌单 iframe（srcdoc）文档：全量曲目 + iframe 内滚动。
+ * 网易云 outchain 播放器写死只列 10 首（size/height 参数均无效，已实测），
+ * 故自建：杂志风 + 每曲链网易云；深色模式经父级 .playlist-frame 的
+ * color-scheme 传播进本文档的 prefers-color-scheme 查询。
+ */
+export function buildPlaylistFrame(
+  playlist: Playlist,
+  labels: { title: string; count: string; hint: string },
+): string {
+  const rows = playlist.tracks
+    .map((t, i) => {
+      const total = Math.round(t.duration / 1000);
+      const dur = t.duration > 0 ? `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}` : "—";
+      return (
+        `<a class="row" href="https://music.163.com/song?id=${t.id}" target="_blank" rel="noreferrer">` +
+        `<span class="no">${String(i + 1).padStart(2, "0")}</span>` +
+        `<span class="nm">${escHtml(t.name)}</span>` +
+        (t.artist ? `<span class="ar">${escHtml(t.artist)}</span>` : "") +
+        `<span class="du">${dur}</span>` +
+        `</a>`
+      );
+    })
+    .join("");
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>
+:root{--paper:#faf8f5;--ink:#1a1a1a;--muted:rgba(26,26,26,.55);--accent:#b4432e;--rule:rgba(26,26,26,.15)}
+@media (prefers-color-scheme:dark){:root{--paper:#141414;--ink:#edeae4;--muted:rgba(237,234,228,.55);--accent:#d0604a;--rule:rgba(237,234,228,.15)}}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:"Times New Roman","Noto Serif SC","Songti SC",serif}
+.hd{display:flex;align-items:baseline;gap:10px;padding:10px 14px 8px;border-bottom:1px solid var(--rule)}
+.hd .t{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hd .c{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.hd .h{margin-left:auto;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:10px;color:var(--muted);white-space:nowrap}
+.lst{height:calc(100% - 35px);overflow-y:auto;overscroll-behavior:contain}
+a.row{display:flex;align-items:baseline;gap:10px;padding:4.5px 14px;text-decoration:none;color:inherit;border-bottom:1px solid color-mix(in srgb,var(--rule) 45%,transparent)}
+a.row:hover{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+a.row:hover .nm{color:var(--accent)}
+.no{flex:none;width:22px;text-align:right;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:10px;color:var(--muted)}
+.nm{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ar{flex:none;max-width:42%;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.du{flex:none;margin-left:auto;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:10px;color:var(--muted)}
+.lst::-webkit-scrollbar{width:8px}
+.lst::-webkit-scrollbar-thumb{background:var(--rule);border-radius:4px}
+.lst::-webkit-scrollbar-track{background:transparent}
+</style>
+</head>
+<body>
+<div class="hd"><span class="t">${escHtml(labels.title)}</span><span class="c">${escHtml(labels.count)}</span><span class="h">${escHtml(labels.hint)}</span></div>
+<div class="lst">${rows}</div>
+</body>
+</html>`;
 }
 
 /** 最近收听列表（Last.fm） */
