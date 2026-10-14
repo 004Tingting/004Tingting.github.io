@@ -39,6 +39,9 @@ function GitHubIcon({ className }: { className?: string }) {
 /** GitHub 浮层图标基准尺寸（px，即 h-6）；实际大小 = 基准 × 槽位实测缩放（收紧态 16px = ×2/3） */
 const GH_BASE = 24;
 
+/** 图标飞行时长（ms）——与收紧/展开编排（globals.css 的 nav-gh-* 规则）同拍：0.75s 全部落位 */
+const GH_FLIGHT_MS = 750;
+
 /** SSR 下退化为 useEffect，避免 useLayoutEffect 的服务端告警（服务端本就不运行 effect） */
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
@@ -46,12 +49,18 @@ const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayout
  * 全站导航卡（唯一悬浮物）：logo + 五栏 + 语言 + 主题 + 快捷图标（返回/主页/刷新），
  * 收紧后中部浮现当前页/文章标题（文章页附底部进度条）。
  *
- * GitHub 图标为**单一浮层节点**（2026-10-15 治闪换）：此前展开/收紧各用一个条件渲染的
- * 图标节点，切换瞬间卸载重挂、图标在两处跳位，阈值附近来回滚动时高频闪换；
- * 现在浮层绝对定位于卡片内，位置与缩放逐帧从目标槽位实测（rAF 缓动追帧，
- * 因为 300ms 布局过渡中的槽位本身在移动），展开态停靠品牌右侧（24px）、
- * 收紧态平滑缩小并移到小标题之后（16px）。槽位只留占位：
- * 品牌槽位内含静态图标兜底（SSR 首帧 / no-JS），收紧槽位常驻保证小标题截断版式不变。
+ * GitHub 图标为**单一浮层节点**（2026-10-15）：最初展开/收紧各一枚条件渲染节点，
+ * 切换瞬间瞬换闪烁；现改为浮层（绝对定位于卡片基准层），位置与缩放逐帧实测。
+ *
+ * **收紧/展开编排（0.75s，同日二稿——治「回程时图标与小标题左右颠倒」）**：
+ *  - 向下收紧：品牌与左侧槽位即时收缩（0–0.3s，此时标题被裁剪不可见）→ 标题擦除式
+ *    呈现（0.3–0.75s，字符从左向右逐个出现，CSS clip）→ 图标同步缓动右移缩小落位（0–0.75s）；
+ *  - 滚动回顶：标题先从右向左逐个消失（0–0.3s）→ 品牌与左侧槽位延迟展开（0.3–0.6s，
+ *    此刻标题已不可见，布局位移全在不可见时段发生）→ 图标缓动左移放大（0–0.75s）；
+ *  - 展开方向图标目标取**缓存的展开位**（固定目标，不追随槽位展开而右滑的实时位置，避免过冲）。
+ *
+ * 槽位只留占位：品牌槽位常驻（宽度随状态平滑收放 + 静态图标兜底 SSR/no-JS），
+ * 小标题后槽位常驻保证截断版式不变。
  */
 export default function Nav({ lang }: { lang: Lang }) {
   const pathname = usePathname() ?? "/";
@@ -78,26 +87,36 @@ export default function Nav({ lang }: { lang: Lang }) {
   const ghFloatRef = useRef<HTMLAnchorElement | null>(null);
   /** 浮层当前视觉位置（基准层局部坐标）；x < 0 = 未就位（首帧前 / 无目标隐藏后） */
   const ghCur = useRef({ x: -1, y: -1, s: 1 });
+  /** 展开位缓存（挂载时/窗口缩放/字体就绪时实测）——回程飞行的固定目标 */
+  const ghBrandBerth = useRef<{ x: number; y: number; s: number } | null>(null);
   const ghRaf = useRef(0);
   const ghFirstRun = useRef(true);
   /** 浮层就位后接管交互；此前由品牌槽位里的静态图标兜底（覆盖 SSR 首帧与 no-JS） */
   const [ghReady, setGhReady] = useState(false);
 
-  /** 测量浮层目标：活动槽位（收紧态 = 小标题后；否则 = 品牌右侧）→ 基准层局部坐标 + 缩放 */
-  const ghMeasure = useCallback((): { x: number; y: number; s: number } | null => {
+  /** 实测活动槽位（收紧态 = 小标题后；否则 = 品牌右侧）；纯测量，不写缓存 */
+  const ghMeasureLive = useCallback((): { x: number; y: number; s: number } | null => {
     const layer = ghLayerRef.current;
     const slot = compactRef.current ? ghMidSlotRef.current : ghBrandSlotRef.current;
     if (!layer || !slot) return null;
     const lr = layer.getBoundingClientRect();
     const sr = slot.getBoundingClientRect();
-    if (sr.width === 0) return null; // 窄屏：信息区整体隐藏，收紧态无目标
+    if (sr.width === 0) return null; // 窄屏：信息区整体隐藏；或左槽位正处于收放过渡（宽度 0）
     return { x: sr.left - lr.left, y: sr.top - lr.top, s: sr.width / GH_BASE };
   }, []);
 
+  /** 飞行目标：收紧 → 实时小标题槽位（随布局平滑滑动，逐帧重测）；
+      展开 → 缓存的展开位（固定目标——左槽位此刻正在延迟展开，实时测量是过渡中间值，不可信） */
+  const ghFlightTarget = useCallback((): { x: number; y: number; s: number } | null => {
+    if (compactRef.current) return ghMeasureLive();
+    return ghBrandBerth.current ?? ghMeasureLive();
+  }, [ghMeasureLive]);
+
   /**
-   * duration = 0 → 直接就位（首帧 / 窗口缩放）；
-   * 否则 rAF 缓动追帧：槽位本身在 300ms 布局过渡里持续移动，只有逐帧重测才能贴住。
-   * 过程中再次切换（阈值附近快速来回滚动）先 cancel 再从当前视觉位置重新起步，不跳变。
+   * duration = 0 → 直接就位（首帧 / 窗口缩放；展开态顺带刷新展开位缓存——只信稳态测量）；
+   * 否则 rAF 缓动：收紧方向逐帧重测槽位（槽位在布局过渡中持续滑动，只有逐帧重测才能贴住）；
+   * 展开方向用固定目标（见 ghFlightTarget）。过程中再次切换（快速来回滚动）先 cancel
+   * 再从当前视觉位置重新起步，不跳变。
    */
   const ghAnimate = useCallback(
     (duration: number) => {
@@ -113,11 +132,19 @@ export default function Nav({ lang }: { lang: Lang }) {
         ghCur.current = { x: -1, y: -1, s: 1 };
         el.style.visibility = "hidden";
       };
-      const target = ghMeasure();
+      const live = ghMeasureLive();
+      /* 展开方向的飞行目标：优先缓存展开位（此时左槽位正延迟展开，实时宽度不可信） */
+      const flew = duration > 0 && !compactRef.current;
+      const target = flew ? ghBrandBerth.current ?? live : live;
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (duration <= 0 || reduceMotion || ghCur.current.x < 0) {
-        if (target) paint(target.x, target.y, target.s);
-        else hide();
+        if (target) {
+          // 稳态（无过渡在跑）的展开位才可信 → 更新缓存
+          if (!compactRef.current && duration <= 0) ghBrandBerth.current = target;
+          paint(target.x, target.y, target.s);
+        } else {
+          hide();
+        }
         setGhReady(true);
         return;
       }
@@ -126,11 +153,13 @@ export default function Nav({ lang }: { lang: Lang }) {
         return;
       }
       const start = { ...ghCur.current };
+      const fixed = compactRef.current ? null : target; // 展开：固定目标；收紧：逐帧重测
       const t0 = performance.now();
       const step = (now: number) => {
         const p = Math.min(1, (now - t0) / duration);
-        const e = 1 - Math.pow(1 - p, 3); // easeOutCubic：起动略快，末端追上槽位
-        const cur = ghMeasure();
+        // easeInOutCubic：前段缓住让标题先擦除、后段并入落位，与 CSS 编排同拍收尾
+        const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+        const cur = fixed ?? ghFlightTarget();
         if (!cur) {
           hide();
           return;
@@ -141,7 +170,7 @@ export default function Nav({ lang }: { lang: Lang }) {
       ghRaf.current = requestAnimationFrame(step);
       setGhReady(true);
     },
-    [ghMeasure],
+    [ghMeasureLive, ghFlightTarget],
   );
 
   /* 挂载：浮层直接就位（同一帧内与品牌槽位静态图标交棒，无闪跳） */
@@ -150,16 +179,16 @@ export default function Nav({ lang }: { lang: Lang }) {
     return () => cancelAnimationFrame(ghRaf.current);
   }, [ghAnimate]);
 
-  /* 收紧状态切换：浮层平滑飞向新槽位（挂载首轮已由上面 effect 直接就位） */
+  /* 收紧状态切换:浮层按 0.75s 编排飞向新位置（挂载首轮已由上面 effect 直接就位） */
   useIsoLayoutEffect(() => {
     if (ghFirstRun.current) {
       ghFirstRun.current = false;
       return;
     }
-    ghAnimate(320);
+    ghAnimate(GH_FLIGHT_MS);
   }, [compact, ghAnimate]);
 
-  /* 窗口尺寸变化：槽位整体跳变，直接就位不补间 */
+  /* 窗口尺寸变化：槽位整体跳变，直接就位不补间（展开态顺带刷新展开位缓存） */
   useEffect(() => {
     const onResize = () => ghAnimate(0);
     window.addEventListener("resize", onResize);
@@ -247,7 +276,7 @@ export default function Nav({ lang }: { lang: Lang }) {
   const iconSvg = "h-4 w-4";
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className={`sticky top-0 z-50 ${compact ? "nav-is-compact" : ""}`}>
       {/* 全宽底衬：纸色 + 毛玻璃；不放 hairline——会被卡片的毛玻璃糊掉（只在两侧残留） */}
       <div
         aria-hidden
@@ -268,7 +297,7 @@ export default function Nav({ lang }: { lang: Lang }) {
         >
           <Link
             href={homeHref}
-            className={`shrink-0 font-serif font-bold tracking-wide transition-all duration-300 hover:text-accent ${
+            className={`nav-brand shrink-0 font-serif font-bold tracking-wide hover:text-accent ${
               compact ? "text-lg" : "text-2xl"
             }`}
           >
@@ -276,7 +305,7 @@ export default function Nav({ lang }: { lang: Lang }) {
           </Link>
 
           {/* GitHub 浮层图标：单一节点（绝对定位），JS 逐帧设定 位置+缩放。
-              展开态停靠品牌右侧（24px），滚动收紧后平滑缩小并移到小标题之后（16px） */}
+              展开态停靠品牌右侧（24px），收紧后平滑缩小并移到小标题之后（16px） */}
           <div ref={ghLayerRef} className="pointer-events-none absolute inset-0 z-20">
             <Link
               ref={ghFloatRef}
@@ -293,37 +322,33 @@ export default function Nav({ lang }: { lang: Lang }) {
             </Link>
           </div>
 
-          {/* 槽位 1（展开态）：品牌右侧 24px 占位 + 静态图标兜底（SSR 首帧 / no-JS；浮层就位后隐去） */}
-          {!compact ? (
-            <Link
-              ref={ghBrandSlotRef}
-              href={SITE.links.github}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="GitHub"
-              title="GitHub"
-              className={`ml-2 inline-flex h-6 w-6 shrink-0 text-ink transition-colors hover:text-accent ${
-                ghReady ? "invisible" : ""
-              }`}
-            >
-              <GitHubIcon className="h-full w-full" />
-            </Link>
-          ) : null}
+          {/* 槽位 1（品牌右侧）：常驻占位——宽度按编排收放（收紧即时 / 展开延迟到标题擦除后，
+              布局位移只发生在标题不可见的时段）；内含静态图标兜底 SSR 首帧 / no-JS，
+              浮层就位后隐去（invisible），同时 min-w-0 + overflow-hidden 保证宽度可收为 0 */}
+          <Link
+            ref={ghBrandSlotRef}
+            href={SITE.links.github}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="GitHub"
+            title="GitHub"
+            className={`nav-gh-slot inline-flex h-6 min-w-0 shrink-0 items-center text-ink transition-colors hover:text-accent ${
+              ghReady ? "invisible" : ""
+            }`}
+          >
+            <GitHubIcon className="h-6 w-6" />
+          </Link>
 
           {/* 中部信息区（仅收紧后浮现，窄屏隐藏）：当前页/文章标题 + 阅读进度。
               收紧态 GitHub 图标停靠标题文字之后——此处常驻 16px 槽位，小标题截断版式与既有约定一致 */}
-          <div
-            aria-hidden={!compact}
-            className={`hidden min-w-0 flex-1 px-2 transition-opacity duration-300 md:block ${
-              compact ? "opacity-100" : "opacity-0"
-            }`}
-          >
+          <div aria-hidden={!compact} className="hidden min-w-0 flex-1 px-2 md:block">
             <div className="flex items-center gap-1.5">
-              <p className="min-w-0 truncate font-serif text-sm font-semibold">{info.title}</p>
+              {/* 标题：擦除式显隐（字符从左向右逐个呈现 / 从右向左逐个消失），见 globals.css */}
+              <p className="nav-gh-title min-w-0 truncate font-serif text-sm font-semibold">{info.title}</p>
               <span ref={ghMidSlotRef} className="h-4 w-4 shrink-0" aria-hidden />
             </div>
             {info.pct !== null ? (
-              <p className="font-mono text-[11px] leading-tight text-muted">
+              <p className="nav-gh-sub font-mono text-[11px] leading-tight text-muted">
                 {Math.round(info.pct * 100)}%
               </p>
             ) : null}

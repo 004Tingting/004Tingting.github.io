@@ -243,64 +243,62 @@ body {
   }
 }
 
-/* ---------- 点阵屏（首页侧栏 Token 卡，DotMatrix.tsx） ----------
-   单词 ⇄ 数字定时交换：每个亮点按列相位错峰（内联 animation-delay），
-   切换时旧图形熄灭、新图形亮起、两股扫掠同时进行——点阵小点在屏内「重组」。
-   周期 10s：前 5s 单词、后 5s 数字（数字相位 = +5s，与 HALF_CYCLE_MS 对应）。
-   dm-both = 两图形共用亮点，常亮（重组时的视觉锚点）；dm-off = 未点亮底点。
-   纯 CSS 动画：no-JS 照常运转；prefers-reduced-motion 时定格显示数字。 */
-.dm-both {
-  fill: var(--color-ink);
+/* ---------- 导航收紧/展开编排（Nav.tsx，2026-10-15 二稿，总时长 0.75s） ----------
+   收紧（向下滚动）：
+     · 0–0.3s 品牌字号收小、品牌槽位宽度即时收起（此时标题被裁剪不可见，位移不可见）；
+     · 0.3–0.75s 标题擦除式呈现——clip 右缘从左向右扫过，字符逐个出现；
+     · 0–0.75s 图标缓动右移缩小（JS，GH_FLIGHT_MS），与标题呈现同拍收尾。
+   展开（回顶）：
+     · 0–0.3s 标题从右向左逐个消失（clip 右缘向左回退）；
+     · 0.3–0.6s 品牌与槽位延迟展开（标题已不可见，布局位移全在不可见时段）；
+     · 0–0.75s 图标缓动左移放大回位（固定目标 = 展开位缓存）。
+   注意：transition 取目标状态的声明——收/放用不同延迟。 */
+.nav-brand {
+  transition:
+    font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+    color 0.2s ease;
 }
-.dm-off {
-  fill: var(--color-ink);
-  opacity: 0.13;
+.nav-is-compact .nav-brand {
+  transition:
+    font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.2s ease;
 }
-.dm-word,
-.dm-num {
-  fill: var(--color-ink);
+.nav-gh-slot {
+  width: 1.5rem; /* 24px 图标槽位 */
+  margin-left: 0.5rem; /* ml-2 */
+  overflow: hidden;
+  transition:
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+    margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+}
+.nav-is-compact .nav-gh-slot {
+  width: 0;
+  margin-left: -1rem; /* -16px：抵消多出的 flex 间距，收紧态标题落位与既有版式一致 */
+  transition:
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-gh-title {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-is-compact .nav-gh-title {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+}
+.nav-gh-sub {
   opacity: 0;
-  animation: dm-swap 10s linear infinite;
+  transition: opacity 0.3s ease;
 }
-@keyframes dm-swap {
-  /* 到位前带两下闪烁的「点亮」→ 长亮 → 带动效的「熄灭」 */
-  0% {
-    opacity: 0;
-  }
-  1% {
-    opacity: 0.85;
-  }
-  2.2% {
-    opacity: 0.25;
-  }
-  3.5% {
-    opacity: 1;
-  }
-  46% {
-    opacity: 1;
-  }
-  47.2% {
-    opacity: 0.15;
-  }
-  48.4% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.2;
-  }
-  53% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
+.nav-is-compact .nav-gh-sub {
+  opacity: 1;
+  transition: opacity 0.3s ease 0.3s;
 }
 @media (prefers-reduced-motion: reduce) {
-  .dm-word,
-  .dm-num {
-    animation: none;
-  }
-  .dm-num {
-    opacity: 1;
+  .nav-brand,
+  .nav-gh-slot,
+  .nav-gh-title,
+  .nav-gh-sub {
+    transition: none;
   }
 }
