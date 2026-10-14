@@ -245,14 +245,14 @@ body {
 
 /* ---------- 导航收紧/展开编排（Nav.tsx，2026-10-15 五稿，总时长 0.25s） ----------
    隐喻（Ting）：GitHub 图标「被变换成」小标题——图标原地溶解消失、小标题随后在原地
-   擦除式浮现；回顶反演：小标题消散、图标原位浮现。全程无飞行，两元素各就各位，
-   纯透明度 / 缩放 / 擦除 + 布局收合的编排。
+   淡入浮现；回顶反演：小标题淡出、图标原位浮现。全程无飞行，两元素各就各位，
+   纯透明度 / 缩放 + 布局收合的编排（小标题显隐用「一开始」的原始淡入淡出，不做擦除）。
    收紧（向下滚动）：
      · 0–0.10s 图标原地淡出并收缩（溶解）；
      · 0.10–0.18s 品牌字号与图标占位收合（图标已不可见，位移不可见）；
-     · 0.18–0.25s 小标题擦除式呈现（clip 右缘从左向右扫过，字符逐个出现）。
+     · 0.18–0.25s 小标题原地淡入。
    展开（回顶）：
-     · 0–0.10s 小标题从右向左逐个消失；
+     · 0–0.10s 小标题原地淡出；
      · 0.10–0.18s 品牌字号与图标占位展开（标题已不可见）；
      · 0.18–0.25s 图标原地浮现（淡入 + 回正缩放）。
    卡片 chrome（Nav 内联 duration-[250ms]）与整套编排同拍。 */
@@ -299,27 +299,18 @@ body {
     visibility 0s linear 0.1s,
     color 0.2s ease;
 }
-.nav-gh-title {
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.nav-is-compact .nav-gh-title {
-  clip-path: inset(0 0 0 0);
-  transition: clip-path 0.07s cubic-bezier(0.4, 0, 0.2, 1) 0.18s;
-}
-.nav-gh-sub {
+.nav-gh-info {
   opacity: 0;
   transition: opacity 0.1s ease;
 }
-.nav-is-compact .nav-gh-sub {
+.nav-is-compact .nav-gh-info {
   opacity: 1;
   transition: opacity 0.07s ease 0.18s;
 }
 @media (prefers-reduced-motion: reduce) {
   .nav-brand,
   .nav-gh-icon,
-  .nav-gh-title,
-  .nav-gh-sub {
+  .nav-gh-info {
     transition: none;
   }
 }

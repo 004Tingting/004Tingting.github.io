@@ -41,9 +41,9 @@ function GitHubIcon({ className }: { className?: string }) {
  * 收紧后中部浮现当前页/文章标题（文章页附底部进度条）。
  *
  * **收紧/展开编排（0.25s，2026-10-15 五稿——Ting：GitHub 图标「被变换成」小标题）**：
- * 图标不再飞行——图标与标题各居常位，收紧时图标原地溶解、小标题随后在原地擦除式浮现；
- * 回顶反演：小标题消散、图标原位浮现。全部由 globals.css 的 nav-* 规则驱动
- * （透明度 / 缩放 / clip 擦除 + 占位收合的时序编排，方向性延迟），无 JS 逐帧动画；
+ * 图标不再飞行——图标与标题各居常位，收紧时图标原地溶解、小标题随后在原地淡入浮现；
+ * 回顶反演：小标题淡出、图标原位浮现。全部由 globals.css 的 nav-* 规则驱动
+ * （透明度 / 缩放 + 占位收合的时序编排，方向性延迟），无 JS 逐帧动画；
  * no-JS 下脚本不触发收紧，图标正常常驻。
  */
 export default function Nav({ lang }: { lang: Lang }) {
@@ -171,13 +171,13 @@ export default function Nav({ lang }: { lang: Lang }) {
             <GitHubIcon className="h-6 w-6" />
           </Link>
 
-          {/* 中部信息区（仅收紧后浮现，窄屏隐藏）：当前页/文章标题 + 阅读进度 */}
-          <div aria-hidden={!compact} className="hidden min-w-0 flex-1 px-2 md:block">
-            {/* 标题：擦除式显隐（字符从左向右逐个呈现 / 从右向左逐个消失），见 globals.css；
-                w-fit 让元素宽度贴合文宽——clip 百分比才会映射到文字本身（整宽块会让擦除被稀释） */}
-            <p className="nav-gh-title w-fit max-w-full truncate font-serif text-sm font-semibold">{info.title}</p>
+          {/* 中部信息区（仅收紧后浮现，窄屏隐藏）：当前页/文章标题 + 阅读进度。
+              显隐 = 整体淡入淡出（「一开始」的原始做法；Ting 2026-10-15：变换隐喻下不再擦除），
+              时序见 globals.css 的 nav-gh-info（收：0.18–0.25s 淡入；放：0–0.1s 淡出） */}
+          <div aria-hidden={!compact} className="nav-gh-info hidden min-w-0 flex-1 px-2 md:block">
+            <p className="truncate font-serif text-sm font-semibold">{info.title}</p>
             {info.pct !== null ? (
-              <p className="nav-gh-sub font-mono text-[11px] leading-tight text-muted">
+              <p className="font-mono text-[11px] leading-tight text-muted">
                 {Math.round(info.pct * 100)}%
               </p>
             ) : null}
