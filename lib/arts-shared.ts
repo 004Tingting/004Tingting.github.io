@@ -365,6 +365,19 @@ export function fmtHubTime(iso: string, lang: Lang): string {
   return `${new Date(d.getTime() + off * 60_000).toISOString().slice(11, 16)} ${off === -240 ? "EDT" : "EST"}`;
 }
 
+const MONTHS_EN_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** hub 时间戳 → 日期（粒度到日）：zh = 北京时间「2026年10月14日」，en = 美国东部「Oct 14, 2026」 */
+export function fmtHubDate(iso: string, lang: Lang): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso.slice(0, 10);
+  const shifted = new Date(d.getTime() + (lang === "zh" ? 8 * 3_600_000 : usEasternOffsetMin(d) * 60_000));
+  const y = shifted.getUTCFullYear();
+  const m = shifted.getUTCMonth() + 1;
+  const day = shifted.getUTCDate();
+  return lang === "zh" ? `${y}年${m}月${day}日` : `${MONTHS_EN_SHORT[m - 1]} ${day}, ${y}`;
+}
+
 /** token 精确显示（tooltip / 完整区用） */
 export function fmtTokensFull(n: number): string {
   return Number.isFinite(n) ? Math.round(n).toLocaleString("en-US") : "—";

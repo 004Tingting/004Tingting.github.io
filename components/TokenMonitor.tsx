@@ -28,6 +28,7 @@ import DotMatrix from "@/components/DotMatrix";
 import {
   fmtCost,
   fmtDayTick,
+  fmtHubDate,
   fmtHubTime,
   fmtMsHours,
   fmtTokensCompact,
@@ -37,8 +38,10 @@ import {
   type TokenPeriod,
 } from "@/lib/arts-shared";
 
-/** 首页侧栏点阵屏的单词（代表「上进」——Ting 2026-10-15 采用推荐）。换词只改这一处，建议 4～7 个字母 */
+/** 首页侧栏点阵屏的轮换内容：单词（代表「上进」，Ting 2026-10-15 采用推荐）、标签署名。
+    换内容只改这里（渲染自动大写），建议每组 ≤7 字符 */
 const DOT_MATRIX_WORD = "STRIVE";
+const DOT_MATRIX_TAG = "04Ting.";
 
 /* ---------- 共享单例轮询器 ---------- */
 
@@ -310,29 +313,28 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
 
   /* ---------- 侧栏紧凑卡 ---------- */
   if (variant === "aside") {
-    /* 主显示（2026-10-15）：点阵屏在单词与「累计 tokens」之间定时重组交换；
-       不参与骨架——动画即时可见，数字随轮询静默更新（点阵逐帧本来就在变） */
+    /* 主显示（2026-10-15 二稿）：点阵屏在 单词 / 累计 tokens / 标签 三组间定时重组轮换；
+       不参与骨架——动画即时可见，数字随轮询静默更新（点阵逐帧本来就在变）。
+       状态行只留一行、粒度到日：●/○ hub 在线/离线 · 更新于 YYYY年M月D日 */
     const allTime = periods?.allTime ?? null;
     const matrixValue = allTime ? fmtTokensCompact(allTime.totalTokens) : "0";
     const matrixTitle = allTime ? `${t.allTime} ${fmtTokensFull(allTime.totalTokens)} tokens` : undefined;
+    const asideStatus = `${lastOk === false ? t.offline : t.online} · ${t.updatedAt} ${
+      updatedAt ? fmtHubDate(updatedAt, lang) : "—"
+    }`;
     return (
       <section>
         <p className="font-mono text-xs tracking-widest text-muted">
           <span className="text-accent">·</span> {t.kicker}
         </p>
         <DotMatrix
-          word={DOT_MATRIX_WORD}
-          value={matrixValue}
+          items={[DOT_MATRIX_WORD, matrixValue, DOT_MATRIX_TAG]}
           title={matrixTitle}
           className="mt-2 block w-full"
         />
-        <dl className={`mt-2.5 space-y-1.5 ${pendingCls ?? ""}`}>
-          <AsideRow lang={lang} t={t} label={t.today} period={periods?.today ?? null} live={live} lead />
-          <AsideRow lang={lang} t={t} label={t.month} period={periods?.month ?? null} live={live} />
-        </dl>
         <p className={`mt-2 flex items-center gap-1.5 font-mono text-[11px] leading-snug text-muted ${pendingCls ?? ""}`}>
           {dot}
-          {live(<span className="min-w-0">{status}</span>)}
+          {live(<span className="min-w-0">{asideStatus}</span>)}
         </p>
         <NoScriptFallback />
       </section>
@@ -498,45 +500,6 @@ function NoScriptFallback() {
 
 type RowT = Record<keyof typeof dic.zh.tokenMonitor, string>;
 type LiveFn = (node: ReactNode) => ReactNode;
-
-function AsideRow({
-  lang,
-  t,
-  label,
-  period,
-  live,
-  lead = false,
-}: {
-  lang: Lang;
-  t: RowT;
-  label: string;
-  period: TokenPeriod | null;
-  live: LiveFn;
-  lead?: boolean;
-}) {
-  return (
-    <div className="flex items-baseline justify-between gap-3">
-      <dt className="shrink-0 font-mono text-xs text-muted">{label}</dt>
-      <dd
-        className="font-mono text-sm tabular-nums"
-        title={period ? fmtTokensFull(period.totalTokens) : undefined}
-      >
-        {live(
-          period ? (
-            <>
-              <span className={lead ? "font-semibold" : undefined}>{fmtTokensCompact(period.totalTokens)}</span>
-              <span className="ml-1.5 font-mono text-[11px] font-normal text-muted">
-                {fmtCost(period.costUsd, lang)}
-              </span>
-            </>
-          ) : (
-            <span className="text-muted">—</span>
-          ),
-        )}
-      </dd>
-    </div>
-  );
-}
 
 /** 关于页栅格项（与「站点数据」同款式：衬线大数字 + 等宽标签） */
 function GridPeriod({

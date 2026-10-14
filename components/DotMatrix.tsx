@@ -1,11 +1,12 @@
 /**
- * 点阵屏（LED 矩阵风，零依赖纯 SVG + CSS 动画，2026-10-15）。
+ * 点阵屏（LED 矩阵风，零依赖纯 SVG + CSS 动画，2026-10-15；同日二稿改多组轮换）。
  *
- * 在单词与数字两组 5×7 字模之间定时交换：每个「亮点」按列相位错峰（内联 animation-delay），
- * 切换瞬间旧图形的点熄灭、新图形的点亮起、两个扫掠同时进行——读起来就是点阵小点在屏内重组。
- * 两图形共用的格位（dm-both）常亮，作为重组时的视觉锚点；未点亮的格位留淡色底点（dm-off）。
- * 动画全部在 CSS（app/globals.css 的 dm-* 规则，周期 10s 与 HALF_CYCLE_MS 对应）：
- * no-JS 下照常运转；prefers-reduced-motion 时定格显示数字。
+ * 在若干组 5×7 字模间定时轮换（当前：STRIVE → 累计 tokens → 04TING.，每组 5s）：
+ * 每个「亮点」按组相位（+5s）与列相位（+22ms）错峰，切换时旧组熄灭、新组亮起、
+ * 两股扫掠同时进行——点阵小点在屏内「重组」。跨组共用的格位叠加多圈，各自按本组相位亮灭。
+ *
+ * 动画全部在 CSS（本组件注入 <style>：@keyframes 按组数生成 + .dm-item 规则），
+ * no-JS 照常运转（SSR 即含 style）；prefers-reduced-motion 时定格显示 primary 组（数值）。
  */
 import type { ReactNode } from "react";
 
@@ -56,10 +57,10 @@ const COLS_PER_CHAR = 5;
 const CHAR_GAP = 1; // 字符间空列
 const PITCH = 6.5; // 单格边长（viewBox 单位）
 const DOT_R = 2.0;
-/** 每列递增的相位延迟（ms）：重组呈从左到右的扫掠 */
+/** 列相位延迟（ms）：重组扫掠从左到右 */
 const COL_STEP_MS = 22;
-/** 交换半周期（ms）——与 globals.css 的 dm-swap 动画 10s 周期对应（数字相位 +50%） */
-const HALF_CYCLE_MS = 5000;
+/** 每组显示时长（ms）——注入的动画周期 = 组数 × ITEM_MS */
+const ITEM_MS = 5000;
 
 /** 文本 → 点亮格位集合（cell = col * ROWS + row；在 cols 宽度内水平居中） */
 function litCells(text: string, cols: number): Set<number> {
@@ -82,58 +83,77 @@ function litCells(text: string, cols: number): Set<number> {
 }
 
 export default function DotMatrix({
-  word,
-  value,
+  items,
+  primary = 1,
   title,
   className,
 }: {
-  /** 交替显示的单词（如 STRIVE） */
-  word: string;
-  /** 交替显示的数字串（如 6.63B；宽度可在屏幕上与单词不同，自动居中） */
-  value: string;
-  /** 悬停提示（如「累计 6,632,213,267 tokens」） */
+  /** 轮换显示的内容（渲染自动大写；建议 ≤7 字符，超长会整体缩小） */
+  items: string[];
+  /** prefers-reduced-motion 时定格显示的组下标（默认第 2 组，即数值） */
+  primary?: number;
+  /** 悬停提示（如「累计 6,623,213,267 tokens」） */
   title?: string;
   className?: string;
 }) {
-  const cols = Math.max(COLS_PER_CHAR * 2, 6 * word.length - 1, 6 * value.length - 1);
-  const inWord = litCells(word, cols);
-  const inNum = litCells(value, cols);
+  const list = items.length > 0 ? items : [""];
+  const n = list.length;
+  const cols = Math.max(COLS_PER_CHAR * 2, ...list.map((s) => (COLS_PER_CHAR + CHAR_GAP) * s.length - CHAR_GAP));
+  const cellSets = list.map((s) => litCells(s, cols));
+
+  /* 注入动画：@keyframes 按组数生成（每组占周期 1/n；组末「带闪熄灭」、组首「带闪点亮」）
+     + .dm-item / .dm-both / .dm-off / reduced-motion 规则（一处定义，随 SSR 输出）。 */
+  const seg = 100 / n;
+  const css = `@keyframes dm-swap {
+  0% { opacity: 0; }
+  0.7% { opacity: 0.85; }
+  1.5% { opacity: 0.25; }
+  2.4% { opacity: 1; }
+  ${(seg - 3.4).toFixed(1)}% { opacity: 1; }
+  ${(seg - 2.4).toFixed(1)}% { opacity: 0.15; }
+  ${(seg - 1.5).toFixed(1)}% { opacity: 1; }
+  ${(seg - 0.2).toFixed(1)}% { opacity: 0.2; }
+  ${(seg + 0.6).toFixed(1)}% { opacity: 0; }
+  97.6% { opacity: 0; }
+  98.4% { opacity: 0.85; }
+  99.2% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+.dm-item { fill: var(--color-ink); opacity: 0; animation: dm-swap ${n * ITEM_MS}ms linear infinite; }
+.dm-both { fill: var(--color-ink); }
+.dm-off { fill: var(--color-ink); opacity: 0.13; }
+@media (prefers-reduced-motion: reduce) {
+  .dm-item { animation: none; }
+  .dm-primary { opacity: 1; }
+}`;
 
   const dots: ReactNode[] = [];
   for (let c = 0; c < cols; c++) {
     for (let r = 0; r < ROWS; r++) {
-      const key = c * ROWS + r;
-      const onWord = inWord.has(key);
-      const onNum = inNum.has(key);
+      const cell = c * ROWS + r;
       const cx = (c + 0.5) * PITCH;
       const cy = (r + 0.5) * PITCH;
-      if (onWord && onNum) {
-        // 两图形共用 → 常亮
-        dots.push(<circle key={key} cx={cx} cy={cy} r={DOT_R} className="dm-both" />);
-      } else if (onWord) {
-        dots.push(
-          <circle
-            key={key}
-            cx={cx}
-            cy={cy}
-            r={DOT_R}
-            className="dm-word"
-            style={{ animationDelay: `${c * COL_STEP_MS}ms` }}
-          />,
-        );
-      } else if (onNum) {
-        dots.push(
-          <circle
-            key={key}
-            cx={cx}
-            cy={cy}
-            r={DOT_R}
-            className="dm-num"
-            style={{ animationDelay: `${c * COL_STEP_MS + HALF_CYCLE_MS}ms` }}
-          />,
-        );
+      const owners: number[] = [];
+      for (let k = 0; k < n; k++) if (cellSets[k].has(cell)) owners.push(k);
+      if (owners.length === 0) {
+        // 全组都不含 → 底点（屏质感）
+        dots.push(<circle key={`o${cell}`} cx={cx} cy={cy} r={DOT_R} className="dm-off" />);
+      } else if (owners.length === n) {
+        // 全组共用 → 常亮锚点
+        dots.push(<circle key={`b${cell}`} cx={cx} cy={cy} r={DOT_R} className="dm-both" />);
       } else {
-        dots.push(<circle key={key} cx={cx} cy={cy} r={DOT_R} className="dm-off" />);
+        for (const k of owners) {
+          dots.push(
+            <circle
+              key={`i${cell}-${k}`}
+              cx={cx}
+              cy={cy}
+              r={DOT_R}
+              className={`dm-item dm-i${k}${k === primary ? " dm-primary" : ""}`}
+              style={{ animationDelay: `${k * ITEM_MS + c * COL_STEP_MS}ms` }}
+            />,
+          );
+        }
       }
     }
   }
@@ -144,8 +164,9 @@ export default function DotMatrix({
       className={className}
       style={{ height: "auto" }}
       role="img"
-      aria-label={`${word} / ${value}`}
+      aria-label={list.join(" / ")}
     >
+      <style>{css}</style>
       {title ? <title>{title}</title> : null}
       {dots}
     </svg>

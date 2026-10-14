@@ -144,7 +144,7 @@ export const zh = {
   },
   /* Token Monitor：hub 多端 AI 工具用量（关于页摘要栅格 + 首页侧栏紧凑卡 + 看板明细页） */
   tokenMonitor: {
-    kicker: "TOKEN 用量",
+    kicker: "TOKEN 总用量",
     intro: "各处的 AI 工具用量上报同一个 hub，聚合后在此取数；今日、本月、累计均为多端合计，不再各算各账。",
     today: "今日",
     month: "本月",
@@ -328,7 +328,7 @@ export const en = {
   },
   /* Token Monitor: multi-device AI tool usage from one hub (About summary grid + homepage card + stats detail page) */
   tokenMonitor: {
-    kicker: "TOKEN USAGE",
+    kicker: "TOTAL TOKEN USAGE",
     intro: "Token usage from the AI tools on both machines, reported to one hub and aggregated here. Today, this month and all-time are combined totals.",
     today: "Today",
     month: "This month",
