@@ -243,67 +243,81 @@ body {
   }
 }
 
-/* ---------- 导航收紧/展开编排（Nav.tsx，2026-10-15 二稿，总时长 0.75s） ----------
+/* ---------- 导航收紧/展开编排（Nav.tsx，2026-10-15 五稿，总时长 0.25s） ----------
+   隐喻（Ting）：GitHub 图标「被变换成」小标题——图标原地溶解消失、小标题随后在原地
+   擦除式浮现；回顶反演：小标题消散、图标原位浮现。全程无飞行，两元素各就各位，
+   纯透明度 / 缩放 / 擦除 + 布局收合的编排。
    收紧（向下滚动）：
-     · 0–0.3s 品牌字号收小、品牌槽位宽度即时收起（此时标题被裁剪不可见，位移不可见）；
-     · 0.3–0.75s 标题擦除式呈现——clip 右缘从左向右扫过，字符逐个出现；
-     · 0–0.75s 图标缓动右移缩小（JS，GH_FLIGHT_MS），与标题呈现同拍收尾。
+     · 0–0.10s 图标原地淡出并收缩（溶解）；
+     · 0.10–0.18s 品牌字号与图标占位收合（图标已不可见，位移不可见）；
+     · 0.18–0.25s 小标题擦除式呈现（clip 右缘从左向右扫过，字符逐个出现）。
    展开（回顶）：
-     · 0–0.3s 标题从右向左逐个消失（clip 右缘向左回退）；
-     · 0.3–0.6s 品牌与槽位延迟展开（标题已不可见，布局位移全在不可见时段）；
-     · 0–0.75s 图标缓动左移放大回位（固定目标 = 展开位缓存）。
-   注意：transition 取目标状态的声明——收/放用不同延迟。 */
+     · 0–0.10s 小标题从右向左逐个消失；
+     · 0.10–0.18s 品牌字号与图标占位展开（标题已不可见）；
+     · 0.18–0.25s 图标原地浮现（淡入 + 回正缩放）。
+   卡片 chrome（Nav 内联 duration-[250ms]）与整套编排同拍。 */
 .nav-brand {
   /* 固定 px 行高（与 text-2xl 原生一致）：Tailwind v4 字号类的行高是比例值，切换类瞬间
      会按「旧字号 × 新比例」计算（32 → 1.556×24 = 37.3 → 28），卡片被瞬间撑高 ±5px、
      内容中心随之下跳（cdp-probe8 实测 2.7px）——固定 px 并纳入同一套过渡后消除 */
   line-height: 2rem;
   transition:
-    font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
-    line-height 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+    font-size 0.08s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
+    line-height 0.08s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
     color 0.2s ease;
 }
 .nav-is-compact .nav-brand {
   line-height: 1.75rem; /* 与 text-lg 原生一致 */
+}
+.nav-gh-icon {
+  width: 1.5rem;
+  margin-left: 0.5rem; /* ml-2 */
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+  /* 展开方向（目标态声明）：标题先擦除（0–0.1s）→ 占位展开（0.1–0.18s）→ 图标 0.18–0.25s 浮现 */
   transition:
-    font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    line-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.08s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
+    margin-left 0.08s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
+    opacity 0.07s ease 0.18s,
+    transform 0.07s cubic-bezier(0.4, 0, 0.2, 1) 0.18s,
+    visibility 0s linear 0.18s,
     color 0.2s ease;
 }
-.nav-gh-slot {
-  width: 1.5rem; /* 24px 图标槽位 */
-  margin-left: 0.5rem; /* ml-2 */
-  overflow: hidden;
-  transition:
-    width 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
-    margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
-}
-.nav-is-compact .nav-gh-slot {
+.nav-is-compact .nav-gh-icon {
   width: 0;
   margin-left: -1rem; /* -16px：抵消多出的 flex 间距，收紧态标题落位与既有版式一致 */
+  opacity: 0;
+  transform: scale(0.72);
+  visibility: hidden;
+  /* 收紧方向：图标先溶解（0–0.1s）→ 占位再收合（0.1–0.18s，此时不可见） */
   transition:
-    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width 0.08s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
+    margin-left 0.08s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
+    opacity 0.1s ease,
+    transform 0.1s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 0.1s,
+    color 0.2s ease;
 }
 .nav-gh-title {
   clip-path: inset(0 100% 0 0);
-  transition: clip-path 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: clip-path 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .nav-is-compact .nav-gh-title {
   clip-path: inset(0 0 0 0);
-  transition: clip-path 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+  transition: clip-path 0.07s cubic-bezier(0.4, 0, 0.2, 1) 0.18s;
 }
 .nav-gh-sub {
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.1s ease;
 }
 .nav-is-compact .nav-gh-sub {
   opacity: 1;
-  transition: opacity 0.3s ease 0.3s;
+  transition: opacity 0.07s ease 0.18s;
 }
 @media (prefers-reduced-motion: reduce) {
   .nav-brand,
-  .nav-gh-slot,
+  .nav-gh-icon,
   .nav-gh-title,
   .nav-gh-sub {
     transition: none;
