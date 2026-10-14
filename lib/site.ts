@@ -56,6 +56,24 @@ export const TOKEN_MONITOR = {
   hub: "https://token-monitor-hub.saikouting004.workers.dev",
   /** 前端轮询间隔（毫秒）——服务端缓存 15s；Ting 2026-10-14 定 90s：更温和，数据延迟 ≤90s 可接受 */
   pollMs: 90_000,
+  /** hub 拉取超时（毫秒）——Ting 2026-10-14 定 2s：超时即落快照，不让访客干等 */
+  fetchTimeoutMs: 2_000,
+  /**
+   * 独立快照仓库（004Tingting/token-monitor-data）：GitHub Actions 每 15 分钟从 hub 公开端点
+   * 拉一次写 token-monitor.json。站点构建优先读它（api.github.com，构建机比 workers.dev 可达），
+   * 访客端在 hub 拉取失败时经国内 GitHub 代理读它（无缓存）——快照新鲜度不依赖站点重新发布。
+   */
+  dataRepo: {
+    owner: "004Tingting",
+    repo: "token-monitor-data",
+    file: "token-monitor.json",
+    /** 访客端读取通道：前两个为国内 GitHub 直通代理（无缓存 + CORS），jsDelivr 兜底（12h 缓存） */
+    proxySources: [
+      "https://gh-proxy.com/https://raw.githubusercontent.com/004Tingting/token-monitor-data/main/token-monitor.json",
+      "https://gh.llkk.cc/https://raw.githubusercontent.com/004Tingting/token-monitor-data/main/token-monitor.json",
+      "https://cdn.jsdelivr.net/gh/004Tingting/token-monitor-data@main/token-monitor.json",
+    ],
+  },
 } as const;
 
 /**

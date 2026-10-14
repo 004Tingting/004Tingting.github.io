@@ -153,6 +153,7 @@ export const zh = {
     online: "hub 在线",
     offline: "hub 离线",
     staleLive: "实时数据停更于",
+    staleRepo: "云端快照",
     staleSnapshot: "显示构建快照",
     updatedAt: "更新于",
     dailyLabel: "近 30 天",
@@ -176,7 +177,7 @@ export const zh = {
     detailTitle: "Token 用量明细",
     backToStats: "← 返回看板",
     footNote:
-      "数字为多端合计，每 90 秒从 hub 拉取（hub 不可达时显示最近一次成功的数据，并标注时间）；人民币金额按 1 美元 = 7.2 元折算（≈），仅供参考；时间按北京时间显示，英文页按美国东部时间显示。",
+      "数字为多端合计：先拉 hub（2 秒超时），拉不到依次退云端快照仓库（每 15 分钟自动刷新）、构建快照，各层均标注数据时间；人民币金额按 1 美元 = 7.2 元折算（≈），仅供参考；时间按北京时间显示，英文页按美国东部时间显示。",
   },
   footer: {
     colophon: "由 Next.js 构建 · 部署于 GitHub Pages",
@@ -336,6 +337,7 @@ export const en = {
     online: "hub online",
     offline: "hub offline",
     staleLive: "live data stalled at",
+    staleRepo: "cloud snapshot",
     staleSnapshot: "showing build snapshot",
     updatedAt: "Updated",
     dailyLabel: "Last 30 days",
@@ -359,7 +361,7 @@ export const en = {
     detailTitle: "Token Usage Details",
     backToStats: "← Back to stats",
     footNote:
-      "Combined across devices, refreshed from the hub every 90 seconds (when the hub is unreachable, the last successful figures are shown with their timestamp). Costs are in USD; the Chinese page shows an approximate RMB conversion at 7.2 CNY/USD. Times are shown in US Eastern (EDT/EST); the Chinese page uses Beijing time.",
+      "Combined across devices: the hub is polled first (2s timeout), then the cloud snapshot repo (auto-refreshed every 15 minutes), then the build snapshot — each tier is labeled with its data time. Costs are in USD; the Chinese page shows an approximate RMB conversion at 7.2 CNY/USD. Times are shown in US Eastern (EDT/EST); the Chinese page uses Beijing time.",
   },
   footer: {
     colophon: "Built with Next.js · Hosted on GitHub Pages",

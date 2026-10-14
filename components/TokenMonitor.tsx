@@ -7,16 +7,19 @@
  * 取数逻辑（Ting 2026-10-14 定：**先拉云端，拉不到再用离线快照**——避免先闪旧值再跳新值）：
  *   ① 首帧 + hydration：实时槽位一律显示骨架（tm-pending）；SSR HTML 里保留快照数字
  *      （opacity 0，不进视觉首帧；no-JS 经 <noscript> 样式恢复可见）
- *   ② 挂载即拉 hub 公开端点（10s 超时）：成功 → 显示实时值（hub 在线）；失败 → 显示构建快照
- *      （hub 离线 · 标注数据时间）；此后每 90s 轮询（Ting 2026-10-14 定，服务端缓存 15s，
- *      更温和），成功切实时、失败保留 last-good 不闪空
- *   ③ 静态图表（30 天柱状 / 日用量热力图 / 12 月累计折线 / 按模型）来自构建时合并数据，
- *      不参与轮询，首帧即出（日序列会随轮询的 30 天窗口增量更新）
+ *   ② 挂载即**并行**两路：hub 公开端点（**2s 超时**，Ting 定：超时即落快照，不干等）
+ *      + 独立快照仓库（三源 Promise.any，各 3s；gh-proxy / gh.llkk 无缓存，jsDelivr 兜底）
+ *   ③ 揭晓规则（全程最多一次跳转）：hub 成功 → 实时值；hub 失败 → 仓库快照（比 SSR 新，
+ *      15 分钟内）顶显示，仓库也没有 → SSR 构建快照；若此前拿到过实时值，失败时保留
+ *      last-good（比仓库快照更新），标签「实时数据停更于」
+ *   ④ 此后每 90s 轮询 hub（Ting 定；后台标签页暂停、切回立即刷新、in-flight 去重），
+ *      失败保留 last-good 不闪空；静态图表（30 天柱状 / 热力图 / 12 月累计 / 按模型）
+ *      来自构建时合并数据，首帧即出（日序列随轮询/快照的窗口增量更新）
  *
  * 共享单例轮询器：模块级订阅表 + 单 interval（多处挂载只有一份轮询）；无订阅者时停表。
  */
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { TOKEN_MONITOR } from "@/lib/site";
 import { dic, type Lang } from "@/lib/i18n";
@@ -47,11 +50,32 @@ type PollOk = {
 type PollResult = PollOk | { ok: false };
 type Subscriber = (r: PollResult) => void;
 
+/** 云端快照仓库的一条记录（normalizeSnapshot 的产物） */
+type RepoSnapshot = {
+  periods: Periods;
+  deviceCount: number | null;
+  fetchedAt: string;
+  daily: TokenDay[];
+};
+
 const subs = new Set<Subscriber>();
 let timer: ReturnType<typeof setInterval> | null = null;
 let inFlight: Promise<void> | null = null;
 
 const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+
+/** 首个成功的 Promise（Promise.any 的手写版，兼容旧浏览器；全部失败才 reject） */
+function firstSuccess<T>(promises: Promise<T>[]): Promise<T> {
+  return new Promise((resolve, reject) => {
+    let remaining = promises.length;
+    if (remaining === 0) return reject(new Error("no sources"));
+    for (const p of promises) {
+      p.then(resolve, () => {
+        if (--remaining === 0) reject(new Error("all sources failed"));
+      });
+    }
+  });
+}
 
 async function pollOnce(): Promise<void> {
   if (inFlight) return inFlight;
@@ -59,7 +83,7 @@ async function pollOnce(): Promise<void> {
     try {
       const res = await fetch(`${TOKEN_MONITOR.hub}/api/public/stats`, {
         cache: "no-store",
-        signal: AbortSignal.timeout(10_000),
+        signal: AbortSignal.timeout(TOKEN_MONITOR.fetchTimeoutMs),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const s = (await res.json()) as Record<string, unknown>;
@@ -92,6 +116,63 @@ async function pollOnce(): Promise<void> {
     }
   })();
   return inFlight;
+}
+
+/* ---------- 云端快照仓库（hub 拉不到时的第二级：比 SSR 快照新，且不依赖站点重新发布） ---------- */
+
+let repoSnap: RepoSnapshot | null = null;
+let repoAt = 0;
+let repoInFlight: Promise<RepoSnapshot | null> | null = null;
+const REPO_TTL_MS = 5 * 60 * 1000;
+
+/** 快照仓库文件 → RepoSnapshot（normalized 形状，refresh.mjs 写入） */
+function normalizeRepoSnapshot(raw: Record<string, unknown>): RepoSnapshot | null {
+  const p = raw.periods as Record<string, Record<string, unknown>> | undefined;
+  if (!p?.today) return null;
+  const period = (name: string): TokenPeriod => ({
+    totalTokens: num(p[name]?.totalTokens),
+    costUsd: num(p[name]?.costUsd),
+  });
+  const rawDaily: Record<string, unknown>[] = Array.isArray(raw.daily) ? raw.daily : [];
+  return {
+    periods: { today: period("today"), month: period("month"), allTime: period("allTime") },
+    deviceCount: typeof raw.deviceCount === "number" ? raw.deviceCount : null,
+    fetchedAt: String(raw.fetchedAt ?? ""),
+    daily: rawDaily.map((d) => ({
+      date: String(d.date ?? ""),
+      tokens: num(d.tokens),
+      cost: num(d.cost),
+      activeTimeMs: num(d.activeTimeMs),
+    })),
+  };
+}
+
+/** 拉快照仓库：5 分钟会话缓存 + in-flight 去重（hub 持续不可达时不会反复打代理） */
+function ensureRepoSnapshot(): Promise<RepoSnapshot | null> {
+  if (repoSnap && Date.now() - repoAt < REPO_TTL_MS) return Promise.resolve(repoSnap);
+  if (repoInFlight) return repoInFlight;
+  repoInFlight = (async () => {
+    try {
+      const raw = await firstSuccess(
+        TOKEN_MONITOR.dataRepo.proxySources.map(async (url) => {
+          const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(3_000) });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return (await res.json()) as Record<string, unknown>;
+        }),
+      );
+      const snap = normalizeRepoSnapshot(raw);
+      if (snap) {
+        repoSnap = snap;
+        repoAt = Date.now();
+      }
+      return snap;
+    } catch {
+      return null;
+    } finally {
+      repoInFlight = null;
+    }
+  })();
+  return repoInFlight;
 }
 
 function subscribe(fn: Subscriber): () => void {
@@ -132,40 +213,63 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
   const [deviceCount, setDeviceCount] = useState<number | null>(initial.deviceCount);
   const [updatedAt, setUpdatedAt] = useState<string | null>(initial.updatedAt);
   const [daily, setDaily] = useState<TokenDay[]>(initial.daily);
-  /** 首次轮询结果未回来 → 实时槽位显示骨架（云端优先，不先露离线旧值） */
+  /** 首次揭晓未定 → 实时槽位显示骨架（云端优先，不先露离线旧值） */
   const [pending, setPending] = useState(true);
-  /** 最近一次轮询是否成功；null = 还没结果 */
+  /** 最近一次 hub 轮询是否成功；null = 还没结果 */
   const [lastOk, setLastOk] = useState<boolean | null>(null);
-  /** 最近一次成功拿到实时数据的时刻（离线时说明数据停更点） */
+  /** 最近一次成功拿到实时数据的时刻（hub 失败时说明数据停更点） */
   const [liveAt, setLiveAt] = useState<string | null>(null);
+  /** 当前显示的是否为云端快照仓库的数据（hub 失败后的第二级） */
+  const [repoOk, setRepoOk] = useState(false);
+  const liveAtRef = useRef<string | null>(null);
 
-  useEffect(
-    () =>
-      subscribe((r) => {
-        setPending(false);
-        if (!r.ok) {
-          setLastOk(false);
-          return;
-        }
-        setLastOk(true);
-        if (r.periods) {
-          setPeriods(r.periods);
-          if (r.updatedAt) setLiveAt(r.updatedAt);
-        }
-        if (r.deviceCount !== null) setDeviceCount(r.deviceCount);
-        if (r.updatedAt) setUpdatedAt(r.updatedAt);
-        if (r.daily.length) {
-          setDaily((prev) => {
-            const map = new Map(prev.map((d) => [d.date, d]));
-            for (const d of r.daily) map.set(d.date, d);
-            return [...map.values()].sort((a, b) => a.date.localeCompare(b.date));
-          });
-        }
-      }),
+  /** 把一路数据（hub 实时 / 仓库快照）应用进状态 */
+  const applyData = useCallback(
+    (data: { periods: Periods | null; deviceCount: number | null; updatedAt: string | null; daily: TokenDay[] }) => {
+      if (data.periods) setPeriods(data.periods);
+      if (data.deviceCount !== null) setDeviceCount(data.deviceCount);
+      if (data.updatedAt) setUpdatedAt(data.updatedAt);
+      if (data.daily.length) {
+        setDaily((prev) => {
+          const map = new Map(prev.map((d) => [d.date, d]));
+          for (const d of data.daily) map.set(d.date, d);
+          return [...map.values()].sort((a, b) => a.date.localeCompare(b.date));
+        });
+      }
+    },
     [],
   );
 
-  /* 状态行：在线（实时）／离线（last-good：实时停更于 X 或 构建快照 X） */
+  useEffect(() => {
+    // 并行预热快照仓库：hub 2s 超时前它通常已就绪，失败路径微秒级取用
+    void ensureRepoSnapshot();
+    return subscribe((r) => {
+      if (r.ok) {
+        setLastOk(true);
+        setRepoOk(false);
+        if (r.updatedAt) {
+          liveAtRef.current = r.updatedAt;
+          setLiveAt(r.updatedAt);
+        }
+        applyData({ periods: r.periods, deviceCount: r.deviceCount, updatedAt: r.updatedAt, daily: r.daily });
+        setPending(false);
+        return;
+      }
+      setLastOk(false);
+      // hub 失败：已有实时值（last-good 更 fresh）→ 保留；否则用仓库快照顶显示；再没有 → SSR 快照
+      void ensureRepoSnapshot().then((snap) => {
+        if (!liveAtRef.current && snap) {
+          setRepoOk(true);
+          applyData({ periods: snap.periods, deviceCount: snap.deviceCount, updatedAt: snap.fetchedAt, daily: snap.daily });
+        } else {
+          setRepoOk(false);
+        }
+        setPending(false);
+      });
+    });
+  }, [applyData]);
+
+  /* 状态行：在线（实时）／离线（last-good：实时停更于 X ＞ 云端快照 X ＞ 构建快照 X） */
   const status = (() => {
     if (pending) return null;
     if (lastOk) {
@@ -178,6 +282,7 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
         .join(" · ");
     }
     if (liveAt) return `${t.offline} · ${t.staleLive} ${fmtHubTime(liveAt, lang)}`;
+    if (repoOk && updatedAt) return `${t.offline} · ${t.staleRepo} ${fmtHubTime(updatedAt, lang)}`;
     return `${t.offline} · ${t.staleSnapshot} ${
       initial.updatedAt ? fmtHubTime(initial.updatedAt, lang) : "—"
     }`;
