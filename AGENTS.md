@@ -112,17 +112,20 @@ bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → �
 | 本机启动 | Ting 侧**双击 `start-live.cmd`**（Node 装在 WorkBuddy 隔离目录，其终端里没有 `npm`） |
 | 为什么这么绕 | 浏览器无法直连网易云接口（无 CORS）、iTunes 等替代源对日韩文歌匹配不准、Last.fm 已停供封面；jsDelivr 的 purge 有 720 秒限流，不适合承载高频更新数据 |
 
-## 「Token 用量」的数据链路（2026-10-14 上线）
+## 「Token 用量」的数据链路（2026-10-14 上线，当日修订）
 
-Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本机）合并到一台 **Cloudflare Worker hub**（`https://token-monitor-hub.saikouting004.workers.dev`，上游项目 [Javis603/token-monitor](https://github.com/Javis603/token-monitor) v0.64.0），本站关于页与首页侧栏展示聚合结果。
+Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本机）合并到一台 **Cloudflare Worker hub**（`https://token-monitor-hub.saikouting004.workers.dev`，上游项目 [Javis603/token-monitor](https://github.com/Javis603/token-monitor) v0.64.0），本站三处展示聚合结果：首页侧栏紧凑卡、关于页摘要栅格、看板子页 `/arts/stats/tokens`。
 
 | 层 | 说明 |
 |---|---|
 | 数据源 | hub `/api/public/stats`——**唯一免密钥路由**（Worker 开了 `PUBLIC_STATS_ENABLED=1`），CORS `*`，`cache-control: max-age=15`；已剥离 devices / 项目标识 / 账号，只留 deviceCount + periods（today/month/allTime）+ historyPreview（30 天日序列 + 12 个月月序列）+ updatedAt/staleAfterMs |
 | 构建时 | `scripts/fetch-token-stats.mjs` 拉公开端点 → `content/arts/token-monitor.json`（快照；失败保留旧文件、不阻断构建——workers.dev 国内可达性因机器/时段而异，失败是预期内情况） |
 | 静态基线 | `content/arts/token-monitor-history.json` = dump-hub-history.ps1（**带密钥**，只在本机跑）从 `/api/history` 导出的全量历史（370 天滚动窗口；当前 65 天）。**建议每周重新生成提交一次**；密钥绝不进前端与仓库 |
-| 合并 | `lib/arts.ts` 的 `getTokenMonitor()`：静态基线铺底，实时快照按 date/month upsert 覆盖——关于页与侧栏卡**同源同数** |
-| 前端 | `components/TokenMonitor.tsx`（client）：模块级单例轮询器（30s，服务端缓存 15s；后台标签页暂停、切回立即刷新）；失败保留 last-good，连续 2 次失败显示「hub 离线 · 显示快照」，绝不闪空 |
+| 合并 | `lib/arts.ts` 的 `getTokenMonitor()`：静态基线铺底，实时快照按 date/month upsert 覆盖——三处挂载（侧栏 / 关于页 / 明细页）**同源同数** |
+| 前端 | `components/TokenMonitor.tsx`（client，三变体 aside/grid/full）：**云端优先**（Ting 2026-10-14 定，治双闪）——首帧实时槽位显示骨架（`tm-pending`，快照数字 opacity 0 留在 DOM 供爬虫/no-JS），挂载即拉（10s 超时），成功显实时值、失败才显构建快照（标注数据时间）；之后模块级单例轮询 30s（后台标签页暂停、切回立即刷新、in-flight 去重），失败保留 last-good 不闪空 |
+| 展示位置 | 首页侧栏紧凑卡 + 关于页摘要栅格（与「站点数据」同篇幅）+ 看板子页 `/arts/stats/tokens`（完整：图表/按工具/摘要/口径脚注，zh/en） |
+| 本地化 | token 单位 M/B 紧凑（精确值在 title tooltip）；货币 en=$ / zh=≈¥（`USD_TO_CNY=7.2` 固定汇率）；时间 zh=北京时间 / en=美国东部 EDT·EST（`fmtHubTime` 手写 DST 判定） |
+| 部署与凭据 | kit 全量存档（指南/部署报告/同步方案/两个 ps1/演示页/credentials）在 `.workbuddy/token-monitor-kit/`（**本地，gitignored——ps1 与 credentials 内含 hub 密钥，严禁进公开仓库**） |
 | 部署与凭据 | kit 全量存档（指南/部署报告/同步方案/两个 ps1/演示页/credentials）在 `.workbuddy/token-monitor-kit/`（**本地，gitignored——ps1 与 credentials 内含 hub 密钥，严禁进公开仓库**） |
 
 ## 环境注意事项（WorkBuddy 会话内，详细见 PITFALLS.md）
