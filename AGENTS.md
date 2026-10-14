@@ -126,6 +126,7 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 | 前端 | `components/TokenMonitor.tsx`（client，三变体 aside/grid/full）：**云端优先 + 2s 规则**（Ting 2026-10-14 定，治双闪与干等）——首帧实时槽位显示骨架（`tm-pending`，快照数字 opacity 0 留在 DOM 供爬虫/no-JS）；挂载时 hub（`fetchTimeoutMs=2000`）与仓库快照（三源 Promise.any 各 3s、5 分钟会话缓存 + in-flight 去重）**并行**；hub 成 → 实时；hub 败 → 仓库快照（此前有实时值则保留 last-good）→ SSR 快照；全程最多一次跳转、最坏 ~3s 骨架。此后单例轮询 **90s**（后台标签页暂停、切回立即刷新） |
 | 展示位置 | 首页侧栏紧凑卡 + 关于页摘要栅格（与「站点数据」同篇幅）+ 看板子页 `/arts/stats/tokens`（完整：三周期 + 近 30 天柱状 + 日用量热力图 + 近 12 个月累计折线 + 按模型两列 + 摘要 chips，zh/en） |
 | 本地化 | token 单位 M/B 紧凑（精确值在 title tooltip）；货币 en=$ / zh=≈¥（`USD_TO_CNY=7.2` 固定汇率）；时间 zh=北京时间 / en=美国东部 EDT·EST（`fmtHubTime` 手写 DST 判定） |
+| 架构图 | 脱敏数据流图（hub / GitHub / 两台电脑 / 本地存储）：https://github.com/004Tingting/token-monitor-data/blob/main/docs/data-flow.svg （源文件同步存档在 `.workbuddy/token-monitor-kit/data-flow.svg`）|
 | 部署与凭据 | kit 全量存档（指南/部署报告/同步方案/两个 ps1/演示页/credentials）在 `.workbuddy/token-monitor-kit/`（**本地，gitignored——ps1 与 credentials 内含 hub 密钥，严禁进公开仓库**） |
 | 部署与凭据 | kit 全量存档（指南/部署报告/同步方案/两个 ps1/演示页/credentials）在 `.workbuddy/token-monitor-kit/`（**本地，gitignored——ps1 与 credentials 内含 hub 密钥，严禁进公开仓库**） |
 
