@@ -72,7 +72,8 @@ scripts/
 ├── fetch-now.mjs         # 构建前拉 Last.fm 快照 + 生成封面映射（prebuild 链路）
 ├── fetch-monthly.mjs     # 构建前拉月度快照（Steam/WeGame/Epic/网易云听歌 → stats-history 等）
 ├── fetch-playlist.mjs    # 构建前拉网易云歌单全量曲目（v6 playlist detail + v3 song detail）
-├── fetch-token-stats.mjs # 构建前拉 Token Monitor hub 多端聚合（免密钥公开端点，失败保留旧快照）
+├── fetch-token-stats.mjs # 构建前取 Token Monitor 快照（优先读快照仓库 Contents API，失败退 hub 直连，再失败保留旧文件）
+├── push-token-snapshot.mjs # 手动拉一次 hub 推送快照仓库（npm run token-snapshot）
 ├── push-now.mjs          # 本机常驻：推送实时「正在听」到 now-data 分支（npm run live）
 └── deploy.sh             # 一键发布：构建 → 推 gh-pages → 触发 Pages 构建
 ```

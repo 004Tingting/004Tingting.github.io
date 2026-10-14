@@ -243,6 +243,13 @@
 - **注意**：按 URL（非 origin 名）推送后本地 `origin/main` 跟踪引用不更新，会误显示 ahead——用 `gh api repos/.../commits/main` 核对远端真实 tip
 - **教训**：`git add`/`git add -A` 前先 `git status` 审阅——曾把另一并行会话的未提交改动一并卷入，也漏过 `scripts/` 目录导致功能缺行
 
+### 23. 创建 GitHub Actions 工作流文件被 404 拒（OAuth token 缺 `workflow` scope）
+
+- **现象**（2026-10-14）：向新建仓库推送 `.github/workflows/*.yml`——Contents API `PUT contents/.github/workflows/refresh.yml` 返回 **404 Not Found**（重试 5 次均 404）；POST `/git/trees` 同样 404；最后 `git push` 才给出明确报错：`refusing to allow an OAuth App to create or update workflow ... without 'workflow' scope`
+- **原因**：gh CLI 的 OAuth token 没有 `workflow` scope。GitHub 对无 scope 的工作流创建请求**不返回 403 而返回 404**（opaque rejection），API 层排查极易误判成「路径不存在 / 仓库没建好 / 网络抽风」
+- **解法**：`gh auth refresh -h github.com -s workflow`（设备码流程，用户浏览器授权一次，约 3 分钟）；授权后 Contents API 直接放行。**这是账号权限操作，需 Ting 本人授权，勿擅自刷新**
+- **判别口诀**：Contents API 对 `.github/workflows` 新路径 404 + POST /git/trees 404 + GET 全部正常 = 先怀疑 workflow scope，别急着查网络
+
 ## 快速修复清单（下次会话遇到直接抄）
 
 ```bash

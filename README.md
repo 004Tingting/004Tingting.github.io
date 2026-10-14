@@ -29,6 +29,7 @@ npm run dev                      # 开发服务器 http://localhost:3000
 npm run build                    # 静态导出到 out/（fetch-now → fetch-monthly → fetch-playlist → fetch-token-stats → next build → postbuild；含 sitemap/robots/RSS/404 生成）
 python scripts/preview.py 8000   # 预览构建产物（支持 clean URL）
 npm run og                       # 重新生成分享卡片图 public/og.png
+npm run token-snapshot           # 拉一次 Token Monitor hub 快照，推送到独立快照仓库（手动补刀）
 ```
 
 ## 站点结构（五栏）
