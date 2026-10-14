@@ -8,8 +8,10 @@
  *   ① 首帧 + hydration：实时槽位一律显示骨架（tm-pending）；SSR HTML 里保留快照数字
  *      （opacity 0，不进视觉首帧；no-JS 经 <noscript> 样式恢复可见）
  *   ② 挂载即拉 hub 公开端点（10s 超时）：成功 → 显示实时值（hub 在线）；失败 → 显示构建快照
- *      （hub 离线 · 标注数据时间）；此后每 30s 轮询，成功切实时、失败保留 last-good 不闪空
- *   ③ 静态图表（30 天柱状 / 12 月折线 / 按工具）来自构建时合并数据，不参与轮询，首帧即出
+ *      （hub 离线 · 标注数据时间）；此后每 90s 轮询（Ting 2026-10-14 定，服务端缓存 15s，
+ *      更温和），成功切实时、失败保留 last-good 不闪空
+ *   ③ 静态图表（30 天柱状 / 日用量热力图 / 12 月累计折线 / 按模型）来自构建时合并数据，
+ *      不参与轮询，首帧即出（日序列会随轮询的 30 天窗口增量更新）
  *
  * 共享单例轮询器：模块级订阅表 + 单 interval（多处挂载只有一份轮询）；无订阅者时停表。
  */
@@ -249,11 +251,19 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
   /* ---------- 看板明细页 ---------- */
   const monthly = initial.monthly;
   const s = initial.summary;
+  // 近 12 个月改累计口径（Ting 2026-10-14）：running sum，折线看的是总量增长而非单月波动
+  const monthlyCum: number[] = [];
+  monthly.reduce((sum, m) => {
+    const next = sum + m.tokens;
+    monthlyCum.push(next);
+    return next;
+  }, 0);
   const chips = [
     s?.currentStreak ? `${t.streak} ${s.currentStreak} ${t.days}` : null,
     s?.longestStreak ? `${t.longest} ${s.longestStreak} ${t.days}` : null,
     s?.messages ? `${s.messages.toLocaleString("en-US")} ${t.messages}` : null,
     s?.peakDayTokens ? `${t.peakDay} ${fmtTokensCompact(s.peakDayTokens)}` : null,
+    s?.favoriteModel ? `${t.topModel} ${s.favoriteModel}` : null,
     s?.activeTimeMs ? `${t.activeTime} ${fmtMsHours(s.activeTimeMs)}` : null,
   ].filter(Boolean);
 
@@ -270,7 +280,7 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
         <BigPeriod lang={lang} t={t} label={t.allTime} period={periods?.allTime ?? null} live={live} />
       </div>
 
-      {/* 近 30 天柱状（朱红 = 今日；静态数据，首帧即出） */}
+      {/* 近 30 天柱状（朱红 = 今日；日序列随轮询增量更新） */}
       <div className="mt-12">
         <div className="flex items-baseline justify-between gap-2">
           <h3 className="font-serif text-sm font-semibold">{t.dailyLabel}</h3>
@@ -279,11 +289,33 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
         <DailyBars days={daily.slice(-30)} emptyNote={t.emptyDaily} lang={lang} />
       </div>
 
-      {/* 近 12 个月折线（复用看板同款组件） */}
+      {/* 日用量热力图（全时段，周一开列；朱红深浅 = 当日用量档位） */}
+      <div className="mt-12">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="font-serif text-sm font-semibold">{t.heatmapLabel}</h3>
+          <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted">
+            {t.heatmapLess}
+            {[0, 1, 2, 3, 4].map((lv) => (
+              <span
+                key={lv}
+                className="inline-block h-2.5 w-2.5 rounded-sm"
+                style={{
+                  background: lv === 0 ? "var(--color-rule)" : "var(--color-accent)",
+                  opacity: lv === 0 ? 0.5 : 0.3 + lv * 0.2,
+                }}
+              />
+            ))}
+            {t.heatmapMore}
+          </span>
+        </div>
+        <DailyHeatmap days={daily} emptyNote={t.emptyDaily} lang={lang} />
+      </div>
+
+      {/* 近 12 个月累计折线（复用看板同款组件；累计口径见 monthlyCum） */}
       <div className="mt-12">
         <MonthlyTrend
           months={monthly.map((m) => m.month)}
-          values={monthly.map((m) => m.tokens)}
+          values={monthlyCum}
           label={t.monthlyLabel}
           unit="tokens"
           lang={lang}
@@ -292,8 +324,8 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
         />
       </div>
 
-      {/* 按工具（仅静态基线含 perClient，公开端点已剥离） */}
-      {initial.byClient.length > 0 ? (
+      {/* 按模型（仅静态基线含 perModel，公开端点已剥离；两列放置） */}
+      {initial.byModel.length > 0 ? (
         <div className="mt-12">
           <div className="flex items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{t.byClient}</h3>
@@ -301,12 +333,12 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
               {t.baselineNote} {initial.baselineGeneratedAt?.slice(0, 10) ?? "—"}
             </span>
           </div>
-          <ul className="mt-4 space-y-2.5">
-            {initial.byClient.map((c) => {
-              const pct = (c.tokens / initial.byClient[0].tokens) * 100;
+          <ul className="mt-4 grid grid-cols-1 gap-x-8 gap-y-2.5 sm:grid-cols-2">
+            {initial.byModel.map((c) => {
+              const pct = (c.tokens / initial.byModel[0].tokens) * 100;
               return (
                 <li key={c.name} className="flex items-center gap-3">
-                  <span className="w-24 shrink-0 truncate font-mono text-xs" title={c.name}>
+                  <span className="w-32 shrink-0 truncate font-mono text-xs" title={c.name}>
                     {c.name}
                   </span>
                   <span className="h-1.5 flex-1 overflow-hidden bg-ink/10">
@@ -438,6 +470,117 @@ function BigPeriod({
         {live(period ? fmtTokensCompact(period.totalTokens) : "—")}
       </p>
       <p className="mt-0.5 font-mono text-xs text-muted">{live(period ? fmtCost(period.costUsd, lang) : "—")}</p>
+    </div>
+  );
+}
+
+/** 日用量热力图（杂志风 SVG，零依赖；周一开列，朱红深浅 = 当日用量档位；悬停看精确值） */
+function DailyHeatmap({ days, emptyNote, lang }: { days: TokenDay[]; emptyNote: string; lang: Lang }) {
+  if (days.length === 0) {
+    return <p className="mt-4 font-mono text-xs text-muted">{emptyNote}</p>;
+  }
+
+  /* 周一开列的周列（UTC 运算，SSR/客户端确定一致；缺失日期 = 当日无用量） */
+  const CELL = 13;
+  const GAP = 3.5;
+  const PAD = { l: 30, t: 18, r: 4, b: 4 };
+  const WEEKDAYS_ZH = ["一", "", "三", "", "五", "", "日"];
+  const WEEKDAYS_EN = ["Mon", "", "Wed", "", "Fri", "", ""];
+  const wd = lang === "zh" ? WEEKDAYS_ZH : WEEKDAYS_EN;
+  const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  const byDate = new Map(days.map((d) => [d.date, d]));
+  const first = new Date(`${days[0].date}T00:00:00Z`);
+  const mondayShift = (first.getUTCDay() + 6) % 7; // 周一 = 0
+  const last = new Date(`${days[days.length - 1].date}T00:00:00Z`);
+
+  type Cell = { date: string; tokens: number; cost: number } | null;
+  const weeks: Cell[][] = [];
+  for (let w = new Date(first); w <= last; w.setUTCDate(w.getUTCDate() + 7)) {
+    const col: Cell[] = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(w);
+      day.setUTCDate(w.getUTCDate() + i - mondayShift);
+      const key = day.toISOString().slice(0, 10);
+      const hit = byDate.get(key);
+      col.push(hit ? { date: key, tokens: hit.tokens, cost: hit.cost } : null);
+    }
+    weeks.push(col);
+  }
+
+  const max = Math.max(1, ...days.map((d) => d.tokens));
+  const level = (tokens: number): number =>
+    tokens <= 0 ? 0 : tokens >= max * 0.75 ? 4 : tokens >= max * 0.5 ? 3 : tokens >= max * 0.25 ? 2 : 1;
+
+  const W = PAD.l + weeks.length * (CELL + GAP) + PAD.r;
+  const H = PAD.t + 7 * (CELL + GAP) + PAD.b;
+
+  /* 月份标签：每列首个日期的月份与上一列不同时标注 */
+  const monthLabels: { x: number; label: string }[] = [];
+  weeks.forEach((col, i) => {
+    const anyDay = col.find(Boolean);
+    if (!anyDay) return;
+    const mm = Number(anyDay.date.slice(5, 7));
+    const prev = i > 0 ? weeks[i - 1].find(Boolean) : null;
+    if (!prev || Number(prev.date.slice(5, 7)) !== mm) {
+      monthLabels.push({
+        x: PAD.l + i * (CELL + GAP),
+        label: lang === "zh" ? `${mm}月` : (MONTHS_EN[mm - 1] ?? String(mm)),
+      });
+    }
+  });
+
+  return (
+    <div className="mt-4 overflow-x-auto">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="block"
+        style={{ width: W, minWidth: W, height: "auto" }}
+        role="img"
+        aria-label={emptyNote}
+      >
+        {/* 月份刻度 */}
+        {monthLabels.map((m) => (
+          <text key={m.label + m.x} x={m.x} y={10} className="fill-muted font-mono" fontSize="9">
+            {m.label}
+          </text>
+        ))}
+        {/* 星期刻度（周一 / 三 / 五） */}
+        {[0, 2, 4].map((r) => (
+          <text
+            key={r}
+            x={PAD.l - 6}
+            y={PAD.t + r * (CELL + GAP) + CELL - 2}
+            textAnchor="end"
+            className="fill-muted font-mono"
+            fontSize="9"
+          >
+            {wd[r]}
+          </text>
+        ))}
+        {/* 日格 */}
+        {weeks.map((col, ci) =>
+          col.map((cell, ri) => {
+            const lv = cell ? level(cell.tokens) : 0;
+            return (
+              <rect
+                key={`${ci}-${ri}`}
+                x={PAD.l + ci * (CELL + GAP)}
+                y={PAD.t + ri * (CELL + GAP)}
+                width={CELL}
+                height={CELL}
+                rx={2}
+                fill={lv === 0 ? "var(--color-rule)" : "var(--color-accent)"}
+                fillOpacity={lv === 0 ? 0.35 : 0.3 + lv * 0.2}
+              >
+                {cell ? (
+                  <title>{`${cell.date} · ${fmtTokensFull(cell.tokens)} tokens · ${fmtCost(cell.cost, lang)}`}</title>
+                ) : null}
+              </rect>
+            );
+          }),
+        )}
+      </svg>
     </div>
   );
 }

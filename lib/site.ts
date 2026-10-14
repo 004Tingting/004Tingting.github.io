@@ -54,8 +54,8 @@ export const GISCUS = {
  */
 export const TOKEN_MONITOR = {
   hub: "https://token-monitor-hub.saikouting004.workers.dev",
-  /** 前端轮询间隔（毫秒）——服务端缓存 15s，30s 轮询为「准实时」且温和 */
-  pollMs: 30_000,
+  /** 前端轮询间隔（毫秒）——服务端缓存 15s；Ting 2026-10-14 定 90s：更温和，数据延迟 ≤90s 可接受 */
+  pollMs: 90_000,
 } as const;
 
 /**

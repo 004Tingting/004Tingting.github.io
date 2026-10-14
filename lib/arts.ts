@@ -368,15 +368,15 @@ export function getTokenMonitor(): TokenMonitorData {
   }
   const monthly = [...monthlyMap.values()].sort((a, b) => a.month.localeCompare(b.month)).slice(-12);
 
-  // 按工具分布：仅静态基线含 perClient（公开端点已剥离项目标识），按 tokens 降序
-  const byClientMap = new Map<string, { tokens: number; cost: number }>();
+  // 按模型分布：仅静态基线含 perModel（公开端点已剥离项目标识），按 tokens 降序
+  const byModelMap = new Map<string, { tokens: number; cost: number }>();
   for (const d of hist?.daily ?? []) {
-    for (const [name, v] of Object.entries(d.perClient ?? {})) {
-      const cur = byClientMap.get(name) ?? { tokens: 0, cost: 0 };
-      byClientMap.set(name, { tokens: cur.tokens + numOr0(v?.tokens), cost: cur.cost + numOr0(v?.cost) });
+    for (const [name, v] of Object.entries(d.perModel ?? {})) {
+      const cur = byModelMap.get(name) ?? { tokens: 0, cost: 0 };
+      byModelMap.set(name, { tokens: cur.tokens + numOr0(v?.tokens), cost: cur.cost + numOr0(v?.cost) });
     }
   }
-  const byClient = [...byClientMap.entries()]
+  const byModel = [...byModelMap.entries()]
     .map(([name, v]) => ({ name, tokens: v.tokens, cost: v.cost }))
     .sort((a, b) => b.tokens - a.tokens);
 
@@ -390,7 +390,7 @@ export function getTokenMonitor(): TokenMonitorData {
     updatedAt: snap?.hubUpdatedAt || snap?.fetchedAt || hist?.generatedAt || null,
     daily,
     monthly,
-    byClient,
+    byModel,
     summary: s
       ? {
           activeDays: numOr0(s.activeDays) || null,
@@ -399,6 +399,7 @@ export function getTokenMonitor(): TokenMonitorData {
           messages: numOr0(s.messages) || null,
           peakDayTokens: numOr0(s.peakDayTokens) || null,
           activeTimeMs: numOr0(s.activeTimeMs) || null,
+          favoriteModel: typeof s.favoriteModel === "string" && s.favoriteModel ? s.favoriteModel : null,
         }
       : null,
     baselineGeneratedAt: hist?.generatedAt ?? null,

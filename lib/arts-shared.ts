@@ -267,8 +267,14 @@ export type TokenSnapshot = {
 export type TokenHistoryFile = {
   generatedAt: string;
   capDays: number;
-  daily: (TokenDay & { perClient?: Record<string, { tokens: number; cost: number }> })[];
-  monthly: (TokenMonth & { perClient?: Record<string, { tokens: number; cost: number }> })[];
+  daily: (TokenDay & {
+    perClient?: Record<string, { tokens: number; cost: number }>;
+    perModel?: Record<string, { tokens: number; cost: number }>;
+  })[];
+  monthly: (TokenMonth & {
+    perClient?: Record<string, { tokens: number; cost: number }>;
+    perModel?: Record<string, { tokens: number; cost: number }>;
+  })[];
   summary: {
     totalTokens?: number;
     totalCost?: number;
@@ -293,9 +299,9 @@ export type TokenMonitorData = {
   daily: TokenDay[];
   /** 合并月序列（升序，12 个月） */
   monthly: TokenMonth[];
-  /** 按工具全时段分布（仅静态基线含 perClient；按 tokens 降序） */
-  byClient: { name: string; tokens: number; cost: number }[];
-  /** 静态基线摘要（连续活跃 / 消息数 / 峰值日 / 活跃时长） */
+  /** 按模型全时段分布（仅静态基线含 perModel；按 tokens 降序） */
+  byModel: { name: string; tokens: number; cost: number }[];
+  /** 静态基线摘要（连续活跃 / 消息数 / 峰值日 / 常用模型等） */
   summary: {
     activeDays: number | null;
     currentStreak: number | null;
@@ -303,8 +309,9 @@ export type TokenMonitorData = {
     messages: number | null;
     peakDayTokens: number | null;
     activeTimeMs: number | null;
+    favoriteModel: string | null;
   } | null;
-  /** 静态基线生成时间（按工具分布的口径截止） */
+  /** 静态基线生成时间（按模型分布的口径截止） */
   baselineGeneratedAt: string | null;
 };
 
