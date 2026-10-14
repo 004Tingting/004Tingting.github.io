@@ -27,9 +27,18 @@ const ROUTES: Record<Lang, Record<(typeof ORDER)[number], string>> = {
   },
 };
 
+/** GitHub 图标（官方 octicons mark-github-16；外链用，fill 继承 currentColor） */
+function GitHubIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" className={className} aria-hidden>
+      <path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656" />
+    </svg>
+  );
+}
+
 /**
  * 全站导航卡（唯一悬浮物）：logo + 五栏 + 语言 + 主题 + 快捷图标（返回/主页/刷新），
- * 收紧后中部浮现当前页/文章标题（文章页附底部进度条）。
+ * 收紧后中部浮现当前页/文章标题（文章页附底部进度条），GitHub 图标移到标题之后。
  * 标题取 article h1（文章详情）或 main h1（其他页）；进度按 <article> 高度计算。
  */
 export default function Nav({ lang }: { lang: Lang }) {
@@ -140,31 +149,43 @@ export default function Nav({ lang }: { lang: Lang }) {
             Ting
           </Link>
 
-          {/* GitHub 图标（标题右侧，外链；mark 取自 GitHub octicons。
-              展开态 ≈ 红框尺寸（32px）＋ 满对比度；收紧态变小并后移一个汉字身位 */}
-          <Link
-            href={SITE.links.github}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub"
-            title="GitHub"
-            className={`shrink-0 text-ink transition-all duration-300 hover:text-accent ${
-              compact ? "ml-5 h-4 w-4" : "ml-2 h-8 w-8"
-            }`}
-          >
-            <svg viewBox="0 0 16 16" fill="currentColor" className="h-full w-full" aria-hidden>
-              <path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656" />
-            </svg>
-          </Link>
+          {/* GitHub 图标 · 展开态（标题右侧；24px 与标题字号齐平，满对比度 ink） */}
+          {!compact ? (
+            <Link
+              href={SITE.links.github}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="GitHub"
+              title="GitHub"
+              className="ml-2 inline-flex h-6 w-6 shrink-0 text-ink transition-all duration-300 hover:text-accent"
+            >
+              <GitHubIcon className="h-full w-full" />
+            </Link>
+          ) : null}
 
-          {/* 中部信息区（仅收紧后浮现，窄屏隐藏）：当前页/文章标题 + 阅读进度 */}
+          {/* 中部信息区（仅收紧后浮现，窄屏隐藏）：当前页/文章标题 + 阅读进度。
+              收紧态 GitHub 小图标跟在标题文字之后——标题位置不变，间距 6px */}
           <div
             aria-hidden={!compact}
             className={`hidden min-w-0 flex-1 px-2 transition-opacity duration-300 md:block ${
               compact ? "opacity-100" : "opacity-0"
             }`}
           >
-            <p className="truncate font-serif text-sm font-semibold">{info.title}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="min-w-0 truncate font-serif text-sm font-semibold">{info.title}</p>
+              {compact ? (
+                <Link
+                  href={SITE.links.github}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="GitHub"
+                  title="GitHub"
+                  className="inline-flex h-4 w-4 shrink-0 text-ink transition-all duration-300 hover:text-accent"
+                >
+                  <GitHubIcon className="h-full w-full" />
+                </Link>
+              ) : null}
+            </div>
             {info.pct !== null ? (
               <p className="font-mono text-[11px] leading-tight text-muted">
                 {Math.round(info.pct * 100)}%
