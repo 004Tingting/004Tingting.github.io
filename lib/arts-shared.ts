@@ -238,6 +238,109 @@ export type MonthlyTrends = {
   };
 };
 
+/* ---------- Token Monitor（hub 多端聚合：构建时快照 + 前端实时轮询） ---------- */
+
+/** 单周期聚合（今日 / 本月 / 累计） */
+export type TokenPeriod = { totalTokens: number; costUsd: number };
+
+/** 日序列行（公开端点 historyPreview 与静态基线共用） */
+export type TokenDay = { date: string; tokens: number; cost: number; activeTimeMs: number };
+
+/** 月序列行 */
+export type TokenMonth = { month: string; tokens: number; cost: number; activeTimeMs: number };
+
+/** content/arts/token-monitor.json（scripts/fetch-token-stats.mjs 生成，免密钥公开端点） */
+export type TokenSnapshot = {
+  source: "token-monitor-hub";
+  fetchedAt: string;
+  hubUpdatedAt: string;
+  staleAfterMs: number;
+  deviceCount: number;
+  periods: { today: TokenPeriod; month: TokenPeriod; allTime: TokenPeriod };
+  /** historyPreview.daily：最近 30 天 */
+  daily: TokenDay[];
+  /** historyPreview.monthly：最近 12 个月 */
+  monthly: TokenMonth[];
+};
+
+/** content/arts/token-monitor-history.json（dump-hub-history.ps1 每周导出的全量基线，勿手改） */
+export type TokenHistoryFile = {
+  generatedAt: string;
+  capDays: number;
+  daily: (TokenDay & { perClient?: Record<string, { tokens: number; cost: number }> })[];
+  monthly: (TokenMonth & { perClient?: Record<string, { tokens: number; cost: number }> })[];
+  summary: {
+    totalTokens?: number;
+    totalCost?: number;
+    activeDays?: number;
+    currentStreak?: number;
+    longestStreak?: number;
+    peakDayTokens?: number;
+    favoriteModel?: string;
+    messages?: number;
+    activeTimeMs?: number;
+  } | null;
+};
+
+/** 合并后的展示模型（静态基线 ∪ 实时快照，实时同日覆盖） */
+export type TokenMonitorData = {
+  /** 三周期聚合（从未拉到过快照则为 null，前端轮询命中后补） */
+  periods: { today: TokenPeriod; month: TokenPeriod; allTime: TokenPeriod } | null;
+  deviceCount: number | null;
+  /** hub 数据更新时间（updatedAt 优先，fetchedAt 兜底） */
+  updatedAt: string | null;
+  /** 合并日序列（升序；实时预览仅 30 天，更长历史靠静态基线） */
+  daily: TokenDay[];
+  /** 合并月序列（升序，12 个月） */
+  monthly: TokenMonth[];
+  /** 按工具全时段分布（仅静态基线含 perClient；按 tokens 降序） */
+  byClient: { name: string; tokens: number; cost: number }[];
+  /** 静态基线摘要（连续活跃 / 消息数 / 峰值日 / 活跃时长） */
+  summary: {
+    activeDays: number | null;
+    currentStreak: number | null;
+    longestStreak: number | null;
+    messages: number | null;
+    peakDayTokens: number | null;
+    activeTimeMs: number | null;
+  } | null;
+  /** 静态基线生成时间（按工具分布的口径截止） */
+  baselineGeneratedAt: string | null;
+};
+
+/** token 紧凑显示：6_343_334_223 → 6.34B（精确值放 title tooltip） */
+export function fmtTokensCompact(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) return "0";
+  if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
+  return String(Math.round(n));
+}
+
+/** token 精确显示（tooltip / 完整区用） */
+export function fmtTokensFull(n: number): string {
+  return Number.isFinite(n) ? Math.round(n).toLocaleString("en-US") : "—";
+}
+
+/** 美元成本：$161 / $12.30 / $0.066 */
+export function fmtCostUsd(v: number): string {
+  if (!Number.isFinite(v) || v <= 0) return "$0";
+  if (v >= 100) return `$${v.toFixed(0)}`;
+  if (v >= 1) return `$${v.toFixed(2)}`;
+  return `$${v.toFixed(3)}`;
+}
+
+/** 毫秒 → 小时：411_194_294 → 114.2h */
+export function fmtMsHours(ms: number): string {
+  if (!Number.isFinite(ms) || ms <= 0) return "0h";
+  return `${(ms / 3_600_000).toFixed(1)}h`;
+}
+
+/** 日序列刻度标签：2026-10-14 → 10.14 */
+export function fmtDayTick(date: string): string {
+  return date.slice(5).replace("-", ".");
+}
+
 export function summarize(
   games: GameEntry[],
   screen: ScreenEntry[],

@@ -20,6 +20,11 @@ import {
   type ScreenEntry,
   type ExerciseEntry,
   type StatsHistory,
+  type TokenDay,
+  type TokenHistoryFile,
+  type TokenMonitorData,
+  type TokenMonth,
+  type TokenSnapshot,
 } from "@/lib/arts-shared";
 
 /** 游艺（/arts）：音律（音乐）/ 游戏 / 影卷（影剧番小说）/ 运动（跑步 · 徒手） */
@@ -312,6 +317,92 @@ a.row:hover .nm{color:var(--accent)}
 /** 最近收听列表（Last.fm） */
 export function getRecentTracks(): LastfmTrack[] {
   return getLastfm()?.recent ?? [];
+}
+
+/* ---------- Token Monitor（hub 多端聚合：静态基线 ∪ 实时快照） ---------- */
+
+const TOKEN_SNAPSHOT_FILE = path.join(ROOT, "token-monitor.json");
+const TOKEN_HISTORY_FILE = path.join(ROOT, "token-monitor-history.json");
+
+const numOr0 = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+
+function readJsonFile<T>(file: string): T | null {
+  if (!fs.existsSync(file)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf-8")) as T;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Token Monitor 合并视图（关于页 + 首页侧栏共用，保证两处数字同源）：
+ * - 三周期 / 30 天与 12 个月预览：实时快照 token-monitor.json（构建时拉，从未拉到则为 null）
+ * - 日/月全序列 + 按工具分布 + 摘要：静态基线 token-monitor-history.json（每周 dump 导出）
+ * - 合并规则：按 date/month upsert，实时快照覆盖静态同日（快照更新）
+ */
+export function getTokenMonitor(): TokenMonitorData {
+  const snap = readJsonFile<TokenSnapshot>(TOKEN_SNAPSHOT_FILE);
+  const hist = readJsonFile<TokenHistoryFile>(TOKEN_HISTORY_FILE);
+
+  const dailyMap = new Map<string, TokenDay>();
+  for (const d of hist?.daily ?? []) {
+    dailyMap.set(String(d.date), {
+      date: String(d.date),
+      tokens: numOr0(d.tokens),
+      cost: numOr0(d.cost),
+      activeTimeMs: numOr0(d.activeTimeMs),
+    });
+  }
+  for (const d of snap?.daily ?? []) {
+    dailyMap.set(d.date, { date: d.date, tokens: numOr0(d.tokens), cost: numOr0(d.cost), activeTimeMs: numOr0(d.activeTimeMs) });
+  }
+  const daily = [...dailyMap.values()].sort((a, b) => a.date.localeCompare(b.date));
+
+  const monthlyMap = new Map<string, TokenMonth>();
+  for (const m of hist?.monthly ?? []) {
+    monthlyMap.set(String(m.month), { month: String(m.month), tokens: numOr0(m.tokens), cost: numOr0(m.cost), activeTimeMs: numOr0(m.activeTimeMs) });
+  }
+  for (const m of snap?.monthly ?? []) {
+    monthlyMap.set(m.month, { month: m.month, tokens: numOr0(m.tokens), cost: numOr0(m.cost), activeTimeMs: numOr0(m.activeTimeMs) });
+  }
+  const monthly = [...monthlyMap.values()].sort((a, b) => a.month.localeCompare(b.month)).slice(-12);
+
+  // 按工具分布：仅静态基线含 perClient（公开端点已剥离项目标识），按 tokens 降序
+  const byClientMap = new Map<string, { tokens: number; cost: number }>();
+  for (const d of hist?.daily ?? []) {
+    for (const [name, v] of Object.entries(d.perClient ?? {})) {
+      const cur = byClientMap.get(name) ?? { tokens: 0, cost: 0 };
+      byClientMap.set(name, { tokens: cur.tokens + numOr0(v?.tokens), cost: cur.cost + numOr0(v?.cost) });
+    }
+  }
+  const byClient = [...byClientMap.entries()]
+    .map(([name, v]) => ({ name, tokens: v.tokens, cost: v.cost }))
+    .sort((a, b) => b.tokens - a.tokens);
+
+  const s = hist?.summary ?? null;
+
+  return {
+    periods: snap
+      ? { today: snap.periods.today, month: snap.periods.month, allTime: snap.periods.allTime }
+      : null,
+    deviceCount: snap ? numOr0(snap.deviceCount) : null,
+    updatedAt: snap?.hubUpdatedAt || snap?.fetchedAt || hist?.generatedAt || null,
+    daily,
+    monthly,
+    byClient,
+    summary: s
+      ? {
+          activeDays: numOr0(s.activeDays) || null,
+          currentStreak: numOr0(s.currentStreak) || null,
+          longestStreak: numOr0(s.longestStreak) || null,
+          messages: numOr0(s.messages) || null,
+          peakDayTokens: numOr0(s.peakDayTokens) || null,
+          activeTimeMs: numOr0(s.activeTimeMs) || null,
+        }
+      : null,
+    baselineGeneratedAt: hist?.generatedAt ?? null,
+  };
 }
 
 /** 汇总统计（构建时计算） */

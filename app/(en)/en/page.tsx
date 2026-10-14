@@ -2,7 +2,7 @@ import Link from "next/link";
 import { dic } from "@/lib/i18n";
 import { getLatestArticles, fmtDate } from "@/lib/articles";
 import { getWorks, toWorkMeta } from "@/lib/works";
-import { getNow } from "@/lib/arts";
+import { getNow, getTokenMonitor } from "@/lib/arts";
 import Kicker from "@/components/Kicker";
 import WorkList from "@/components/WorkList";
 import NowPlayingLive from "@/components/NowPlayingLive";
@@ -14,6 +14,7 @@ export default function EnHomePage() {
   const latest = getLatestArticles("en", 3);
   const works = getWorks("en").map(toWorkMeta);
   const now = getNow();
+  const token = getTokenMonitor();
 
   return (
     <div className="mx-auto max-w-5xl px-6">
@@ -90,6 +91,7 @@ export default function EnHomePage() {
         <HomeAside
           lang="en"
           now={now}
+          token={token}
           latest={latest.map((a) => ({
             slug: a.slug,
             title: a.title,

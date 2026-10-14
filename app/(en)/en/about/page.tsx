@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getMonthlyTrends, getStats } from "@/lib/arts";
+import { getMonthlyTrends, getStats, getTokenMonitor } from "@/lib/arts";
 import Kicker from "@/components/Kicker";
+import TokenMonitor from "@/components/TokenMonitor";
 
 export const metadata: Metadata = { title: "About" };
 
@@ -11,6 +12,7 @@ export default function AboutPage() {
   const t = dic.en.about;
   const s = getStats("en");
   const mt = getMonthlyTrends("en");
+  const token = getTokenMonitor();
   // Unified game-hours scope: manual frontmatter + Steam + WeGame + Epic (snapshot merge)
   const gameTotalH = mt.baselines.games ?? s.gameHours;
 
@@ -55,6 +57,9 @@ export default function AboutPage() {
           Full dashboard →
         </Link>
       </section>
+
+      {/* Token Monitor: multi-device AI tool usage from the hub (live) */}
+      <TokenMonitor lang="en" initial={token} variant="full" />
     </article>
   );
 }

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { dic, type Lang } from "@/lib/i18n";
 import type { Section } from "@/lib/articles";
+import type { TokenMonitorData } from "@/lib/arts-shared";
 import NowPlayingLive, { type NowSnapshot } from "@/components/NowPlayingLive";
+import TokenMonitor from "@/components/TokenMonitor";
 import FadeRule from "@/components/FadeRule";
 
 /** 首页侧栏「近作」需要的字段（ArticleMeta + 所属栏目） */
@@ -52,18 +54,20 @@ const BLURBS: Record<Lang, Record<(typeof ORDER)[number], string>> = {
 
 /**
  * 首页侧栏（仅 ≥1280px 显示）。
- * 四部分：编辑部印记（装饰）→ 正在听（实时）→ 五栏索引（导航）→ 近作（时效）。
- * 本体为服务端组件，正在听为客户端子组件（实时轮询）。
+ * 五部分：编辑部印记（装饰）→ 正在听（实时）→ Token 用量（实时）→ 五栏索引（导航）→ 近作（时效）。
+ * 本体为服务端组件，正在听与 Token 为客户端子组件（实时轮询）。
  * 注：系统级性能监控浏览器做不到（沙箱限制），不做此类组件——详见 WORKLOG 2026-10-10。
  */
 export default function HomeAside({
   lang,
   latest,
   now,
+  token,
 }: {
   lang: Lang;
   latest: RecentItem[];
   now: NowSnapshot | null;
+  token: TokenMonitorData;
 }) {
   const t = dic[lang].home.aside;
   const routes = ROUTES[lang];
@@ -91,6 +95,11 @@ export default function HomeAside({
         {/* 正在听：实时状态（窄版，位于印记与索引之间） */}
         <div className="border-t border-rule pt-3">
           <NowPlayingLive lang={lang} initial={now} variant="aside" />
+        </div>
+
+        {/* Token 用量：hub 多端聚合（紧凑卡，与正在听同为实时卡） */}
+        <div className="border-t border-rule pt-3">
+          <TokenMonitor lang={lang} initial={token} variant="aside" />
         </div>
 
         {/* 五栏索引 */}

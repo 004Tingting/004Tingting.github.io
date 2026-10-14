@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getMonthlyTrends, getStats } from "@/lib/arts";
+import { getMonthlyTrends, getStats, getTokenMonitor } from "@/lib/arts";
 import Kicker from "@/components/Kicker";
+import TokenMonitor from "@/components/TokenMonitor";
 
 export const metadata: Metadata = { title: "关于" };
 
@@ -11,6 +12,7 @@ export default function AboutPage() {
   const t = dic.zh.about;
   const s = getStats("zh");
   const mt = getMonthlyTrends("zh");
+  const token = getTokenMonitor();
   // 游戏总时长统一口径：人工 frontmatter + Steam + WeGame + Epic（快照合并）
   const gameTotalH = mt.baselines.games ?? s.gameHours;
 
@@ -55,6 +57,9 @@ export default function AboutPage() {
           完整看板 →
         </Link>
       </section>
+
+      {/* Token Monitor：hub 多端 AI 工具用量（实时） */}
+      <TokenMonitor lang="zh" initial={token} variant="full" />
     </article>
   );
 }

@@ -46,6 +46,19 @@ export const GISCUS = {
 };
 
 /**
+ * Token Monitor hub（Cloudflare Worker，多端 AI 工具用量聚合）。
+ * 公开端点 /api/public/stats 免密钥、CORS *、cache-control max-age=15——前端轮询与
+ * 构建时拉取（scripts/fetch-token-stats.mjs）都用它；带密钥的 /api/history 不进前端，
+ * 全量基线由 dump-hub-history.ps1 每周导出（content/arts/token-monitor-history.json）。
+ * hub 部署与凭据存档：.workbuddy/token-monitor-kit/（本地，勿入公开仓库）。
+ */
+export const TOKEN_MONITOR = {
+  hub: "https://token-monitor-hub.saikouting004.workers.dev",
+  /** 前端轮询间隔（毫秒）——服务端缓存 15s，30s 轮询为「准实时」且温和 */
+  pollMs: 30_000,
+} as const;
+
+/**
  * Microsoft Clarity 访客统计（不在站点上呈现，仅后台可见）。
  * projectId 为公开值（会出现在页面源码中），非密钥；留空则不埋点。
  * 获取：https://clarity.microsoft.com → 新建项目 → Settings → 复制 Project ID。
