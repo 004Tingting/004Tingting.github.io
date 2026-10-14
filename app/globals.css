@@ -242,3 +242,65 @@ body {
     animation: none;
   }
 }
+
+/* ---------- 点阵屏（首页侧栏 Token 卡，DotMatrix.tsx） ----------
+   单词 ⇄ 数字定时交换：每个亮点按列相位错峰（内联 animation-delay），
+   切换时旧图形熄灭、新图形亮起、两股扫掠同时进行——点阵小点在屏内「重组」。
+   周期 10s：前 5s 单词、后 5s 数字（数字相位 = +5s，与 HALF_CYCLE_MS 对应）。
+   dm-both = 两图形共用亮点，常亮（重组时的视觉锚点）；dm-off = 未点亮底点。
+   纯 CSS 动画：no-JS 照常运转；prefers-reduced-motion 时定格显示数字。 */
+.dm-both {
+  fill: var(--color-ink);
+}
+.dm-off {
+  fill: var(--color-ink);
+  opacity: 0.13;
+}
+.dm-word,
+.dm-num {
+  fill: var(--color-ink);
+  opacity: 0;
+  animation: dm-swap 10s linear infinite;
+}
+@keyframes dm-swap {
+  /* 到位前带两下闪烁的「点亮」→ 长亮 → 带动效的「熄灭」 */
+  0% {
+    opacity: 0;
+  }
+  1% {
+    opacity: 0.85;
+  }
+  2.2% {
+    opacity: 0.25;
+  }
+  3.5% {
+    opacity: 1;
+  }
+  46% {
+    opacity: 1;
+  }
+  47.2% {
+    opacity: 0.15;
+  }
+  48.4% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  53% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dm-word,
+  .dm-num {
+    animation: none;
+  }
+  .dm-num {
+    opacity: 1;
+  }
+}
