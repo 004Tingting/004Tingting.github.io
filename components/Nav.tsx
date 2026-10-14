@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { dic, type Lang } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -36,10 +36,22 @@ function GitHubIcon({ className }: { className?: string }) {
   );
 }
 
+/** GitHub 浮层图标基准尺寸（px，即 h-6）；实际大小 = 基准 × 槽位实测缩放（收紧态 16px = ×2/3） */
+const GH_BASE = 24;
+
+/** SSR 下退化为 useEffect，避免 useLayoutEffect 的服务端告警（服务端本就不运行 effect） */
+const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 /**
  * 全站导航卡（唯一悬浮物）：logo + 五栏 + 语言 + 主题 + 快捷图标（返回/主页/刷新），
- * 收紧后中部浮现当前页/文章标题（文章页附底部进度条），GitHub 图标移到标题之后。
- * 标题取 article h1（文章详情）或 main h1（其他页）；进度按 <article> 高度计算。
+ * 收紧后中部浮现当前页/文章标题（文章页附底部进度条）。
+ *
+ * GitHub 图标为**单一浮层节点**（2026-10-15 治闪换）：此前展开/收紧各用一个条件渲染的
+ * 图标节点，切换瞬间卸载重挂、图标在两处跳位，阈值附近来回滚动时高频闪换；
+ * 现在浮层绝对定位于卡片内，位置与缩放逐帧从目标槽位实测（rAF 缓动追帧，
+ * 因为 300ms 布局过渡中的槽位本身在移动），展开态停靠品牌右侧（24px）、
+ * 收紧态平滑缩小并移到小标题之后（16px）。槽位只留占位：
+ * 品牌槽位内含静态图标兜底（SSR 首帧 / no-JS），收紧槽位常驻保证小标题截断版式不变。
  */
 export default function Nav({ lang }: { lang: Lang }) {
   const pathname = usePathname() ?? "/";
@@ -54,6 +66,116 @@ export default function Nav({ lang }: { lang: Lang }) {
   const domCache = useRef<{ article: HTMLElement | null; prose: Element | null; h1: Element | null; ready: boolean }>(
     { article: null, prose: null, h1: null, ready: false }
   );
+  const compactRef = useRef(compact);
+  compactRef.current = compact;
+
+  /* ---------- GitHub 浮层图标 ---------- */
+
+  /** 浮层基准层（inset-0 = 与槽位测量同一坐标系）、两处槽位、浮层本体 */
+  const ghLayerRef = useRef<HTMLDivElement | null>(null);
+  const ghBrandSlotRef = useRef<HTMLAnchorElement | null>(null);
+  const ghMidSlotRef = useRef<HTMLSpanElement | null>(null);
+  const ghFloatRef = useRef<HTMLAnchorElement | null>(null);
+  /** 浮层当前视觉位置（基准层局部坐标）；x < 0 = 未就位（首帧前 / 无目标隐藏后） */
+  const ghCur = useRef({ x: -1, y: -1, s: 1 });
+  const ghRaf = useRef(0);
+  const ghFirstRun = useRef(true);
+  /** 浮层就位后接管交互；此前由品牌槽位里的静态图标兜底（覆盖 SSR 首帧与 no-JS） */
+  const [ghReady, setGhReady] = useState(false);
+
+  /** 测量浮层目标：活动槽位（收紧态 = 小标题后；否则 = 品牌右侧）→ 基准层局部坐标 + 缩放 */
+  const ghMeasure = useCallback((): { x: number; y: number; s: number } | null => {
+    const layer = ghLayerRef.current;
+    const slot = compactRef.current ? ghMidSlotRef.current : ghBrandSlotRef.current;
+    if (!layer || !slot) return null;
+    const lr = layer.getBoundingClientRect();
+    const sr = slot.getBoundingClientRect();
+    if (sr.width === 0) return null; // 窄屏：信息区整体隐藏，收紧态无目标
+    return { x: sr.left - lr.left, y: sr.top - lr.top, s: sr.width / GH_BASE };
+  }, []);
+
+  /**
+   * duration = 0 → 直接就位（首帧 / 窗口缩放）；
+   * 否则 rAF 缓动追帧：槽位本身在 300ms 布局过渡里持续移动，只有逐帧重测才能贴住。
+   * 过程中再次切换（阈值附近快速来回滚动）先 cancel 再从当前视觉位置重新起步，不跳变。
+   */
+  const ghAnimate = useCallback(
+    (duration: number) => {
+      cancelAnimationFrame(ghRaf.current);
+      const el = ghFloatRef.current;
+      if (!el) return;
+      const paint = (x: number, y: number, s: number) => {
+        ghCur.current = { x, y, s };
+        el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${s})`;
+        el.style.visibility = "";
+      };
+      const hide = () => {
+        ghCur.current = { x: -1, y: -1, s: 1 };
+        el.style.visibility = "hidden";
+      };
+      const target = ghMeasure();
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (duration <= 0 || reduceMotion || ghCur.current.x < 0) {
+        if (target) paint(target.x, target.y, target.s);
+        else hide();
+        setGhReady(true);
+        return;
+      }
+      if (!target) {
+        hide();
+        return;
+      }
+      const start = { ...ghCur.current };
+      const t0 = performance.now();
+      const step = (now: number) => {
+        const p = Math.min(1, (now - t0) / duration);
+        const e = 1 - Math.pow(1 - p, 3); // easeOutCubic：起动略快，末端追上槽位
+        const cur = ghMeasure();
+        if (!cur) {
+          hide();
+          return;
+        }
+        paint(start.x + (cur.x - start.x) * e, start.y + (cur.y - start.y) * e, start.s + (cur.s - start.s) * e);
+        if (p < 1) ghRaf.current = requestAnimationFrame(step);
+      };
+      ghRaf.current = requestAnimationFrame(step);
+      setGhReady(true);
+    },
+    [ghMeasure],
+  );
+
+  /* 挂载：浮层直接就位（同一帧内与品牌槽位静态图标交棒，无闪跳） */
+  useIsoLayoutEffect(() => {
+    ghAnimate(0);
+    return () => cancelAnimationFrame(ghRaf.current);
+  }, [ghAnimate]);
+
+  /* 收紧状态切换：浮层平滑飞向新槽位（挂载首轮已由上面 effect 直接就位） */
+  useIsoLayoutEffect(() => {
+    if (ghFirstRun.current) {
+      ghFirstRun.current = false;
+      return;
+    }
+    ghAnimate(320);
+  }, [compact, ghAnimate]);
+
+  /* 窗口尺寸变化：槽位整体跳变，直接就位不补间 */
+  useEffect(() => {
+    const onResize = () => ghAnimate(0);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [ghAnimate]);
+
+  /* 字体晚加载（display:swap）会挪动品牌宽度 → 槽位位移，加载完成后重新对位 */
+  useEffect(() => {
+    let cancelled = false;
+    void document.fonts?.ready?.then(() => {
+      if (!cancelled) ghAnimate(0);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [ghAnimate]);
 
   useEffect(() => {
     let raf = 0;
@@ -66,9 +188,13 @@ export default function Nav({ lang }: { lang: Lang }) {
         cache.h1 = cache.article?.querySelector("h1") ?? null;
         cache.ready = true;
       }
-      const compactNext = window.scrollY > 24;
+      const y = window.scrollY;
+      // 滞回收紧（2026-10-15）：只在单一阈值上跨线时状态来回闪换 → 收紧 >24 / 展开 <12；
       // 值没变就不 setState：否则每个滚动帧都会重渲染整张导航卡
-      setCompact((prev) => (prev === compactNext ? prev : compactNext));
+      setCompact((prev) => {
+        const next = prev ? y > 12 : y > 24;
+        return next === prev ? prev : next;
+      });
 
       const { article, prose, h1 } = cache;
       if (article && prose) {
@@ -149,22 +275,43 @@ export default function Nav({ lang }: { lang: Lang }) {
             Ting
           </Link>
 
-          {/* GitHub 图标 · 展开态（标题右侧；24px 与标题字号齐平，满对比度 ink） */}
-          {!compact ? (
+          {/* GitHub 浮层图标：单一节点（绝对定位），JS 逐帧设定 位置+缩放。
+              展开态停靠品牌右侧（24px），滚动收紧后平滑缩小并移到小标题之后（16px） */}
+          <div ref={ghLayerRef} className="pointer-events-none absolute inset-0 z-20">
             <Link
+              ref={ghFloatRef}
               href={SITE.links.github}
               target="_blank"
               rel="noreferrer"
               aria-label="GitHub"
               title="GitHub"
-              className="ml-2 inline-flex h-6 w-6 shrink-0 text-ink transition-all duration-300 hover:text-accent"
+              className={`pointer-events-auto absolute left-0 top-0 flex h-6 w-6 origin-top-left items-center justify-center text-ink transition-colors hover:text-accent ${
+                ghReady ? "" : "invisible"
+              }`}
+            >
+              <GitHubIcon className="h-full w-full" />
+            </Link>
+          </div>
+
+          {/* 槽位 1（展开态）：品牌右侧 24px 占位 + 静态图标兜底（SSR 首帧 / no-JS；浮层就位后隐去） */}
+          {!compact ? (
+            <Link
+              ref={ghBrandSlotRef}
+              href={SITE.links.github}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="GitHub"
+              title="GitHub"
+              className={`ml-2 inline-flex h-6 w-6 shrink-0 text-ink transition-colors hover:text-accent ${
+                ghReady ? "invisible" : ""
+              }`}
             >
               <GitHubIcon className="h-full w-full" />
             </Link>
           ) : null}
 
           {/* 中部信息区（仅收紧后浮现，窄屏隐藏）：当前页/文章标题 + 阅读进度。
-              收紧态 GitHub 小图标跟在标题文字之后——标题位置不变，间距 6px */}
+              收紧态 GitHub 图标停靠标题文字之后——此处常驻 16px 槽位，小标题截断版式与既有约定一致 */}
           <div
             aria-hidden={!compact}
             className={`hidden min-w-0 flex-1 px-2 transition-opacity duration-300 md:block ${
@@ -173,18 +320,7 @@ export default function Nav({ lang }: { lang: Lang }) {
           >
             <div className="flex items-center gap-1.5">
               <p className="min-w-0 truncate font-serif text-sm font-semibold">{info.title}</p>
-              {compact ? (
-                <Link
-                  href={SITE.links.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="GitHub"
-                  title="GitHub"
-                  className="inline-flex h-4 w-4 shrink-0 text-ink transition-all duration-300 hover:text-accent"
-                >
-                  <GitHubIcon className="h-full w-full" />
-                </Link>
-              ) : null}
+              <span ref={ghMidSlotRef} className="h-4 w-4 shrink-0" aria-hidden />
             </div>
             {info.pct !== null ? (
               <p className="font-mono text-[11px] leading-tight text-muted">
