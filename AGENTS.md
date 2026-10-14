@@ -122,8 +122,8 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 | 构建时 | `scripts/fetch-token-stats.mjs` 拉公开端点 → `content/arts/token-monitor.json`（快照；失败保留旧文件、不阻断构建——workers.dev 国内可达性因机器/时段而异，失败是预期内情况） |
 | 静态基线 | `content/arts/token-monitor-history.json` = dump-hub-history.ps1（**带密钥**，只在本机跑）从 `/api/history` 导出的全量历史（370 天滚动窗口；当前 65 天）。**建议每周重新生成提交一次**；密钥绝不进前端与仓库 |
 | 合并 | `lib/arts.ts` 的 `getTokenMonitor()`：静态基线铺底，实时快照按 date/month upsert 覆盖——三处挂载（侧栏 / 关于页 / 明细页）**同源同数** |
-| 前端 | `components/TokenMonitor.tsx`（client，三变体 aside/grid/full）：**云端优先**（Ting 2026-10-14 定，治双闪）——首帧实时槽位显示骨架（`tm-pending`，快照数字 opacity 0 留在 DOM 供爬虫/no-JS），挂载即拉（10s 超时），成功显实时值、失败才显构建快照（标注数据时间）；之后模块级单例轮询 30s（后台标签页暂停、切回立即刷新、in-flight 去重），失败保留 last-good 不闪空 |
-| 展示位置 | 首页侧栏紧凑卡 + 关于页摘要栅格（与「站点数据」同篇幅）+ 看板子页 `/arts/stats/tokens`（完整：图表/按工具/摘要/口径脚注，zh/en） |
+| 前端 | `components/TokenMonitor.tsx`（client，三变体 aside/grid/full）：**云端优先**（Ting 2026-10-14 定，治双闪）——首帧实时槽位显示骨架（`tm-pending`，快照数字 opacity 0 留在 DOM 供爬虫/no-JS），挂载即拉（10s 超时），成功显实时值、失败才显构建快照（标注数据时间）；之后模块级单例轮询 **90s**（Ting 2026-10-14 定；后台标签页暂停、切回立即刷新、in-flight 去重），失败保留 last-good 不闪空 |
+| 展示位置 | 首页侧栏紧凑卡 + 关于页摘要栅格（与「站点数据」同篇幅）+ 看板子页 `/arts/stats/tokens`（完整：三周期 + 近 30 天柱状 + **日用量热力图**（周一开列、朱红 5 档）+ **近 12 个月累计折线** + **按模型两列** + 摘要 chips，zh/en） |
 | 本地化 | token 单位 M/B 紧凑（精确值在 title tooltip）；货币 en=$ / zh=≈¥（`USD_TO_CNY=7.2` 固定汇率）；时间 zh=北京时间 / en=美国东部 EDT·EST（`fmtHubTime` 手写 DST 判定） |
 | 部署与凭据 | kit 全量存档（指南/部署报告/同步方案/两个 ps1/演示页/credentials）在 `.workbuddy/token-monitor-kit/`（**本地，gitignored——ps1 与 credentials 内含 hub 密钥，严禁进公开仓库**） |
 | 部署与凭据 | kit 全量存档（指南/部署报告/同步方案/两个 ps1/演示页/credentials）在 `.workbuddy/token-monitor-kit/`（**本地，gitignored——ps1 与 credentials 内含 hub 密钥，严禁进公开仓库**） |
