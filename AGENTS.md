@@ -39,7 +39,7 @@ app/
 ├── sitemap.ts / robots.ts
 ├── feed.xml/route.ts     # 中文 RSS（en 版在 (en)/en/feed.xml/route.ts）
 └── favicon.svg
-components/               # Nav / Footer / ThemeToggle / Kicker / ArticleList / ArticleDetail / WorkList / MarkdownBody / Giscus / NowPlayingLive / EmbedPlayer / LifeEntryList / GameSourceList / Analytics
+components/               # Nav / Footer / ThemeToggle / Kicker / ArticleList / ArticleDetail / WorkList / MarkdownBody / Giscus / NowPlayingLive / EmbedPlayer / LifeEntryList / GameSourceList / Analytics / TokenMonitor
 content/
 ├── research/{zh,en}/*.md     # 研思文章
 ├── chronicles/{zh,en}/*.md   # 纪事文章
@@ -50,6 +50,8 @@ content/
     ├── lastfm.json           # 构建时生成（实时收听快照，勿手改）
     ├── stats-history.json    # 构建时生成（月度快照：games/steam/wegame/epic/screen，勿手改）
     ├── lastfm-monthly.json / netease-monthly.json  # 构建时生成（听歌月度，勿手改）
+    ├── token-monitor.json     # 构建时生成（hub 实时快照：三周期+30d/12mo，勿手改）
+    ├── token-monitor-history.json  # 静态全量基线（dump-hub-history.ps1 每周导出，65→370 天）
     ├── wegame-games.json / epic-games.json          # 人工报数（Ting 周更，Buddy 改数字）
     ├── games/{zh,en}/*.md    # 游戏条目（手动精选）
     ├── screen/{zh,en}/*.md   # 影卷条目（剧 / 番 / 影 / 小说）
@@ -70,6 +72,7 @@ scripts/
 ├── fetch-now.mjs         # 构建前拉 Last.fm 快照 + 生成封面映射（prebuild 链路）
 ├── fetch-monthly.mjs     # 构建前拉月度快照（Steam/WeGame/Epic/网易云听歌 → stats-history 等）
 ├── fetch-playlist.mjs    # 构建前拉网易云歌单全量曲目（v6 playlist detail + v3 song detail）
+├── fetch-token-stats.mjs # 构建前拉 Token Monitor hub 多端聚合（免密钥公开端点，失败保留旧快照）
 ├── push-now.mjs          # 本机常驻：推送实时「正在听」到 now-data 分支（npm run live）
 └── deploy.sh             # 一键发布：构建 → 推 gh-pages → 触发 Pages 构建
 ```
@@ -91,7 +94,7 @@ scripts/
 
 ```bash
 npm run dev                      # 开发（建议在普通终端跑，见环境注意）
-npm run build                    # 构建（fetch-now → fetch-monthly → fetch-playlist → next build → postbuild 生成 404.html）
+npm run build                    # 构建（fetch-now → fetch-monthly → fetch-playlist → fetch-token-stats → next build → postbuild 生成 404.html）
 python scripts/preview.py 8000   # 预览构建产物（clean URL）
 npm run og                       # 重新生成分享卡片图
 npm run live                     # 启动「正在听」实时推送（本机常驻，见下）
@@ -108,6 +111,19 @@ bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → �
 | 构建时 | `scripts/fetch-now.mjs` 生成快照与封面映射（`public/covers.json` + `public/covers/*.jpg`，最近 50 首） |
 | 本机启动 | Ting 侧**双击 `start-live.cmd`**（Node 装在 WorkBuddy 隔离目录，其终端里没有 `npm`） |
 | 为什么这么绕 | 浏览器无法直连网易云接口（无 CORS）、iTunes 等替代源对日韩文歌匹配不准、Last.fm 已停供封面；jsDelivr 的 purge 有 720 秒限流，不适合承载高频更新数据 |
+
+## 「Token 用量」的数据链路（2026-10-14 上线）
+
+Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本机）合并到一台 **Cloudflare Worker hub**（`https://token-monitor-hub.saikouting004.workers.dev`，上游项目 [Javis603/token-monitor](https://github.com/Javis603/token-monitor) v0.64.0），本站关于页与首页侧栏展示聚合结果。
+
+| 层 | 说明 |
+|---|---|
+| 数据源 | hub `/api/public/stats`——**唯一免密钥路由**（Worker 开了 `PUBLIC_STATS_ENABLED=1`），CORS `*`，`cache-control: max-age=15`；已剥离 devices / 项目标识 / 账号，只留 deviceCount + periods（today/month/allTime）+ historyPreview（30 天日序列 + 12 个月月序列）+ updatedAt/staleAfterMs |
+| 构建时 | `scripts/fetch-token-stats.mjs` 拉公开端点 → `content/arts/token-monitor.json`（快照；失败保留旧文件、不阻断构建——workers.dev 国内可达性因机器/时段而异，失败是预期内情况） |
+| 静态基线 | `content/arts/token-monitor-history.json` = dump-hub-history.ps1（**带密钥**，只在本机跑）从 `/api/history` 导出的全量历史（370 天滚动窗口；当前 65 天）。**建议每周重新生成提交一次**；密钥绝不进前端与仓库 |
+| 合并 | `lib/arts.ts` 的 `getTokenMonitor()`：静态基线铺底，实时快照按 date/month upsert 覆盖——关于页与侧栏卡**同源同数** |
+| 前端 | `components/TokenMonitor.tsx`（client）：模块级单例轮询器（30s，服务端缓存 15s；后台标签页暂停、切回立即刷新）；失败保留 last-good，连续 2 次失败显示「hub 离线 · 显示快照」，绝不闪空 |
+| 部署与凭据 | kit 全量存档（指南/部署报告/同步方案/两个 ps1/演示页/credentials）在 `.workbuddy/token-monitor-kit/`（**本地，gitignored——ps1 与 credentials 内含 hub 密钥，严禁进公开仓库**） |
 
 ## 环境注意事项（WorkBuddy 会话内，详细见 PITFALLS.md）
 

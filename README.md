@@ -26,7 +26,7 @@ Ting 的个人网站——一本双语「个人杂志」，五栏：研思 / 造
 ```bash
 npm install
 npm run dev                      # 开发服务器 http://localhost:3000
-npm run build                    # 静态导出到 out/（fetch-now → fetch-monthly → fetch-playlist → next build → postbuild；含 sitemap/robots/RSS/404 生成）
+npm run build                    # 静态导出到 out/（fetch-now → fetch-monthly → fetch-playlist → fetch-token-stats → next build → postbuild；含 sitemap/robots/RSS/404 生成）
 python scripts/preview.py 8000   # 预览构建产物（支持 clean URL）
 npm run og                       # 重新生成分享卡片图 public/og.png
 ```
@@ -55,6 +55,7 @@ npm run og                       # 重新生成分享卡片图 public/og.png
   - 运动：`kind`（run/bodyweight/other）/ `duration`（分钟）/ `distance`（公里）/ `note`
   - 音律 cover：`instrument` / `bilibili`（BV 号）/ `date` / `order`（展示顺序，升序）
 - 常驻歌单：`content/arts/now.json`（分区标签与外链配置）+ `content/arts/playlist.json`（全量曲目，`scripts/fetch-playlist.mjs` 构建时拉取，勿手改）
+- Token 用量：`content/arts/token-monitor.json`（hub 实时快照，构建时拉取）+ `content/arts/token-monitor-history.json`（静态全量基线，每周导出刷新）——详见下文「Token 用量」节
 
 > frontmatter 注意：日期要加引号；值里含 ASCII 冒号+空格（`: `）时整段加引号。
 > 「按性质不按题材」归栏：推导/复盘→研思，叙事/随笔→纪事，产物→造物，消费文娱→游艺。
@@ -108,3 +109,14 @@ npm run live -- --interval 10   # 自定义间隔
 - 配置：`.env.local` 需有 `LASTFM_API_KEY` / `LASTFM_USER` / `GITHUB_TOKEN`（`GITHUB_TOKEN` 用 `gh auth token` 获取）；另含 `NETEASE_MUSIC_U`（听歌统计）、`STEAM_API_KEY` / `STEAM_ID`（游戏时长）
 - 脚本只在**切歌时**推送（无变化不产生提交），不会刷提交历史
 - **不开脚本时**网站自动降级：Last.fm 直连取曲目 + 构建时封面映射表（`public/covers.json`）
+
+## Token 用量（hub 实时聚合）
+
+关于页与首页侧栏的「TOKEN 用量」，展示两台电脑上各 AI 工具用量的**多端聚合**——数据来自 Ting 自建的 Cloudflare Worker hub（上游项目 [Javis603/token-monitor](https://github.com/Javis603/token-monitor)）：
+
+- **实时部分**：前端每 30 秒直拉 hub 公开端点 `/api/public/stats`（免密钥、CORS 开放、服务端缓存 15 秒）；hub 不可达时保留最近一次的值，并显示「hub 离线 · 显示快照」
+- **构建时快照**：`scripts/fetch-token-stats.mjs` 每次构建拉一次写 `content/arts/token-monitor.json`（拉取失败保留旧文件，不阻断构建）
+- **全量历史**：`content/arts/token-monitor-history.json`（日序列 370 天滚动窗口）由本机脚本 `dump-hub-history.ps1`（带密钥）每周导出，**建议每周重新生成并提交一次**；超窗历史靠每周刷新 + localStorage 累积不丢
+- **安全**：hub 密钥只在本机脚本与 widget 里，不进前端、不进仓库；公开端点已剥离设备与账号标识
+
+> hub 部署全过程、凭据存档与维护命令见 `.workbuddy/token-monitor-kit/`（本地目录，含密钥文件，**勿提交**）。
