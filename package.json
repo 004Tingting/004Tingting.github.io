@@ -8,7 +8,8 @@
     "start": "next start",
     "og": "node scripts/og.mjs",
     "now": "node scripts/fetch-now.mjs",
-    "live": "node scripts/push-now.mjs"
+    "live": "node scripts/push-now.mjs",
+    "token-snapshot": "node scripts/push-token-snapshot.mjs"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.2.5",
