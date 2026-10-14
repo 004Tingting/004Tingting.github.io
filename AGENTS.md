@@ -119,7 +119,7 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 | 层 | 说明 |
 |---|---|
 | 数据源 | hub `/api/public/stats`——**唯一免密钥路由**（Worker 开了 `PUBLIC_STATS_ENABLED=1`），CORS `*`，`cache-control: max-age=15`；已剥离 devices / 项目标识 / 账号，只留 deviceCount + periods（today/month/allTime）+ historyPreview（30 天日序列 + 12 个月月序列）+ updatedAt/staleAfterMs |
-| 快照仓库 | **`004Tingting/token-monitor-data`**（public，Ting 2026-10-14 拍板单开）：`token-monitor.json`（normalized 快照）+ `refresh.mjs` + 15 分钟定时工作流（**workflow scope 授权后启用**）；`npm run token-snapshot`（`scripts/push-token-snapshot.mjs`）手动拉一次 hub 推送。代理通道 gh-proxy / gh.llkk（无缓存）+ jsDelivr（兜底）实测可达 |
+| 快照仓库 | **`004Tingting/token-monitor-data`**（public，Ting 2026-10-14 拍板单开）：`token-monitor.json`（normalized 快照）+ `refresh.mjs` + **15 分钟定时工作流（已启用，2026-10-14 22:03 手动触发验证通过）**；`npm run token-snapshot`（`scripts/push-token-snapshot.mjs`）手动补刀。代理通道 gh-proxy / gh.llkk（无缓存）+ jsDelivr（兜底）实测可达 |
 | 构建时 | `scripts/fetch-token-stats.mjs` **仓库优先**（Contents API + .env.local 的 GITHUB_TOKEN，构建机对 api.github.com 可达性通常好于 workers.dev）→ hub 直连 → 保留旧文件不阻断构建；产物 `content/arts/token-monitor.json` |
 | 静态基线 | `content/arts/token-monitor-history.json` = dump-hub-history.ps1（**带密钥**，只在本机跑）从 `/api/history` 导出的全量历史（370 天滚动窗口；当前 65 天）。**建议每周重新生成提交一次**；密钥绝不进前端与仓库 |
 | 合并 | `lib/arts.ts` 的 `getTokenMonitor()`：静态基线铺底，实时快照按 date/month upsert 覆盖——三处挂载（侧栏 / 关于页 / 明细页）**同源同数** |

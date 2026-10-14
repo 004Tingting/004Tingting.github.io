@@ -115,7 +115,7 @@ npm run live -- --interval 10   # 自定义间隔
 关于页摘要、首页侧栏与看板子页 `/arts/stats/tokens` 的「TOKEN 用量」，展示两台电脑上各 AI 工具用量的**多端聚合**——数据来自 Ting 自建的 Cloudflare Worker hub（上游项目 [Javis603/token-monitor](https://github.com/Javis603/token-monitor)）：
 
 - **三层取数**（Ting 2026-10-14 定）：页面加载先拉 hub 公开端点 `/api/public/stats`（免密钥，**2 秒超时**）→ 拉不到读**快照仓库** `004Tingting/token-monitor-data`（经 gh-proxy / gh.llkk 等国内可达代理，15 分钟自动刷新）→ 再不行用构建快照。每层都标注数据时间，不会先闪旧值再跳新值；加载成功后每 90 秒刷新一次
-- **快照仓库**：`004Tingting/token-monitor-data`（public）由 GitHub Actions 每 15 分钟自动拉取 hub 写入 `token-monitor.json`（工作流待 workflow scope 授权后启用；此前用 `npm run token-snapshot` 手动刷新——拉一次 hub 推送仓库）
+- **快照仓库**：`004Tingting/token-monitor-data`（public）由 GitHub Actions **每 15 分钟自动拉取** hub 写入 `token-monitor.json`（已上线，2026-10-14 手动触发验证通过）；手动补刀用 `npm run token-snapshot`（拉一次 hub 推送仓库）
 - **构建时**：`scripts/fetch-token-stats.mjs` **仓库优先**（Contents API，构建机对 api.github.com 的可达性通常好于 workers.dev）→ hub 直连 → 保留旧文件，不阻断构建
 - **全量历史**：`content/arts/token-monitor-history.json`（日序列 370 天滚动窗口）由本机脚本 `dump-hub-history.ps1`（带密钥）每周导出，**建议每周重新生成并提交一次**
 - **口径**：token 用 M/B 紧凑显示（悬停看精确值）；货币英文页为美元、中文页为人民币折算（1 美元 = 7.2 元，仅供参考）；时间英文页为美国东部（EDT/EST）、中文页为北京时间
