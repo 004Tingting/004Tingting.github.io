@@ -209,3 +209,36 @@ body {
 .dark .playlist-frame {
   color-scheme: dark;
 }
+
+/* Token Monitor 实时槽位骨架（云端优先取数）：
+   pending 时显骨架、真实值 opacity 0（仍留在 DOM 供爬虫与 no-JS——
+   no-JS 经组件内 <noscript> 样式恢复可见）；首帧永不闪离线旧值 */
+.tm-skel {
+  display: none;
+}
+.tm-pending .tm-real {
+  opacity: 0;
+}
+.tm-pending .tm-skel {
+  display: inline-block;
+  width: 3.2em;
+  height: 0.85em;
+  background: var(--color-rule);
+  border-radius: 1px;
+  vertical-align: -0.08em;
+  animation: tm-pulse 1.2s ease-in-out infinite;
+}
+@keyframes tm-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tm-pending .tm-skel {
+    animation: none;
+  }
+}

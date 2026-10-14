@@ -58,8 +58,8 @@ export default function AboutPage() {
         </Link>
       </section>
 
-      {/* Token Monitor：hub 多端 AI 工具用量（实时） */}
-      <TokenMonitor lang="zh" initial={token} variant="full" />
+      {/* Token Monitor：hub 多端 AI 工具用量（摘要栅格，明细在 /arts/stats/tokens） */}
+      <TokenMonitor lang="zh" initial={token} variant="grid" />
     </article>
   );
 }

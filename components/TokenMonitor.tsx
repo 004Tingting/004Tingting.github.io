@@ -1,26 +1,28 @@
 "use client";
 
 /**
- * Token Monitor：hub 多端 AI 工具用量聚合展示（关于页完整区 + 首页侧栏紧凑卡）。
+ * Token Monitor：hub 多端 AI 工具用量聚合展示。
+ * 三个变体：首页侧栏紧凑卡（aside）/ 关于页摘要栅格（grid，与「站点数据」同篇幅）/ 看板明细页（full）。
  *
- * 数据链路（与「正在听」同哲学——构建时快照兜底，前端实时刷新）：
- *   ① 服务端首帧：getTokenMonitor() 合并静态基线（token-monitor-history.json，370 天窗口）
- *      + 构建时快照（token-monitor.json，fetch-token-stats.mjs 拉公开端点）
- *   ② 前端轮询：每 30s 直拉 hub /api/public/stats（免密钥、CORS *、服务端缓存 15s），
- *      更新三周期与日序列；标签页不可见时暂停，切回立即刷新（同 NowPlayingLive）
- *   ③ 降级：轮询失败保留 last-good 值，连续 2 次失败显示「hub 离线」——绝不闪空
+ * 取数逻辑（Ting 2026-10-14 定：**先拉云端，拉不到再用离线快照**——避免先闪旧值再跳新值）：
+ *   ① 首帧 + hydration：实时槽位一律显示骨架（tm-pending）；SSR HTML 里保留快照数字
+ *      （opacity 0，不进视觉首帧；no-JS 经 <noscript> 样式恢复可见）
+ *   ② 挂载即拉 hub 公开端点（10s 超时）：成功 → 显示实时值（hub 在线）；失败 → 显示构建快照
+ *      （hub 离线 · 标注数据时间）；此后每 30s 轮询，成功切实时、失败保留 last-good 不闪空
+ *   ③ 静态图表（30 天柱状 / 12 月折线 / 按工具）来自构建时合并数据，不参与轮询，首帧即出
  *
- * 共享单例轮询器：模块级订阅表 + 单 interval。两处挂载（不同路由不会同时出现，
- * 但同页多实例也只有一份轮询）；无订阅者时停表。
+ * 共享单例轮询器：模块级订阅表 + 单 interval（多处挂载只有一份轮询）；无订阅者时停表。
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { TOKEN_MONITOR } from "@/lib/site";
 import { dic, type Lang } from "@/lib/i18n";
 import MonthlyTrend from "@/components/MonthlyTrend";
 import {
-  fmtCostUsd,
+  fmtCost,
   fmtDayTick,
+  fmtHubTime,
   fmtMsHours,
   fmtTokensCompact,
   fmtTokensFull,
@@ -53,7 +55,10 @@ async function pollOnce(): Promise<void> {
   if (inFlight) return inFlight;
   inFlight = (async () => {
     try {
-      const res = await fetch(`${TOKEN_MONITOR.hub}/api/public/stats`, { cache: "no-store" });
+      const res = await fetch(`${TOKEN_MONITOR.hub}/api/public/stats`, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(10_000),
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const s = (await res.json()) as Record<string, unknown>;
       const rawPeriods = s.periods as Record<string, Record<string, unknown>> | undefined;
@@ -110,20 +115,13 @@ function subscribe(fn: Subscriber): () => void {
   };
 }
 
-/* ---------- 工具 ---------- */
-
-/** ISO → HH:mm（UTC 直切，避免服务端/客户端时区差异导致 hydration 不一致） */
-function hhmmUtc(iso: string): string {
-  return iso.length >= 16 && iso[10] === "T" ? iso.slice(11, 16) : iso.slice(0, 10);
-}
-
 /* ---------- 组件 ---------- */
 
 type Props = {
   lang: Lang;
-  /** 服务端合并视图（getTokenMonitor）——两处挂载同源，杜绝数字不一致 */
+  /** 服务端合并视图（getTokenMonitor）——实时槽位的离线兜底 + 静态图表数据 */
   initial: TokenMonitorData;
-  variant: "aside" | "full";
+  variant: "aside" | "grid" | "full";
 };
 
 export default function TokenMonitor({ lang, initial, variant }: Props) {
@@ -132,18 +130,26 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
   const [deviceCount, setDeviceCount] = useState<number | null>(initial.deviceCount);
   const [updatedAt, setUpdatedAt] = useState<string | null>(initial.updatedAt);
   const [daily, setDaily] = useState<TokenDay[]>(initial.daily);
-  const [fails, setFails] = useState(0);
-  const [polled, setPolled] = useState(false);
+  /** 首次轮询结果未回来 → 实时槽位显示骨架（云端优先，不先露离线旧值） */
+  const [pending, setPending] = useState(true);
+  /** 最近一次轮询是否成功；null = 还没结果 */
+  const [lastOk, setLastOk] = useState<boolean | null>(null);
+  /** 最近一次成功拿到实时数据的时刻（离线时说明数据停更点） */
+  const [liveAt, setLiveAt] = useState<string | null>(null);
 
   useEffect(
     () =>
       subscribe((r) => {
-        setPolled(true);
+        setPending(false);
         if (!r.ok) {
-          setFails((f) => f + 1);
+          setLastOk(false);
           return;
         }
-        if (r.periods) setPeriods(r.periods);
+        setLastOk(true);
+        if (r.periods) {
+          setPeriods(r.periods);
+          if (r.updatedAt) setLiveAt(r.updatedAt);
+        }
         if (r.deviceCount !== null) setDeviceCount(r.deviceCount);
         if (r.updatedAt) setUpdatedAt(r.updatedAt);
         if (r.daily.length) {
@@ -153,23 +159,43 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
             return [...map.values()].sort((a, b) => a.date.localeCompare(b.date));
           });
         }
-        setFails(0);
       }),
     [],
   );
 
-  const offline = polled && fails >= 2;
-  const status = offline
-    ? t.offline
-    : [
-        polled ? t.online : null,
+  /* 状态行：在线（实时）／离线（last-good：实时停更于 X 或 构建快照 X） */
+  const status = (() => {
+    if (pending) return null;
+    if (lastOk) {
+      return [
+        t.online,
         deviceCount !== null ? `${deviceCount} ${t.devicesSuffix}` : null,
-        updatedAt ? `${t.updatedAt} ${hhmmUtc(updatedAt)} UTC` : null,
+        updatedAt ? `${t.updatedAt} ${fmtHubTime(updatedAt, lang)}` : null,
       ]
         .filter(Boolean)
         .join(" · ");
+    }
+    if (liveAt) return `${t.offline} · ${t.staleLive} ${fmtHubTime(liveAt, lang)}`;
+    return `${t.offline} · ${t.staleSnapshot} ${
+      initial.updatedAt ? fmtHubTime(initial.updatedAt, lang) : "—"
+    }`;
+  })();
 
-  const dot = <span className={offline ? "text-muted" : "text-accent"}>{offline ? "○" : "●"}</span>;
+  const dot = (
+    <span className={pending || lastOk === false ? "text-muted" : "text-accent"}>
+      {lastOk === false ? "○" : "●"}
+    </span>
+  );
+
+  /** 实时槽位骨架：pending 时显骨架、隐藏真实值（真实值留在 DOM 供 no-JS/爬虫） */
+  const live = (node: ReactNode) => (
+    <>
+      <span className="tm-real">{node}</span>
+      <span className="tm-skel" aria-hidden />
+    </>
+  );
+
+  const pendingCls = pending ? "tm-pending" : undefined;
 
   /* ---------- 侧栏紧凑卡 ---------- */
   if (variant === "aside") {
@@ -178,20 +204,49 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
         <p className="font-mono text-xs tracking-widest text-muted">
           <span className="text-accent">·</span> {t.kicker}
         </p>
-        <dl className="mt-2.5 space-y-1.5">
-          <AsideRow label={t.today} period={periods?.today ?? null} lead />
-          <AsideRow label={t.month} period={periods?.month ?? null} />
-          <AsideRow label={t.allTime} period={periods?.allTime ?? null} />
+        <dl className={`mt-2.5 space-y-1.5 ${pendingCls ?? ""}`}>
+          <AsideRow lang={lang} t={t} label={t.today} period={periods?.today ?? null} live={live} lead />
+          <AsideRow lang={lang} t={t} label={t.month} period={periods?.month ?? null} live={live} />
+          <AsideRow lang={lang} t={t} label={t.allTime} period={periods?.allTime ?? null} live={live} />
         </dl>
-        <p className="mt-2 flex items-center gap-1.5 font-mono text-[11px] leading-snug text-muted">
+        <p className={`mt-2 flex items-center gap-1.5 font-mono text-[11px] leading-snug text-muted ${pendingCls ?? ""}`}>
           {dot}
-          <span className="min-w-0">{status}</span>
+          {live(<span className="min-w-0">{status}</span>)}
         </p>
+        <NoScriptFallback />
       </section>
     );
   }
 
-  /* ---------- 关于页完整区 ---------- */
+  /* ---------- 关于页摘要栅格（与「站点数据」同篇幅） ---------- */
+  if (variant === "grid") {
+    const detailHref = lang === "zh" ? "/arts/stats/tokens" : "/en/arts/stats/tokens";
+    return (
+      <section className="mt-14 border-t border-rule pt-10">
+        <h2 className="font-mono text-sm tracking-widest text-muted">
+          <span className="text-accent">·</span> {t.kicker}
+        </h2>
+        <div className={`mt-6 grid grid-cols-3 gap-x-8 gap-y-5 ${pendingCls ?? ""}`}>
+          <GridPeriod lang={lang} t={t} label={t.today} period={periods?.today ?? null} live={live} />
+          <GridPeriod lang={lang} t={t} label={t.month} period={periods?.month ?? null} live={live} />
+          <GridPeriod lang={lang} t={t} label={t.allTime} period={periods?.allTime ?? null} live={live} />
+        </div>
+        <p className={`mt-5 flex items-center gap-1.5 font-mono text-xs text-muted ${pendingCls ?? ""}`}>
+          {dot}
+          {live(status)}
+        </p>
+        <Link
+          href={detailHref}
+          className="mt-6 inline-block font-mono text-sm text-accent hover:underline"
+        >
+          {t.detailLink} →
+        </Link>
+        <NoScriptFallback />
+      </section>
+    );
+  }
+
+  /* ---------- 看板明细页 ---------- */
   const monthly = initial.monthly;
   const s = initial.summary;
   const chips = [
@@ -203,30 +258,25 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
   ].filter(Boolean);
 
   return (
-    <section className="mt-14 border-t border-rule pt-10">
-      <h2 className="font-mono text-sm tracking-widest text-muted">
-        <span className="text-accent">·</span> {t.kicker}
-      </h2>
-      <p className="mt-3 max-w-2xl text-sm text-muted">{t.intro}</p>
-
-      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
-        <BigPeriod label={t.today} period={periods?.today ?? null} />
-        <BigPeriod label={t.month} period={periods?.month ?? null} />
-        <BigPeriod label={t.allTime} period={periods?.allTime ?? null} />
-      </div>
-
-      <p className="mt-5 flex items-center gap-1.5 font-mono text-xs text-muted">
+    <div>
+      <p className={`flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-muted ${pendingCls ?? ""}`}>
         {dot}
-        {status}
+        {live(status)}
       </p>
 
-      {/* 近 30 天柱状（朱红 = 今日） */}
+      <div className={`mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3 ${pendingCls ?? ""}`}>
+        <BigPeriod lang={lang} t={t} label={t.today} period={periods?.today ?? null} live={live} />
+        <BigPeriod lang={lang} t={t} label={t.month} period={periods?.month ?? null} live={live} />
+        <BigPeriod lang={lang} t={t} label={t.allTime} period={periods?.allTime ?? null} live={live} />
+      </div>
+
+      {/* 近 30 天柱状（朱红 = 今日；静态数据，首帧即出） */}
       <div className="mt-12">
         <div className="flex items-baseline justify-between gap-2">
           <h3 className="font-serif text-sm font-semibold">{t.dailyLabel}</h3>
           <span className="font-mono text-[11px] text-muted">{t.unitDay}</span>
         </div>
-        <DailyBars days={daily.slice(-30)} emptyNote={t.emptyDaily} />
+        <DailyBars days={daily.slice(-30)} emptyNote={t.emptyDaily} lang={lang} />
       </div>
 
       {/* 近 12 个月折线（复用看板同款组件） */}
@@ -276,41 +326,108 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
       ) : null}
 
       {chips.length > 0 ? <p className="mt-8 font-mono text-xs text-muted">{chips.join(" · ")}</p> : null}
-    </section>
+
+      {/* 口径说明：货币 / 时区 / 数据来源 */}
+      <p className="mt-8 border-t border-rule pt-4 text-xs leading-relaxed text-muted">{t.footNote}</p>
+      <NoScriptFallback />
+    </div>
+  );
+}
+
+/** no-JS 时恢复显示 SSR 里的快照数字（骨架仅服务于「先拉云端」的交互逻辑） */
+function NoScriptFallback() {
+  return (
+    <noscript>
+      <style>{".tm-pending .tm-real{opacity:1}.tm-pending .tm-skel{display:none}"}</style>
+    </noscript>
   );
 }
 
 /* ---------- 子组件 ---------- */
 
+type RowT = Record<keyof typeof dic.zh.tokenMonitor, string>;
+type LiveFn = (node: ReactNode) => ReactNode;
+
 function AsideRow({
+  lang,
+  t,
   label,
   period,
+  live,
   lead = false,
 }: {
+  lang: Lang;
+  t: RowT;
   label: string;
   period: TokenPeriod | null;
+  live: LiveFn;
   lead?: boolean;
 }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
       <dt className="shrink-0 font-mono text-xs text-muted">{label}</dt>
-      <dd className="font-mono text-sm tabular-nums" title={period ? fmtTokensFull(period.totalTokens) : undefined}>
-        {period ? (
-          <>
-            <span className={lead ? "font-semibold" : undefined}>{fmtTokensCompact(period.totalTokens)}</span>
-            <span className="ml-1.5 font-mono text-[11px] font-normal text-muted">
-              {fmtCostUsd(period.costUsd)}
-            </span>
-          </>
-        ) : (
-          <span className="text-muted">—</span>
+      <dd
+        className="font-mono text-sm tabular-nums"
+        title={period ? fmtTokensFull(period.totalTokens) : undefined}
+      >
+        {live(
+          period ? (
+            <>
+              <span className={lead ? "font-semibold" : undefined}>{fmtTokensCompact(period.totalTokens)}</span>
+              <span className="ml-1.5 font-mono text-[11px] font-normal text-muted">
+                {fmtCost(period.costUsd, lang)}
+              </span>
+            </>
+          ) : (
+            <span className="text-muted">—</span>
+          ),
         )}
       </dd>
     </div>
   );
 }
 
-function BigPeriod({ label, period }: { label: string; period: TokenPeriod | null }) {
+/** 关于页栅格项（与「站点数据」同款式：衬线大数字 + 等宽标签） */
+function GridPeriod({
+  lang,
+  t,
+  label,
+  period,
+  live,
+}: {
+  lang: Lang;
+  t: RowT;
+  label: string;
+  period: TokenPeriod | null;
+  live: LiveFn;
+}) {
+  return (
+    <div>
+      <p
+        className="font-serif text-2xl font-bold tabular-nums"
+        title={period ? fmtTokensFull(period.totalTokens) : undefined}
+      >
+        {live(period ? fmtTokensCompact(period.totalTokens) : "—")}
+      </p>
+      <p className="mt-0.5 font-mono text-xs text-muted">{label}</p>
+      <p className="font-mono text-xs text-muted">{live(period ? fmtCost(period.costUsd, lang) : "—")}</p>
+    </div>
+  );
+}
+
+function BigPeriod({
+  lang,
+  t,
+  label,
+  period,
+  live,
+}: {
+  lang: Lang;
+  t: RowT;
+  label: string;
+  period: TokenPeriod | null;
+  live: LiveFn;
+}) {
   return (
     <div>
       <p className="font-mono text-xs text-muted">{label}</p>
@@ -318,15 +435,15 @@ function BigPeriod({ label, period }: { label: string; period: TokenPeriod | nul
         className="mt-1 font-serif text-3xl font-bold tabular-nums"
         title={period ? fmtTokensFull(period.totalTokens) : undefined}
       >
-        {period ? fmtTokensCompact(period.totalTokens) : "—"}
+        {live(period ? fmtTokensCompact(period.totalTokens) : "—")}
       </p>
-      <p className="mt-0.5 font-mono text-xs text-muted">{period ? fmtCostUsd(period.costUsd) : "—"}</p>
+      <p className="mt-0.5 font-mono text-xs text-muted">{live(period ? fmtCost(period.costUsd, lang) : "—")}</p>
     </div>
   );
 }
 
 /** 近 30 天柱状（杂志风 SVG，零依赖；朱红 = 今日，其余墨色） */
-function DailyBars({ days, emptyNote }: { days: TokenDay[]; emptyNote: string }) {
+function DailyBars({ days, emptyNote, lang }: { days: TokenDay[]; emptyNote: string; lang: Lang }) {
   if (days.length === 0) {
     return <p className="mt-4 font-mono text-xs text-muted">{emptyNote}</p>;
   }
@@ -354,7 +471,7 @@ function DailyBars({ days, emptyNote }: { days: TokenDay[]; emptyNote: string })
             height={Math.max(h, 1.5)}
             className={isToday ? "fill-accent" : d.tokens > 0 ? "fill-ink/25" : "fill-ink/10"}
           >
-            <title>{`${d.date} · ${fmtTokensFull(d.tokens)} tokens · ${fmtCostUsd(d.cost)}`}</title>
+            <title>{`${d.date} · ${fmtTokensFull(d.tokens)} tokens · ${fmtCost(d.cost, lang)}`}</title>
           </rect>
         );
       })}

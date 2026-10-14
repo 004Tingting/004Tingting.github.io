@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getGameHoursFull, getCovers, getExercise, getGames, getMonthlyTrends, getScreen, getStats } from "@/lib/arts";
+import { getGameHoursFull, getCovers, getExercise, getGames, getMonthlyTrends, getScreen, getStats, getTokenMonitor } from "@/lib/arts";
 import { fmtScreenHours } from "@/lib/arts-shared";
 import Kicker from "@/components/Kicker";
 import MonthlyTrend from "@/components/MonthlyTrend";
+import TokenMonitor from "@/components/TokenMonitor";
 
 export const metadata: Metadata = { title: "Stats" };
 
@@ -227,6 +228,9 @@ export default function StatsPage() {
         </div>
         <p className="mt-4 max-w-2xl text-xs text-muted">{st.musicNote}</p>
       </section>
+
+      {/* Token usage: hub multi-device aggregation (summary grid carries its own details link) */}
+      <TokenMonitor lang="en" initial={getTokenMonitor()} variant="grid" />
     </div>
   );
 }

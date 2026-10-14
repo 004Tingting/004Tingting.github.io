@@ -58,8 +58,8 @@ export default function AboutPage() {
         </Link>
       </section>
 
-      {/* Token Monitor: multi-device AI tool usage from the hub (live) */}
-      <TokenMonitor lang="en" initial={token} variant="full" />
+      {/* Token Monitor: multi-device AI tool usage from the hub (summary grid; details at /en/arts/stats/tokens) */}
+      <TokenMonitor lang="en" initial={token} variant="grid" />
     </article>
   );
 }

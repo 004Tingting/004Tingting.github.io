@@ -317,6 +317,47 @@ export function fmtTokensCompact(n: number): string {
   return String(Math.round(n));
 }
 
+/** 美元 → 人民币折算汇率（hub 数据以美元计；中文页显示人民币观感，固定汇率避免每日波动） */
+export const USD_TO_CNY = 7.2;
+
+/** 成本展示：en = $162 / $12.30 / $0.066；zh = ≈¥1,169 / ≈¥561 / ≈¥33（固定汇率折算） */
+export function fmtCost(v: number, lang: Lang): string {
+  if (!Number.isFinite(v) || v <= 0) return lang === "zh" ? "≈¥0" : "$0";
+  if (lang === "zh") {
+    const cny = v * USD_TO_CNY;
+    const body = cny >= 100 ? Math.round(cny).toLocaleString("en-US") : cny >= 10 ? cny.toFixed(0) : cny.toFixed(1);
+    return `≈¥${body}`;
+  }
+  if (v >= 100) return `$${v.toFixed(0)}`;
+  if (v >= 1) return `$${v.toFixed(2)}`;
+  return `$${v.toFixed(3)}`;
+}
+
+/** 美国东部时间偏移（分钟，含 DST）：3 月第二个周日 ~ 11 月第一个周日为 EDT(-240)，其余 EST(-300) */
+function usEasternOffsetMin(d: Date): number {
+  const year = d.getUTCFullYear();
+  const nthSundayUtc = (month0: number, n: number, hourUtc: number) => {
+    const first = new Date(Date.UTC(year, month0, 1));
+    const day = 1 + ((7 - first.getUTCDay()) % 7) + (n - 1) * 7;
+    return Date.UTC(year, month0, day, hourUtc);
+  };
+  const dstStart = nthSundayUtc(2, 2, 7); // 3 月第二个周日 02:00 EST = 07:00 UTC
+  const dstEnd = nthSundayUtc(10, 1, 6); // 11 月第一个周日 02:00 EDT = 06:00 UTC
+  const t = d.getTime();
+  return t >= dstStart && t < dstEnd ? -240 : -300;
+}
+
+/** hub 时间戳 → 本地化「HH:MM 时区」：zh = 北京时间（UTC+8），en = 美国东部（EDT/EST，含 DST） */
+export function fmtHubTime(iso: string, lang: Lang): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso.slice(0, 10);
+  if (lang === "zh") {
+    return `${new Date(d.getTime() + 8 * 3_600_000).toISOString().slice(11, 16)} 北京时间`;
+  }
+  const off = usEasternOffsetMin(d);
+  return `${new Date(d.getTime() + off * 60_000).toISOString().slice(11, 16)} ${off === -240 ? "EDT" : "EST"}`;
+}
+
 /** token 精确显示（tooltip / 完整区用） */
 export function fmtTokensFull(n: number): string {
   return Number.isFinite(n) ? Math.round(n).toLocaleString("en-US") : "—";

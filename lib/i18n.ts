@@ -142,7 +142,7 @@ export const zh = {
     title: "关于",
     placeholder: "Ting。这一页在等它的内容——稍后再来。",
   },
-  /* Token Monitor：hub 多端 AI 工具用量（关于页完整区 + 首页侧栏紧凑卡） */
+  /* Token Monitor：hub 多端 AI 工具用量（关于页摘要栅格 + 首页侧栏紧凑卡 + 看板明细页） */
   tokenMonitor: {
     kicker: "TOKEN 用量",
     intro: "各处的 AI 工具用量上报同一个 hub，聚合后在此取数；今日、本月、累计均为多端合计，不再各算各账。",
@@ -151,7 +151,9 @@ export const zh = {
     allTime: "累计",
     devicesSuffix: "台设备",
     online: "hub 在线",
-    offline: "hub 离线 · 显示快照",
+    offline: "hub 离线",
+    staleLive: "实时数据停更于",
+    staleSnapshot: "显示构建快照",
     updatedAt: "更新于",
     dailyLabel: "近 30 天",
     unitDay: "tokens / 日",
@@ -166,6 +168,11 @@ export const zh = {
     messages: "条消息",
     peakDay: "峰值日",
     activeTime: "活跃时长",
+    detailLink: "Token 用量明细",
+    detailTitle: "Token 用量明细",
+    backToStats: "← 返回看板",
+    footNote:
+      "数字为多端合计，每 30 秒从 hub 拉取（hub 不可达时显示最近一次成功的数据，并标注时间）；人民币金额按 1 美元 = 7.2 元折算（≈），仅供参考；时间按北京时间显示，英文页按美国东部时间显示。",
   },
   footer: {
     colophon: "由 Next.js 构建 · 部署于 GitHub Pages",
@@ -314,7 +321,7 @@ export const en = {
     title: "About",
     placeholder: "Ting. This page is waiting for its content — check back later.",
   },
-  /* Token Monitor: multi-device AI tool usage from one hub (About section + homepage card) */
+  /* Token Monitor: multi-device AI tool usage from one hub (About summary grid + homepage card + stats detail page) */
   tokenMonitor: {
     kicker: "TOKEN USAGE",
     intro: "Token usage from the AI tools on both machines, reported to one hub and aggregated here. Today, this month and all-time are combined totals.",
@@ -323,7 +330,9 @@ export const en = {
     allTime: "All time",
     devicesSuffix: "devices",
     online: "hub online",
-    offline: "hub offline · showing snapshot",
+    offline: "hub offline",
+    staleLive: "live data stalled at",
+    staleSnapshot: "showing build snapshot",
     updatedAt: "Updated",
     dailyLabel: "Last 30 days",
     unitDay: "tokens / day",
@@ -338,6 +347,11 @@ export const en = {
     messages: "messages",
     peakDay: "Peak day",
     activeTime: "Active time",
+    detailLink: "Token usage details",
+    detailTitle: "Token Usage Details",
+    backToStats: "← Back to stats",
+    footNote:
+      "Combined across devices, refreshed from the hub every 30 seconds (when the hub is unreachable, the last successful figures are shown with their timestamp). Costs are in USD; the Chinese page shows an approximate RMB conversion at 7.2 CNY/USD. Times are shown in US Eastern (EDT/EST); the Chinese page uses Beijing time.",
   },
   footer: {
     colophon: "Built with Next.js · Hosted on GitHub Pages",
