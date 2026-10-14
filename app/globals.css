@@ -254,13 +254,20 @@ body {
      · 0–0.75s 图标缓动左移放大回位（固定目标 = 展开位缓存）。
    注意：transition 取目标状态的声明——收/放用不同延迟。 */
 .nav-brand {
+  /* 固定 px 行高（与 text-2xl 原生一致）：Tailwind v4 字号类的行高是比例值，切换类瞬间
+     会按「旧字号 × 新比例」计算（32 → 1.556×24 = 37.3 → 28），卡片被瞬间撑高 ±5px、
+     内容中心随之下跳（cdp-probe8 实测 2.7px）——固定 px 并纳入同一套过渡后消除 */
+  line-height: 2rem;
   transition:
     font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
+    line-height 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s,
     color 0.2s ease;
 }
 .nav-is-compact .nav-brand {
+  line-height: 1.75rem; /* 与 text-lg 原生一致 */
   transition:
     font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    line-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     color 0.2s ease;
 }
 .nav-gh-slot {

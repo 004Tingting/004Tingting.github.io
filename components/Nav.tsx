@@ -105,6 +105,17 @@ export default function Nav({ lang }: { lang: Lang }) {
     return { x: sr.left - lr.left, y: sr.top - lr.top, s: sr.width / GH_BASE };
   }, []);
 
+  /** 活动槽位中心的 Y（基准层局部）——不受宽度影响（左槽位收放期间宽度为 0，高度始终可测），纵向软跟随用 */
+  const ghSlotCenterY = useCallback((): number | null => {
+    const layer = ghLayerRef.current;
+    const slot = compactRef.current ? ghMidSlotRef.current : ghBrandSlotRef.current;
+    if (!layer || !slot) return null;
+    const lr = layer.getBoundingClientRect();
+    const sr = slot.getBoundingClientRect();
+    if (sr.height === 0) return null;
+    return sr.top + sr.height / 2 - lr.top;
+  }, []);
+
   /** 飞行目标：收紧 → 实时小标题槽位（随布局平滑滑动，逐帧重测）；
       展开 → 缓存的展开位（固定目标——左槽位此刻正在延迟展开，实时测量是过渡中间值，不可信） */
   const ghFlightTarget = useCallback((): { x: number; y: number; s: number } | null => {
@@ -155,22 +166,37 @@ export default function Nav({ lang }: { lang: Lang }) {
       const start = { ...ghCur.current };
       const fixed = compactRef.current ? null : target; // 展开：固定目标；收紧：逐帧重测
       const t0 = performance.now();
+      let prevNow = t0;
+      let yCur = start.y; // 纵向软跟随的当前值
       const step = (now: number) => {
         const p = Math.min(1, (now - t0) / duration);
-        // easeInOutCubic：前段缓住让标题先擦除、后段并入落位，与 CSS 编排同拍收尾
+        // easeInOutCubic：横向缓动（Ting 指定的 0.75s 渐变）
         const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
         const cur = fixed ?? ghFlightTarget();
         if (!cur) {
           hide();
           return;
         }
-        paint(start.x + (cur.x - start.x) * e, start.y + (cur.y - start.y) * e, start.s + (cur.s - start.s) * e);
+        const s = start.s + (cur.s - start.s) * e;
+        /* 纵向不与横向共用缓动：布局（文字行/槽位中心）按 300ms 曲线移动，
+           共用缓动会滞后于行中心（实测 ±7px 高度偏差）；改为帧率归一化指数软跟随，
+           逐帧贴住活动槽位中心，末帧精确落位 */
+        const cy = ghSlotCenterY();
+        const dt = Math.min(now - prevNow, 64);
+        prevNow = now;
+        if (cy !== null) {
+          yCur += (cy - 12 * s - yCur) * (1 - Math.exp(-dt / 22));
+          if (p >= 1) yCur = cy - 12 * s;
+        } else {
+          yCur = start.y + (cur.y - start.y) * e;
+        }
+        paint(start.x + (cur.x - start.x) * e, yCur, s);
         if (p < 1) ghRaf.current = requestAnimationFrame(step);
       };
       ghRaf.current = requestAnimationFrame(step);
       setGhReady(true);
     },
-    [ghMeasureLive, ghFlightTarget],
+    [ghMeasureLive, ghFlightTarget, ghSlotCenterY],
   );
 
   /* 挂载：浮层直接就位（同一帧内与品牌槽位静态图标交棒，无闪跳） */
@@ -345,7 +371,7 @@ export default function Nav({ lang }: { lang: Lang }) {
             <div className="flex items-center gap-1.5">
               {/* 标题：擦除式显隐（字符从左向右逐个呈现 / 从右向左逐个消失），见 globals.css */}
               <p className="nav-gh-title min-w-0 truncate font-serif text-sm font-semibold">{info.title}</p>
-              <span ref={ghMidSlotRef} className="h-4 w-4 shrink-0" aria-hidden />
+              <span ref={ghMidSlotRef} className="nav-mid-slot h-4 w-4 shrink-0" aria-hidden />
             </div>
             {info.pct !== null ? (
               <p className="nav-gh-sub font-mono text-[11px] leading-tight text-muted">
