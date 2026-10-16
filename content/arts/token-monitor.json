@@ -1,42 +1,24 @@
 {
   "source": "token-monitor-hub",
-  "fetchedAt": "2026-10-16T14:07:03.055Z",
-  "hubUpdatedAt": "2026-10-16T14:07:02.821Z",
+  "fetchedAt": "2026-10-16T17:00:23.272Z",
+  "hubUpdatedAt": "2026-10-16T17:00:22.761Z",
   "staleAfterMs": 600000,
   "deviceCount": 2,
   "periods": {
     "today": {
-      "totalTokens": 0,
-      "costUsd": 0
+      "totalTokens": 49106396,
+      "costUsd": 0.63967
     },
     "month": {
-      "totalTokens": 2276669726,
-      "costUsd": 85.75034
+      "totalTokens": 2806263986,
+      "costUsd": 101.584726
     },
     "allTime": {
-      "totalTokens": 6629904321,
-      "costUsd": 170.270205
+      "totalTokens": 7159976108,
+      "costUsd": 186.108516
     }
   },
   "daily": [
-    {
-      "date": "2026-09-13",
-      "tokens": 76915109,
-      "cost": 1.4397211439999997,
-      "activeTimeMs": 3623227
-    },
-    {
-      "date": "2026-09-14",
-      "tokens": 46972066,
-      "cost": 1.9086004339999993,
-      "activeTimeMs": 6014297
-    },
-    {
-      "date": "2026-09-15",
-      "tokens": 17767216,
-      "cost": 0.16516067999999998,
-      "activeTimeMs": 875587
-    },
     {
       "date": "2026-09-16",
       "tokens": 41038739,
@@ -195,9 +177,27 @@
     },
     {
       "date": "2026-10-14",
-      "tokens": 350316943,
-      "cost": 11.772465546,
-      "activeTimeMs": 22144819
+      "tokens": 370815381,
+      "cost": 14.64700185,
+      "activeTimeMs": 23643106
+    },
+    {
+      "date": "2026-10-15",
+      "tokens": 250541784,
+      "cost": 3.272153509,
+      "activeTimeMs": 11739697
+    },
+    {
+      "date": "2026-10-16",
+      "tokens": 210772987,
+      "cost": 9.690732626000003,
+      "activeTimeMs": 18159508
+    },
+    {
+      "date": "2026-10-17",
+      "tokens": 42561619,
+      "cost": 0.6083098199999999,
+      "activeTimeMs": 1690235
     }
   ],
   "monthly": [
@@ -221,9 +221,9 @@
     },
     {
       "month": "2026-10",
-      "tokens": 2273469937,
-      "cost": 85.1010552432,
-      "activeTimeMs": 212993811
+      "tokens": 2797844765,
+      "cost": 101.5467875022,
+      "activeTimeMs": 246081538
     }
   ]
 }
