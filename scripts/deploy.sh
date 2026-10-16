@@ -7,6 +7,8 @@
 #
 # 用法：bash scripts/deploy.sh
 # 说明：本地产物与线上完全一致（同一套源码 + 同一次构建）。
+# 推送自带备用通道（2026-10-17 加固）：gh-pages 直推失败 → API 通道（scripts/push-pages-api.mjs，
+#   只依赖 api.github.com）；快照推送 → scripts/push-remote.sh（直推失败自动转 SSH-over-443 临时密钥）。
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -48,6 +50,7 @@ git config core.autocrlf false
 git add -A
 git -c user.name="004Tingting" -c user.email="SaiKouTING004@outlook.com" \
   commit -q -m "deploy: $(date '+%Y-%m-%d %H:%M')" || echo "  （无变更）"
+cd ..
 
 # 推送：优先用 gh 的 token 直接推送
 # 原因：本机系统级配置了 credential.helper=helper-selector（WorkBuddy PortableGit），
@@ -65,29 +68,40 @@ fi
 # 关键：用 `-c credential.helper=` 在命令行覆盖（优先级最高），彻底禁用 credential helper。
 # 否则会被系统级 `credential.helper=helper-selector`（WorkBuddy PortableGit 注入）接管
 # → 弹 GUI 对话框 / 命令卡 1~2 分钟后被强杀（认证与保存凭据两个阶段各触发一次）。
+# 直推失败自动走备用通道（2026-10-17 加固：schannel 吊销检查故障时 HTTPS 直推必失败）：
+#   ① 直推 HTTPS → ② API 通道（Git Data 差分推 out/，只依赖 api.github.com）
+PUSHED=""
 if [ -n "$TOKEN" ]; then
-  git -c credential.helper= push -f -q "https://x-access-token:${TOKEN}@github.com/${REPO}.git" gh-pages
+  if git -C out -c credential.helper= push -f -q "https://x-access-token:${TOKEN}@github.com/${REPO}.git" gh-pages; then
+    PUSHED="直推"
+  elif GITHUB_TOKEN="$TOKEN" node scripts/push-pages-api.mjs; then
+    PUSHED="API 通道"
+  fi
 else
-  git -c credential.helper= push -f -q origin gh-pages
+  if git -C out -c credential.helper= push -f -q origin gh-pages; then
+    PUSHED="直推（origin）"
+  fi
 fi
-cd ..
+if [ -z "$PUSHED" ]; then
+  echo "  ✗ gh-pages 推送失败（直推与 API 通道均未成功）"
+  exit 1
+fi
+echo "  ✓ gh-pages 已推送（${PUSHED}）"
 
 echo "▸ 2.5/3 回提交数据快照（若有变更）…"
-# fetch-monthly.mjs 写入的快照必须回到源分支，游戏/影卷的月度差分才能跨月积累
-SNAPSHOT_FILES="content/arts/stats-history.json content/arts/lastfm-monthly.json"
+# fetch-monthly.mjs 写入的快照必须回到源分支，游戏/影卷的月度差分才能跨月积累；
+# token-monitor-history.json 为每周手动导出的全量基线（有变更时一并入库）
+SNAPSHOT_FILES="content/arts/stats-history.json content/arts/lastfm-monthly.json content/arts/token-monitor-history.json"
 if [ -n "$(git status --porcelain $SNAPSHOT_FILES 2>/dev/null)" ]; then
   git add $SNAPSHOT_FILES
   git -c user.name="004Tingting" -c user.email="SaiKouTING004@outlook.com" \
     commit -q -m "stats: monthly snapshot $(date '+%Y-%m-%d %H:%M')"
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
-  if [ -n "$TOKEN" ]; then
-    git -c credential.helper= push -q "https://x-access-token:${TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/${BRANCH}" \
-      && echo "  ✓ 快照已回提交并推送（${BRANCH}）" \
-      || echo "  ⚠ 快照推送失败，可稍后手动 git push"
+  # 健全推送（直推 → SSH-over-443 备用通道），见 scripts/push-remote.sh
+  if bash scripts/push-remote.sh "$BRANCH"; then
+    echo "  ✓ 快照已回提交并推送（${BRANCH}）"
   else
-    git -c credential.helper= push -q origin HEAD \
-      && echo "  ✓ 快照已回提交并推送（${BRANCH}）" \
-      || echo "  ⚠ 快照推送失败，可稍后手动 git push"
+    echo "  ⚠ 快照推送失败（两通道均未成功），可稍后 bash scripts/push-remote.sh ${BRANCH}"
   fi
 else
   echo "  （快照无变更）"

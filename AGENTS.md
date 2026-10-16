@@ -99,7 +99,8 @@ npm run build                    # 构建（fetch-now → fetch-monthly → fetc
 python scripts/preview.py 8000   # 预览构建产物（clean URL）
 npm run og                       # 重新生成分享卡片图
 npm run live                     # 启动「正在听」实时推送（本机常驻，见下）
-bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → 触发 Pages 构建）
+bash scripts/deploy.sh           # 一键发布（构建 → 推 gh-pages → 触发 Pages 构建；推送自带备用通道）
+bash scripts/push-remote.sh main # 健壮推送当前 HEAD 到远端分支（直推失败自动转 SSH-over-443 临时密钥）
 ```
 
 ## 「正在听」的数据链路（重要）
