@@ -1,11 +1,11 @@
 {
   "source": "stats-history",
-  "updatedAt": "2026-10-16T17:27:55.344Z",
+  "updatedAt": "2026-10-17T04:54:12.259Z",
   "snapshots": {
     "2026-10": {
       "games": {
         "明日方舟": 1924,
-        "明日方舟：终末地": 339.8,
+        "明日方舟：终末地": 368.7,
         "燕云十六声": 12.7
       },
       "screen": {
@@ -75,8 +75,8 @@
         "如果当时|许嵩": 927.6,
         "叶わぬ恋じゃ終われない！|ハコニワリリィ": 550.8,
         "Monster|STARSET": 730.5,
+        "猛独が襲う (Cover)|MyGO!!!!!": 720.6,
         "Last Dance|Xomu": 578.5,
-        "猛独が襲う (Cover)|MyGO!!!!!": 712.1,
         "Barricades|澤野弘之": 620,
         "One Last Kiss|宇多田ヒカル": 705.7,
         "好きだから。|『ユイカ』": 821.3,
@@ -135,8 +135,8 @@
         "今年勇|许嵩": 370.9,
         "小人间|双笙（陈元汐）": 422.9,
         "5:20AM|刀酱": 293,
+        "月並みに輝け|結束バンド": 441.2,
         "Look At Me Now|Charlie Puth": 352.3,
-        "月並みに輝け|結束バンド": 437.1,
         "I Really Want to Stay at Your House|Rosa Walton": 431.6,
         "绝世舞姬|张曦匀": 324.9,
         "相见欢|塞壬唱片-MSR": 294,
@@ -385,6 +385,7 @@
         "Bongo Cat": 122.7,
         "Soul's Remnant": 0.3,
         "Stellar Blade™": 78,
+        "Where Winds Meet": 6.8,
         "Stellar Blade™ Demo": 7.4,
         "TBH: Task Bar Hero": 297.7,
         "DEFLATE": 75.6,
