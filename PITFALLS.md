@@ -250,11 +250,18 @@
 - **解法**：`gh auth refresh -h github.com -s workflow`（设备码流程，用户浏览器授权一次，约 3 分钟）；授权后 Contents API 直接放行。**这是账号权限操作，需 Ting 本人授权，勿擅自刷新**
 - **判别口诀**：Contents API 对 `.github/workflows` 新路径 404 + POST /git/trees 404 + GET 全部正常 = 先怀疑 workflow scope，别急着查网络
 
+### 24. Steam API 构建时偶发 `fetch failed`（快照沿用旧值）
+
+- **现象**（2026-10-17）：`npm run build` 输出 `✗ Steam 拉取失败：fetch failed → 本次快照不含 Steam（沿用旧值）`——页面游戏数据停在上一版（新游戏 / 新时长不出现），构建本身不中断
+- **原因**：`fetch-monthly.mjs` 对 `api.steampowered.com` 的请求无重试，网络抖动即失败；失败时快照保留 `prevSnap.steam`
+- **解法**：单独跑 `node scripts/fetch-monthly.mjs`（通常一次成功）→ 再构建发布
+- **判别口诀**：**查 Steam 数据一律按 appid**——`GetOwnedGames` 按名字搜对新上架 / 本地化名不可靠（`Arknights: Endfield` 首次按名字查零命中即此坑；appid 4732690）
+
 ## 快速修复清单（下次会话遇到直接抄）
 
 ```bash
-# 构建（先清缓存，走非沙箱）
-cd P:/personal-site && rm -rf .next out && npm run build
+# 构建（勿删整个 .next——预清 server/static/types/diagnostics + out/；须前台非沙箱）
+cd P:/personal-site && bash scripts/deploy.sh   # 一键：预清 → 构建 → 发布（推荐）
 
 # 本地预览（clean URL）
 python scripts/preview.py 8000
@@ -263,6 +270,6 @@ python scripts/preview.py 8000
 env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy \
   "/c/Program Files/GitHub CLI/gh.exe" <command>
 
-# 推送上线
-git add -A && git commit -m "..." && git push
+# 推送上线（直推失败自动转 SSH-over-443 备用通道）
+bash scripts/push-remote.sh main
 ```

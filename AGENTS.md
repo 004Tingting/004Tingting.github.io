@@ -123,21 +123,30 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 | 数据源 | hub `/api/public/stats`——**唯一免密钥路由**（Worker 开了 `PUBLIC_STATS_ENABLED=1`），CORS `*`，`cache-control: max-age=15`；已剥离 devices / 项目标识 / 账号，只留 deviceCount + periods（today/month/allTime）+ historyPreview（30 天日序列 + 12 个月月序列）+ updatedAt/staleAfterMs |
 | 快照仓库 | **`004Tingting/token-monitor-data`**（public，Ting 2026-10-14 拍板单开）：`token-monitor.json`（normalized 快照）+ `refresh.mjs` + **15 分钟定时工作流（已启用，2026-10-14 22:03 手动触发验证通过）**；`npm run token-snapshot`（`scripts/push-token-snapshot.mjs`）手动补刀。代理通道 gh-proxy / gh.llkk（无缓存）+ jsDelivr（兜底）实测可达 |
 | 构建时 | `scripts/fetch-token-stats.mjs` **仓库优先**（Contents API + .env.local 的 GITHUB_TOKEN，构建机对 api.github.com 可达性通常好于 workers.dev）→ hub 直连 → 保留旧文件不阻断构建；产物 `content/arts/token-monitor.json` |
-| 静态基线 | `content/arts/token-monitor-history.json` = dump-hub-history.ps1（**带密钥**，只在本机跑）从 `/api/history` 导出的全量历史（370 天滚动窗口；当前 65 天）。**建议每周重新生成提交一次**；密钥绝不进前端与仓库 |
+| 静态基线 | `content/arts/token-monitor-history.json` = dump-hub-history.ps1（**带密钥**，只在本机跑）从 `/api/history` 导出的全量历史（370 天滚动窗口；**当前 68 天**，2026-10-17）。**建议每周重新生成提交一次**；密钥绝不进前端与仓库 |
 | 合并 | `lib/arts.ts` 的 `getTokenMonitor()`：静态基线铺底，实时快照按 date/month upsert 覆盖——三处挂载（侧栏 / 关于页 / 明细页）**同源同数** |
 | 前端 | `components/TokenMonitor.tsx`（client，三变体 aside/grid/full）：**云端优先 + 2s 规则**（Ting 2026-10-14 定，治双闪与干等）——首帧实时槽位显示骨架（`tm-pending`，快照数字 opacity 0 留在 DOM 供爬虫/no-JS）；挂载时 hub（`fetchTimeoutMs=2000`）与仓库快照（三源 Promise.any 各 3s、5 分钟会话缓存 + in-flight 去重）**并行**；hub 成 → 实时；hub 败 → 仓库快照（此前有实时值则保留 last-good）→ SSR 快照；全程最多一次跳转、最坏 ~3s 骨架。此后单例轮询 **90s**（后台标签页暂停、切回立即刷新） |
-| 展示位置 | 首页侧栏紧凑卡 + 关于页摘要栅格（与「站点数据」同篇幅）+ 看板子页 `/arts/stats/tokens`（完整：三周期 + 近 30 天柱状 + 日用量热力图 + 近 12 个月累计折线 + 按模型两列 + 摘要 chips，zh/en） |
+| 展示位置 | 首页侧栏紧凑卡 + 关于页摘要栅格（与「站点数据」同篇幅）+ 看板子页 `/arts/stats/tokens`（完整：三周期 + 近 30 天柱状 + 日用量热力图 + 近 12 个月累计折线 + 按模型两列 + 摘要 chips，zh/en）；首页卡为点阵屏 `DotMatrix`（2026-10-17 升级：boot 自检 + 两侧状态灯 + 错点四档 + 数值组 accent；增量组未启用） |
 | 本地化 | token 单位 M/B 紧凑（精确值在 title tooltip）；货币 en=$ / zh=≈¥（`USD_TO_CNY=7.2` 固定汇率）；时间 zh=北京时间 / en=美国东部 EDT·EST（`fmtHubTime` 手写 DST 判定） |
 | 架构图 | 脱敏数据流图（hub / GitHub / 两台电脑 / 本地存储）：https://github.com/004Tingting/token-monitor-data/blob/main/docs/data-flow.svg （源文件同步存档在 `.workbuddy/token-monitor-kit/data-flow.svg`）|
 | 部署与凭据 | kit 全量存档（指南/部署报告/同步方案/两个 ps1/演示页/credentials）在 `.workbuddy/token-monitor-kit/`（**本地，gitignored——ps1 与 credentials 内含 hub 密钥，严禁进公开仓库**） |
-| 部署与凭据 | kit 全量存档（指南/部署报告/同步方案/两个 ps1/演示页/credentials）在 `.workbuddy/token-monitor-kit/`（**本地，gitignored——ps1 与 credentials 内含 hub 密钥，严禁进公开仓库**） |
+
+## 「游艺」数据口径（2026-10-17 定）
+
+| 项 | 口径 |
+|---|---|
+| 游戏总时长 | **手动条目 + Steam 全库 + WeGame + Epic**（四源各算一次；`getArtsStats` 走快照求和） |
+| 跨平台同款 | **`STEAM_MERGE`**（`lib/arts.ts`，zh/en 各一份，Steam 库名 → 手动条目 title）：映射内时长**相加**进手动条目展示、Steam 平台分区与全榜**不单列**；总时长口径不变。当前两条：`Where Winds Meet → 燕云十六声`、`Arknights: Endfield（appid 4732690）→ 明日方舟：终末地` |
+| Steam 查询 | **一律按 appid**（名字搜索对新上架 / 本地化名不可靠）；`GetOwnedGames` 只存有游玩记录的游戏；构建时偶发 `fetch failed` → 单独跑 `node scripts/fetch-monthly.mjs` 补拉 |
+| WeGame / Epic | 人工报数 `wegame-games.json` / `epic-games.json`（Ting 周更，Buddy 改数字） |
+| 影卷 / 运动 / 音律 | 影卷 hours 两位小数（rating 待补）；运动逐次条目（duration 分钟 / distance km 可缺省）；音律 = Last.fm scrobble + 网易云官方时长（`netease-monthly.json`） |
 
 ## 环境注意事项（WorkBuddy 会话内，详细见 PITFALLS.md）
 
 - **gh CLI 必须清代理调用**：`env -u HTTPS_PROXY -u HTTP_PROXY -u https_proxy -u http_proxy "/c/Program Files/GitHub CLI/gh.exe" ...`（平台内部代理 127.0.0.1:15422 会掐断 GitHub POST）
 - **git push 必须禁用 credential helper**：系统级 `credential.helper=helper-selector`（PortableGit 注入）会弹 GUI 或导致卡死 → 一律用 `git -c credential.helper= push ...`（`scripts/deploy.sh` 已内置）
 - **Node spawn 子进程受限**：`execFileSync('git')` 在沙箱内报 EBUSY → 脚本里改用 HTTP API
-- **构建前先 `rm -rf .next`**：沙箱的 safe-delete shim 在回合内累计删除 ≥50 文件会拦杀进程
+- **构建前预清 `.next` 的 4 个易过期子目录（server/static/types/diagnostics）+ `out/`**——**不要删整个 `.next`**（会触发冷目录 EPERM）；沙箱的 safe-delete shim 删除 ≥50 文件会拦杀进程，故构建必须**前台 + 非沙箱**（`deploy.sh` 已内置预清逻辑）
 - **网络间歇性 EOF**：gh/git 操作套 3–5 次重试
 - **Pages 当前为 legacy 模式**（source: `gh-pages` 分支）—— 这是刻意选择，用于绕开 Actions 排队；切回 workflow 模式：`gh api -X PUT repos/004Tingting/004Tingting.github.io/pages -f build_type=workflow`
 - **jsDelivr 的 purge 会被限流**：响应出现 `{"throttled":true,"throttlingReset":720}` 即已限流；高频更新的数据不要走 jsDelivr（详见 PITFALLS #19）
@@ -150,7 +159,7 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
   |---|---|---|---|
   | 研思 | 研思 | `/research` | 推导、方法、文献与复盘 |
   | 造物 | 造物 | `/works` | 软件、项目与实验成果 |
-  | 游艺 | 游艺 | `/arts` | 音律（`/arts/music`）/ 游戏（`/arts/games`）/ 影卷（`/arts/screen`）/ 运动（`/arts/exercise`）/ 看板（`/arts/stats`，基础版）|
+  | 游艺 | 游艺 | `/arts` | 音律（`/arts/music`）/ 游戏（`/arts/games`）/ 影卷（`/arts/screen`）/ 运动（`/arts/exercise`）/ 看板（`/arts/stats`：月度趋势折线 + 游戏/Token 明细页）|
   | 纪事 | 纪事 | `/chronicles` | 时间切片、复盘与随笔 |
   | 关于 | 关于 | `/about` | 履历与站务 |
 - 旧 URL（`/blog` `/life/*` `/projects/*`）由 `scripts/postbuild.mjs` 生成 meta-refresh 跳转页
@@ -173,6 +182,6 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 
 - 里程碑 **M0–M6 全部完成**（M6 = 五栏信息架构重构）；站点已上线运行
 - **最新状态与待办以根目录 `HANDOFF.md` 为准**
-- 待办主线：**内容替换**——研思首篇真文章《用延迟反馈「预订」收敛时刻：Deng et al. 2024 论文精读笔记》（zh+en）**已上线**（2026-10-12 21:19 发布，Ting 网页审稿中；占位示例已退役）；影卷 38 条 rating 评分待 Ting 补（条目已全「看完」、时长两位小数）、cover 2 条待 BV 号 / 原速 BPM / 曲谱 / 伴奏、OinO / 游戏设计项目页偏框架、about 页仍是占位；**开篇 en 版已按 zh 定稿重写上线**（2026-10-12）；看板基础版 + 月度趋势已上线（详见根目录 `HANDOFF.md`）
+- 待办主线：**内容替换**——研思首篇真文章《用延迟反馈「预订」收敛时刻：Deng et al. 2024 论文精读笔记》（zh+en）**已上线**（2026-10-12 21:19 发布，Ting 网页审稿中；占位示例已退役）；影卷 38 条 rating 评分待 Ting 补（条目已全「看完」、时长两位小数）、cover 2 条待 BV 号 / 原速 BPM / 曲谱 / 伴奏、OinO / 游戏设计项目页偏框架、about 页仍是占位；**开篇 en 版已按 zh 定稿重写上线**（2026-10-12）；看板（月度趋势 + 游戏/Token 明细页）已上线（详见根目录 `HANDOFF.md`）
 - **内容发布流程（2026-10-12 Ting 拍板）**：「默认直接发布，发布后由我在网页上直接审」——Buddy 完成内容交付后直接 `bash scripts/deploy.sh` 发布，Ting 线上审稿后提修订，修订后再发布；不再等本地审稿
 - **giscus 评论已启用**（App 已装、`enabled=true`）；Discussions 分类用 Announcements
