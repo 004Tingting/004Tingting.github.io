@@ -316,10 +316,21 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
     /* 主显示（2026-10-15 二稿）：点阵屏在 单词 / 累计 tokens / 标签 三组间定时重组轮换；
        不参与骨架——动画即时可见，数字随轮询静默更新（点阵逐帧本来就在变）。
        状态行只留一行、粒度到日：●/○ hub 在线/离线 · 更新于 YYYY年M月D日
-       boot（2026-10-17）：开机自检——整屏先全亮，再按列逐列退回底点（一次性；reduced-motion 自动停用） */
+       2026-10-17：boot 开机自检 + 两侧状态灯（gutter）+ 错点随数据新鲜度分级（glitch）
+       —— 屏面的「稳定程度」直接表达数据可信度；增量组与数值配色未启用 */
     const allTime = periods?.allTime ?? null;
     const matrixValue = allTime ? fmtTokensCompact(allTime.totalTokens) : "0";
     const matrixTitle = allTime ? `${t.allTime} ${fmtTokensFull(allTime.totalTokens)} tokens` : undefined;
+
+    /** 数据新鲜度：0 实时 / 1 实时停更 / 2 快照兜底 / 3 构建快照 —— 与状态行三层兜底一致 */
+    const tier = lastOk === false ? (liveAt ? 1 : repoOk ? 2 : 3) : 0;
+    const GLITCH_BY_TIER = [
+      { density: 0.015, patterns: 8, holdMs: 140, seed: 3 }, // 正常：偶发孤点
+      { density: 0.03, patterns: 2, holdMs: 300, seed: 5 }, // 停更：开始不稳
+      { density: 0.045, patterns: 1, holdMs: 480, seed: 5 }, // 快照：同几处坏点反复闪
+      { density: 0.06, patterns: 1, holdMs: 620, seed: 7 }, // 离线：持续故障
+    ];
+
     const asideStatus = `${lastOk === false ? t.offline : t.online} · ${t.updatedAt} ${
       updatedAt ? fmtHubDate(updatedAt, lang) : "—"
     }`;
@@ -332,6 +343,10 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
           items={[DOT_MATRIX_WORD, matrixValue, DOT_MATRIX_TAG]}
           title={matrixTitle}
           boot
+          label={`${t.allTime} ${matrixValue} tokens`}
+          lang={lang}
+          gutter={{ heartbeat: true, online: lastOk !== false }}
+          glitch={GLITCH_BY_TIER[tier]}
           className="mt-2 block w-full"
         />
         <p className={`mt-2 flex items-center gap-1.5 font-mono text-[11px] leading-snug text-muted ${pendingCls ?? ""}`}>
