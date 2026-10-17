@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ting · 个人杂志</title>
+    <link>https://004tingting.github.io/</link>
+    <description>Ting 的个人杂志：控制科学研究、工程实践与设计的交叉地带。</description>
+    <language>zh-CN</language>
+    <atom:link href="https://004tingting.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>用延迟反馈「预订」收敛时刻：Deng et al. 2024 论文精读笔记</title>
+      <link>https://004tingting.github.io/research/deng-2024-predefined-time-tsmc/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/research/deng-2024-predefined-time-tsmc/</guid>
+      <pubDate>Mon, 12 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Deng 等 2024 年发表于 IEEE TAC 的论文精读，用带人工时延的平滑滑模面构造非奇异预定时间终端滑模控制，附对 CAV 场景的适用性分析。</description>
+    </item>
+    <item>
+      <title>写在开始：为什么我要办一份「个人杂志」</title>
+      <link>https://004tingting.github.io/chronicles/hello-world/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/chronicles/hello-world/</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 GMT</pubDate>
+      <description>我是谁、五栏各是干什么的，以及办这个站的一点私心。</description>
+    </item>
+  </channel>
+</rss>
