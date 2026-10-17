@@ -49,25 +49,56 @@ const str = (v: unknown, d = ""): string => (typeof v === "string" ? v : d);
 const numOrNull = (v: unknown): number | null => (typeof v === "number" ? v : null);
 const strArray = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : typeof v === "string" && v ? [v] : []);
 
-/** 游戏条目（按 date 倒序） */
+/**
+ * 跨平台同款游戏：Steam 库名 → 手动条目 title。
+ * 规则（Ting 2026-10-17 定）：同款游戏的 Steam 版时长**相加**进手动条目显示；Steam 平台分区不单列
+ * （总时长口径不变—— Steam 全库本来就计入四源之和，不重复）。今后终末地等上架 Steam 时加一行即可。
+ */
+const STEAM_MERGE: Record<Lang, Record<string, string>> = {
+  zh: { "Where Winds Meet": "燕云十六声" },
+  en: { "Where Winds Meet": "Where Winds Meet" },
+};
+
+/** 最新月度快照（跨平台合并读 Steam 时长用；缺失/损坏返回 null） */
+function latestSnapshot(): StatsHistory["snapshots"][string] | null {
+  try {
+    const history = JSON.parse(fs.readFileSync(STATS_HISTORY_FILE, "utf-8")) as StatsHistory;
+    const months = Object.keys(history.snapshots).sort();
+    return history.snapshots[months[months.length - 1]] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** 游戏条目（按 date 倒序）；跨平台同款（STEAM_MERGE）的 Steam 时长并入 hours */
 export function getGames(lang: Lang): GameEntry[] {
+  const steam = latestSnapshot()?.steam ?? {};
   return readEntries(lang, "games")
-    .map(({ slug, data }) => ({
-      slug,
-      title: str(data.title, slug),
-      platform: strArray(data.platform),
-      status: asGameStatus(data.status),
-      rating: numOrNull(data.rating),
-      hours: numOrNull(data.hours),
-      designStudy: data.designStudy === true,
-      date: str(data.date),
-      review: typeof data.review === "string" ? data.review : null,
-      summary: str(data.summary),
-    }))
+    .map(({ slug, data }) => {
+      const title = str(data.title, slug);
+      let hours = numOrNull(data.hours);
+      for (const [steamName, manualName] of Object.entries(STEAM_MERGE[lang])) {
+        if (manualName === title && typeof steam[steamName] === "number") {
+          hours = Math.round(((hours ?? 0) + steam[steamName]) * 10) / 10;
+        }
+      }
+      return {
+        slug,
+        title,
+        platform: strArray(data.platform),
+        status: asGameStatus(data.status),
+        rating: numOrNull(data.rating),
+        hours,
+        designStudy: data.designStudy === true,
+        date: str(data.date),
+        review: typeof data.review === "string" ? data.review : null,
+        summary: str(data.summary),
+      };
+    })
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
-/** 游戏时长全榜：人工 frontmatter 条目 + Steam 全库 + WeGame 周更快照，同名去重（人工标记保留、时长取大），按小时倒序 */
+/** 游戏时长全榜：人工 frontmatter 条目 + Steam 全库 + WeGame + Epic，同名去重（人工标记保留、时长取大）；跨平台同款已并入手动条目，Steam 源跳过 */
 export function getGameHoursFull(lang: Lang): Array<{ name: string; hours: number; manual: boolean }> {
   const byName = new Map<string, { hours: number; manual: boolean }>();
   for (const g of getGames(lang)) {
@@ -79,6 +110,7 @@ export function getGameHoursFull(lang: Lang): Array<{ name: string; hours: numbe
     const last = history.snapshots[months[months.length - 1]];
     for (const source of ["steam", "wegame", "epic"] as const) {
       for (const [name, hours] of Object.entries(last?.[source] ?? {})) {
+        if (source === "steam" && name in STEAM_MERGE[lang]) continue; // 已并入同款手动条目
         const prev = byName.get(name);
         if (!prev) byName.set(name, { hours, manual: false });
         else byName.set(name, { hours: Math.max(prev.hours, hours), manual: true });
@@ -113,7 +145,11 @@ export function getGameSources(lang: Lang): GameSourceItem[] {
     /* 快照缺失/损坏时仅返回空列表 */
   }
   return [...merged.entries()]
-    .filter(([name]) => !manualNames.has(name))
+    .filter(
+      ([name, v]) =>
+        !manualNames.has(name) &&
+        !(v.source === "steam" && name in STEAM_MERGE[lang]), // 跨平台同款并入手动条目，不在平台分区单列
+    )
     .map(([name, v]) => ({ name, ...v }))
     .sort((a, b) => b.hours - a.hours);
 }
