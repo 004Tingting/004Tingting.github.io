@@ -1,6 +1,6 @@
 {
   "source": "stats-history",
-  "updatedAt": "2026-10-17T05:23:09.507Z",
+  "updatedAt": "2026-10-17T08:09:56.802Z",
   "snapshots": {
     "2026-10": {
       "games": {
@@ -61,7 +61,7 @@
         "レプリカント|ヨルシカ": 944.2,
         "負け犬にアンコールはいらない|ヨルシカ": 1015.3,
         "Die For You|VALORANT": 848.2,
-        "もしも命が描けたら|YOASOBI": 339.4,
+        "もしも命が描けたら|YOASOBI": 799.8,
         "正義|ずっと真夜中でいいのに。": 1034.3,
         "言って。|ヨルシカ": 904.3,
         "横竖撇点折|米白": 853.7,
@@ -74,8 +74,8 @@
         "又三郎|ヨルシカ": 671.8,
         "如果当时|许嵩": 927.6,
         "叶わぬ恋じゃ終われない！|ハコニワリリィ": 550.8,
+        "猛独が襲う (Cover)|MyGO!!!!!": 724.8,
         "Monster|STARSET": 730.5,
-        "猛独が襲う (Cover)|MyGO!!!!!": 720.6,
         "Last Dance|Xomu": 578.5,
         "Barricades|澤野弘之": 620,
         "One Last Kiss|宇多田ヒカル": 705.7,
@@ -132,10 +132,10 @@
         "如见青山|洛少爷": 384.4,
         "Mine (Illenium Remix)|ILLENIUM": 470.5,
         "Sucks Being Sober|Annika Wells": 374.6,
+        "月並みに輝け|結束バンド": 449.5,
         "今年勇|许嵩": 370.9,
         "小人间|双笙（陈元汐）": 422.9,
         "5:20AM|刀酱": 293,
-        "月並みに輝け|結束バンド": 445.4,
         "Look At Me Now|Charlie Puth": 352.3,
         "I Really Want to Stay at Your House|Rosa Walton": 431.6,
         "绝世舞姬|张曦匀": 324.9,
@@ -145,6 +145,7 @@
         "Cyaegha|USAO": 242.7,
         "都落ち|ヨルシカ": 429.4,
         "Lion|Hearts & Colors": 371.5,
+        "Vows of the Sea|塞壬唱片-MSR": 365.5,
         "All My Friends|Madeon": 344.5
       },
       "steam": {
@@ -370,6 +371,7 @@
         "100 Capitalist Cats": 0.4,
         "Marvel Rivals": 0.5,
         "Sakura Bunny Girls 2": 0,
+        "Battlefield™ 6": 0.3,
         "Buckshot Roulette": 0.3,
         "8AM": 3,
         "Slay the Spire 2": 59.5,
@@ -392,7 +394,7 @@
         "MUSYNX:RETURN": 15,
         "这是谐音梗": 0.9,
         "Mistfall Hunter Demo": 0.4,
-        "Arknights: Endfield": 0.4,
+        "Arknights: Endfield": 0.6,
         "Reshine Playtest": 0.6,
         "My Party Is Grinding": 1
       },
