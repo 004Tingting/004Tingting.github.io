@@ -468,7 +468,24 @@ ${glGroupRules}@media (prefers-reduced-motion: reduce) {
       cssParts.push(warm > 0 ? `${plain} fill: ${fillOf(k)}; }` : `${plain} }`);
     }
   }
-  cssParts.push(`${scope}.dm-both { fill: var(--color-ink); }`);
+  if (needGroupFill) {
+    /* 跨组共用锚点跟随「当前显示组」染色（站点补丁 2026-10-17）：
+       共用点常亮、原为固定墨色——数值组显示时它们是白点，破坏整组一色。
+       按组时段做 fill 关键帧硬切（与 dm-item 的 k*ITEM_MS 时基对齐）。 */
+    const bothStops = Array.from({ length: n }, (_, k) => {
+      const from = ((k * 100) / n).toFixed(4);
+      const to = (((k + 1) * 100) / n - 0.004).toFixed(4);
+      return `  ${from}% { fill: ${fillOf(k)}; }
+  ${to}% { fill: ${fillOf(k)}; }`;
+    }).join("\n");
+    cssParts.push(`@keyframes dm-both-${n}-c {
+${bothStops}
+  100% { fill: ${fillOf(n - 1)}; }
+}`);
+    cssParts.push(`${scope}.dm-both { fill: var(--color-ink); animation: dm-both-${n}-c ${n * ITEM_MS}ms linear infinite; }`);
+  } else {
+    cssParts.push(`${scope}.dm-both { fill: var(--color-ink); }`);
+  }
   cssParts.push(`${scope}.dm-off { fill: var(--color-ink); opacity: 0.13; }`);
   if (persistMs > 0) cssParts.push(`${scope}.dm-after { fill-opacity: ${persistOp}; }`);
 
@@ -525,6 +542,7 @@ ${glGroupRules}@media (prefers-reduced-motion: reduce) {
   if (gu.on && gu.online === false) rm.push(`  ${scope}.dm-on-off { animation: none; opacity: 1; }`);
   if (idle) rm.push(`  ${scope}.dm-idle { animation: none; opacity: 0.13; }`);
   if (bootOn) rm.push(`  .dm-n${n}.dm-boot .dm-off { animation: none; opacity: 0.13; }`);
+  if (needGroupFill) rm.push(`  ${scope}.dm-both { animation: none; fill: ${fillOf(fixedPrimary)}; }`);
   cssParts.push(`@media (prefers-reduced-motion: reduce) {
 ${rm.join("\n")}
 }`);
