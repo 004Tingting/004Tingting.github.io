@@ -52,11 +52,18 @@ const strArray = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : t
 /**
  * 跨平台同款游戏：Steam 库名 → 手动条目 title。
  * 规则（Ting 2026-10-17 定）：同款游戏的 Steam 版时长**相加**进手动条目显示；Steam 平台分区不单列
- * （总时长口径不变—— Steam 全库本来就计入四源之和，不重复）。今后终末地等上架 Steam 时加一行即可。
+ * （总时长口径不变—— Steam 全库本来就计入四源之和，不重复）。
+ * 键为 Steam 端 appinfo 返回的库名；终末地 Steam appid 4732690（Ting 提供）。
  */
 const STEAM_MERGE: Record<Lang, Record<string, string>> = {
-  zh: { "Where Winds Meet": "燕云十六声" },
-  en: { "Where Winds Meet": "Where Winds Meet" },
+  zh: {
+    "Where Winds Meet": "燕云十六声",
+    "Arknights: Endfield": "明日方舟：终末地",
+  },
+  en: {
+    "Where Winds Meet": "Where Winds Meet",
+    "Arknights: Endfield": "Arknights: Endfield",
+  },
 };
 
 /** 最新月度快照（跨平台合并读 Steam 时长用；缺失/损坏返回 null） */
