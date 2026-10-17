@@ -315,7 +315,8 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
   if (variant === "aside") {
     /* 主显示（2026-10-15 二稿）：点阵屏在 单词 / 累计 tokens / 标签 三组间定时重组轮换；
        不参与骨架——动画即时可见，数字随轮询静默更新（点阵逐帧本来就在变）。
-       状态行只留一行、粒度到日：●/○ hub 在线/离线 · 更新于 YYYY年M月D日 */
+       状态行只留一行、粒度到日：●/○ hub 在线/离线 · 更新于 YYYY年M月D日
+       boot（2026-10-17）：开机自检——整屏先全亮，再按列逐列退回底点（一次性；reduced-motion 自动停用） */
     const allTime = periods?.allTime ?? null;
     const matrixValue = allTime ? fmtTokensCompact(allTime.totalTokens) : "0";
     const matrixTitle = allTime ? `${t.allTime} ${fmtTokensFull(allTime.totalTokens)} tokens` : undefined;
@@ -330,6 +331,7 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
         <DotMatrix
           items={[DOT_MATRIX_WORD, matrixValue, DOT_MATRIX_TAG]}
           title={matrixTitle}
+          boot
           className="mt-2 block w-full"
         />
         <p className={`mt-2 flex items-center gap-1.5 font-mono text-[11px] leading-snug text-muted ${pendingCls ?? ""}`}>
