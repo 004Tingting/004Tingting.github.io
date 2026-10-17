@@ -316,11 +316,16 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
     /* 主显示（2026-10-15 二稿）：点阵屏在 单词 / 累计 tokens / 标签 三组间定时重组轮换；
        不参与骨架——动画即时可见，数字随轮询静默更新（点阵逐帧本来就在变）。
        状态行只留一行、粒度到日：●/○ hub 在线/离线 · 更新于 YYYY年M月D日
-       2026-10-17：boot 开机自检 + 两侧状态灯（gutter）+ 错点随数据新鲜度分级（glitch）
-       —— 屏面的「稳定程度」直接表达数据可信度；增量组与数值配色未启用 */
+       2026-10-17：boot 开机自检 + 两侧状态灯（gutter）+ 错点随数据新鲜度分级（glitch）+ 数值组 accent 配色
+       —— 屏面的「稳定程度」直接表达数据可信度；增量组未启用 */
     const allTime = periods?.allTime ?? null;
     const matrixValue = allTime ? fmtTokensCompact(allTime.totalTokens) : "0";
     const matrixTitle = allTime ? `${t.allTime} ${fmtTokensFull(allTime.totalTokens)} tokens` : undefined;
+
+    /** 三组固定（无增量组）：数值组 accent 单独配色，其余墨色 */
+    const matrixItems = [DOT_MATRIX_WORD, matrixValue, DOT_MATRIX_TAG];
+    const valueIdx = matrixItems.indexOf(matrixValue);
+    const groupColors = matrixItems.map((_, i) => (i === valueIdx ? "var(--color-accent)" : undefined));
 
     /** 数据新鲜度：0 实时 / 1 实时停更 / 2 快照兜底 / 3 构建快照 —— 与状态行三层兜底一致 */
     const tier = lastOk === false ? (liveAt ? 1 : repoOk ? 2 : 3) : 0;
@@ -340,11 +345,13 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
           <span className="text-accent">·</span> {t.kicker}
         </p>
         <DotMatrix
-          items={[DOT_MATRIX_WORD, matrixValue, DOT_MATRIX_TAG]}
+          items={matrixItems}
+          primary={valueIdx}
           title={matrixTitle}
           boot
           label={`${t.allTime} ${matrixValue} tokens`}
           lang={lang}
+          groupColors={groupColors}
           gutter={{ heartbeat: true, online: lastOk !== false }}
           glitch={GLITCH_BY_TIER[tier]}
           className="mt-2 block w-full"
