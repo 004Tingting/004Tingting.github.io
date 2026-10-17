@@ -382,7 +382,7 @@ export default function DotMatrix({
               cx={(c + 0.5) * PITCH}
               cy={(r + 0.5) * PITCH}
               r={dotR}
-              className={`dm-glitch dm-g${k}${gl.className ? ` ${gl.className}` : ""}`}
+              className={`dm-glitch dm-g${k}${needGroupFill ? ` dm-c${k}` : ""}${gl.className ? ` ${gl.className}` : ""}`}
               style={{ animationDelay: `${(i % effP) * cycle + k * ITEM_MS + delayOf(cell)}ms` }}
             />,
           );
@@ -414,6 +414,14 @@ export default function DotMatrix({
       const dur = effP * cycle;
       const gp = Math.min(99, (gl.holdMs / dur) * 100); // 错点窗口占动画周期的百分比
       const gName = `dm-glitch-${n}-${effP}`;
+      /* 组色覆盖（站点补丁 2026-10-17）：错点跟随所属组的配色——数值组的鬼点也随 accent，
+         不再是固定墨色；未启用组色时保持原样（默认路径逐字节不变） */
+      const glGroupRules = needGroupFill
+        ? Array.from(
+            { length: n },
+            (_, k) => `${scope}.dm-glitch.dm-c${k} { fill: var(--dm-glitch-ink, ${fillOf(k)}); }`,
+          ).join("\n") + "\n"
+        : "";
       glitchCss = `@keyframes ${gName} {
   0% { opacity: 1; }
   ${(gp * 0.45).toFixed(4)}% { opacity: 0.25; }
@@ -422,7 +430,7 @@ export default function DotMatrix({
   100% { opacity: 0; }
 }
 ${scope}.dm-glitch { fill: var(--dm-glitch-ink, var(--color-ink)); opacity: 0; animation: ${gName} ${dur}ms linear infinite; }
-@media (prefers-reduced-motion: reduce) {
+${glGroupRules}@media (prefers-reduced-motion: reduce) {
   ${scope}.dm-glitch { animation: none; opacity: 0; }
 }`;
     }
