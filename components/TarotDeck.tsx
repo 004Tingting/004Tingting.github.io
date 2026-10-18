@@ -44,9 +44,36 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
   };
 
   const closeCard = () => {
+    const node = faceRef.current;
+    const cardEl = active ? document.getElementById(`tarot-card-${active.id}`) : null;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const finish = () => {
+      document.documentElement.classList.remove("tarot-open");
+      setActive(null);
+      window.history.replaceState(null, "", window.location.pathname);
+    };
+
+    /* 反向 FLIP：牌面缩回列表卡片的位置与尺寸；遮罩同步淡出；导航同时展开 */
+    if (!node || !cardEl || reduce) {
+      finish();
+      return;
+    }
+    const from = node.getBoundingClientRect();
+    const to = cardEl.getBoundingClientRect();
+    if (!from.width || !to.width) {
+      finish();
+      return;
+    }
+    node.style.setProperty("--flip-x", `${to.left - from.left}px`);
+    node.style.setProperty("--flip-y", `${to.top - from.top}px`);
+    node.style.setProperty("--flip-sx", `${to.width / from.width}`);
+    node.style.setProperty("--flip-sy", `${to.height / from.height}`);
+    node.classList.remove("tarot-face-anim");
+    node.classList.add("tarot-face-out");
+    document.querySelector(".tarot-veil")?.classList.add("tarot-veil-out");
     document.documentElement.classList.remove("tarot-open");
-    setActive(null);
-    window.history.replaceState(null, "", window.location.pathname);
+    window.setTimeout(finish, 360);
   };
 
   /* FLIP：弹窗挂载后，把牌面从「卡片的位置与尺寸」过渡到最终位置（420ms） */
@@ -237,7 +264,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
       {/* 卡牌详情弹窗：遮罩独立淡入；牌面走 FLIP */}
       {active && (
         <div
-          className="tarot-veil fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
+          className="tarot-veil fixed inset-0 z-40 flex items-center justify-center bg-ink/50 p-4"
           role="dialog"
           aria-modal="true"
           aria-label={cardName(active, lang)}
@@ -262,7 +289,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
                 {active.id === "major-0" ? (
                   <TarotFoilCard />
                 ) : (
-                  <div className="relative aspect-[2/3] w-full rounded-[3px] border border-rule bg-paper">
+                  <div className="relative aspect-[2100/3600] w-full rounded-[3px] border border-rule bg-paper">
                     <span className="absolute inset-3 border border-rule/70" />
                     <span className="absolute inset-x-0 top-4 text-center font-mono text-xs tracking-widest text-muted">
                       {cardMark(active, lang)}
@@ -326,18 +353,52 @@ function CardTile({ card, lang, onOpen }: { card: TarotCard; lang: Lang; onOpen:
       aria-label={name}
       className="group block w-full text-left"
     >
-      <span className="relative block aspect-[2/3] w-full rounded-[2px] border border-rule bg-paper transition-colors group-hover:border-accent">
-        <span className="absolute inset-1.5 border border-rule/60" />
-        <span className="absolute inset-x-0 top-2.5 text-center font-mono text-[10px] tracking-widest text-muted">
-          {cardMark(card, lang)}
+      {card.id === "major-0" ? (
+        /* 愚者：真实牌面（静态、无视差；视差只在详情弹窗里产生） */
+        <span className="relative block aspect-[2100/3600] w-full overflow-hidden rounded-[2px] border border-rule bg-paper transition-colors group-hover:border-accent">
+          <img
+            src="/tarot/major-00/artwork.webp"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            draggable={false}
+          />
+          <img
+            src="/tarot/major-00/edge.webp"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            draggable={false}
+          />
+          <img
+            src="/tarot/major-00/number.webp"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            draggable={false}
+          />
+          <img
+            src="/tarot/major-00/title.webp"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            draggable={false}
+          />
         </span>
-        <span className="absolute inset-0 grid place-items-center">
-          <span className="h-2 w-2 rotate-45 border border-accent/80" />
+      ) : (
+        <span className="relative block aspect-[2100/3600] w-full rounded-[2px] border border-rule bg-paper transition-colors group-hover:border-accent">
+          <span className="absolute inset-1.5 border border-rule/60" />
+          <span className="absolute inset-x-0 top-2.5 text-center font-mono text-[10px] tracking-widest text-muted">
+            {cardMark(card, lang)}
+          </span>
+          <span className="absolute inset-0 grid place-items-center">
+            <span className="h-2 w-2 rotate-45 border border-accent/80" />
+          </span>
+          <span className="absolute inset-x-1 bottom-2 text-center font-serif text-[11px] font-semibold leading-tight">
+            {name}
+          </span>
         </span>
-        <span className="absolute inset-x-1 bottom-2 text-center font-serif text-[11px] font-semibold leading-tight">
-          {name}
-        </span>
-      </span>
+      )}
     </button>
   );
 }
