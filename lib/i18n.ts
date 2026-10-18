@@ -52,8 +52,9 @@ export const zh = {
         placeholder: "页面先占位，牌面与抽牌逻辑稍后接入。",
         deck: {
           searchLabel: "搜索",
-          searchPlaceholder: "搜索牌名（中文或英文）",
+          searchPlaceholder: "搜索牌名（中文 / 英文 / 拼音）",
           searchEmpty: "没有匹配的牌。",
+          chipAll: "全部",
           major: "大阿卡纳",
           majorNote: "22 张，从愚者到世界。",
           minor: "小阿卡纳",
@@ -272,8 +273,9 @@ export const en = {
         placeholder: "Placeholder page. The deck and the draw logic come later.",
         deck: {
           searchLabel: "Search",
-          searchPlaceholder: "Search by name (zh/en)",
+          searchPlaceholder: "Search by name (zh/en/pinyin)",
           searchEmpty: "No cards match.",
+          chipAll: "All",
           major: "Major Arcana",
           majorNote: "22 cards, from The Fool to The World.",
           minor: "Minor Arcana",

@@ -19,6 +19,10 @@ export type TarotCard = {
   /** 中文关键词（2 个） */
   keywords: string[];
   keywordsEn: string[];
+  /** 全拼（搜索用，如 "quanzhanger"） */
+  pinyin: string;
+  /** 拼音首字母（如 "qze"） */
+  initials: string;
 };
 
 /* ---------- 大阿卡纳（22） ---------- */
@@ -48,6 +52,32 @@ const MAJOR_DEFS: Array<[string, string, [string, string], [string, string]]> = 
   ["世界", "The World", ["完成", "圆满"], ["Completion", "Wholeness"]],
 ];
 
+/** 大阿卡纳拼音 [全拼, 首字母]（按 0–21 顺序） */
+const MAJOR_PY: Array<[string, string]> = [
+  ["yuzhe", "yz"],
+  ["moshushi", "mss"],
+  ["nvjisi", "njs"],
+  ["nvhuang", "nh"],
+  ["huangdi", "hd"],
+  ["jiaohuang", "jh"],
+  ["lianren", "lr"],
+  ["zhanche", "zc"],
+  ["liliang", "ll"],
+  ["yinzhe", "yz"],
+  ["mingyunzhilun", "myzl"],
+  ["zhengyi", "zy"],
+  ["daodiaoren", "ddr"],
+  ["sishen", "ss"],
+  ["jiezhi", "jz"],
+  ["emo", "em"],
+  ["ta", "t"],
+  ["xingxing", "xx"],
+  ["yueliang", "yl"],
+  ["taiyang", "ty"],
+  ["shenpan", "sp"],
+  ["shijie", "sj"],
+];
+
 export const MAJOR_CARDS: TarotCard[] = MAJOR_DEFS.map(([name, nameEn, keywords, keywordsEn], i) => ({
   id: `major-${i}`,
   name,
@@ -56,6 +86,8 @@ export const MAJOR_CARDS: TarotCard[] = MAJOR_DEFS.map(([name, nameEn, keywords,
   number: i,
   keywords,
   keywordsEn,
+  pinyin: MAJOR_PY[i][0],
+  initials: MAJOR_PY[i][1],
 }));
 
 /* ---------- 小阿卡纳（56） ---------- */
@@ -68,29 +100,32 @@ export const SUITS: Array<{
   elementEn: string;
   keywords: [string, string];
   keywordsEn: [string, string];
+  /** 花色拼音 [全拼, 首字母] */
+  py: string;
+  ini: string;
 }> = [
-  { id: "wands", name: "权杖", nameEn: "Wands", element: "火", elementEn: "Fire", keywords: ["行动", "热情"], keywordsEn: ["Action", "Passion"] },
-  { id: "cups", name: "圣杯", nameEn: "Cups", element: "水", elementEn: "Water", keywords: ["情感", "关系"], keywordsEn: ["Feeling", "Relationship"] },
-  { id: "swords", name: "宝剑", nameEn: "Swords", element: "风", elementEn: "Air", keywords: ["思想", "冲突"], keywordsEn: ["Mind", "Conflict"] },
-  { id: "pentacles", name: "星币", nameEn: "Pentacles", element: "土", elementEn: "Earth", keywords: ["物质", "劳作"], keywordsEn: ["Matter", "Craft"] },
+  { id: "wands", name: "权杖", nameEn: "Wands", element: "火", elementEn: "Fire", keywords: ["行动", "热情"], keywordsEn: ["Action", "Passion"], py: "quanzhang", ini: "qz" },
+  { id: "cups", name: "圣杯", nameEn: "Cups", element: "水", elementEn: "Water", keywords: ["情感", "关系"], keywordsEn: ["Feeling", "Relationship"], py: "shengbei", ini: "sb" },
+  { id: "swords", name: "宝剑", nameEn: "Swords", element: "风", elementEn: "Air", keywords: ["思想", "冲突"], keywordsEn: ["Mind", "Conflict"], py: "baojian", ini: "bj" },
+  { id: "pentacles", name: "星币", nameEn: "Pentacles", element: "土", elementEn: "Earth", keywords: ["物质", "劳作"], keywordsEn: ["Matter", "Craft"], py: "xingbi", ini: "xb" },
 ];
 
-/** 牌面数字（1 = 首牌；11–14 = 侍从 / 骑士 / 王后 / 国王） */
-const RANKS: Array<{ zh: string; en: string; keyZh: string; keyEn: string }> = [
-  { zh: "首牌", en: "Ace", keyZh: "起点", keyEn: "Seed" },
-  { zh: "二", en: "Two", keyZh: "权衡", keyEn: "Weighing" },
-  { zh: "三", en: "Three", keyZh: "开展", keyEn: "Growth" },
-  { zh: "四", en: "Four", keyZh: "稳定", keyEn: "Stability" },
-  { zh: "五", en: "Five", keyZh: "冲突", keyEn: "Conflict" },
-  { zh: "六", en: "Six", keyZh: "调和", keyEn: "Harmony" },
-  { zh: "七", en: "Seven", keyZh: "审视", keyEn: "Review" },
-  { zh: "八", en: "Eight", keyZh: "推进", keyEn: "Progress" },
-  { zh: "九", en: "Nine", keyZh: "临界", keyEn: "Threshold" },
-  { zh: "十", en: "Ten", keyZh: "收束", keyEn: "Culmination" },
-  { zh: "侍从", en: "Page", keyZh: "讯息", keyEn: "Message" },
-  { zh: "骑士", en: "Knight", keyZh: "行动", keyEn: "Action" },
-  { zh: "王后", en: "Queen", keyZh: "涵养", keyEn: "Nurture" },
-  { zh: "国王", en: "King", keyZh: "掌舵", keyEn: "Command" },
+/** 牌面数字（1 = 首牌；11–14 = 侍从 / 骑士 / 王后 / 国王）；py = [全拼, 首字母] */
+const RANKS: Array<{ zh: string; en: string; keyZh: string; keyEn: string; py: string; ini: string }> = [
+  { zh: "首牌", en: "Ace", keyZh: "起点", keyEn: "Seed", py: "shoupai", ini: "sp" },
+  { zh: "二", en: "Two", keyZh: "权衡", keyEn: "Weighing", py: "er", ini: "e" },
+  { zh: "三", en: "Three", keyZh: "开展", keyEn: "Growth", py: "san", ini: "s" },
+  { zh: "四", en: "Four", keyZh: "稳定", keyEn: "Stability", py: "si", ini: "s" },
+  { zh: "五", en: "Five", keyZh: "冲突", keyEn: "Conflict", py: "wu", ini: "w" },
+  { zh: "六", en: "Six", keyZh: "调和", keyEn: "Harmony", py: "liu", ini: "l" },
+  { zh: "七", en: "Seven", keyZh: "审视", keyEn: "Review", py: "qi", ini: "q" },
+  { zh: "八", en: "Eight", keyZh: "推进", keyEn: "Progress", py: "ba", ini: "b" },
+  { zh: "九", en: "Nine", keyZh: "临界", keyEn: "Threshold", py: "jiu", ini: "j" },
+  { zh: "十", en: "Ten", keyZh: "收束", keyEn: "Culmination", py: "shi", ini: "s" },
+  { zh: "侍从", en: "Page", keyZh: "讯息", keyEn: "Message", py: "shicong", ini: "sc" },
+  { zh: "骑士", en: "Knight", keyZh: "行动", keyEn: "Action", py: "qishi", ini: "qs" },
+  { zh: "王后", en: "Queen", keyZh: "涵养", keyEn: "Nurture", py: "wanghou", ini: "wh" },
+  { zh: "国王", en: "King", keyZh: "掌舵", keyEn: "Command", py: "guowang", ini: "gw" },
 ];
 
 export const MINOR_BY_SUIT: Record<TarotSuit, TarotCard[]> = {
@@ -112,6 +147,8 @@ for (const suit of SUITS) {
       number,
       keywords: [suit.keywords[0], r.keyZh],
       keywordsEn: [suit.keywordsEn[0], r.keyEn],
+      pinyin: `${suit.py}${r.py}`,
+      initials: `${suit.ini}${r.ini}`,
     };
   });
 }
