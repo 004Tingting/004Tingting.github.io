@@ -319,7 +319,13 @@ body {
   --nav-fx: 0.25s;
 }
 html.tarot-open {
-  --nav-fx: 0.42s;
+  --nav-fx: 0.36s;
+}
+/* 导航收紧与面板展开同拍（牌面到位后才开始） */
+html.tarot-open .nav-brand,
+html.tarot-open .nav-gh-icon,
+html.tarot-open .nav-gh-info {
+  transition-delay: 0.4s;
 }
 
 @keyframes tarot-veil-in {
@@ -331,7 +337,27 @@ html.tarot-open {
   }
 }
 .tarot-veil {
-  animation: tarot-veil-in 0.24s ease-out both;
+  animation: tarot-veil-in 0.24s ease-out 0.4s both;
+}
+
+/* 面板展开（第二拍）：牌面先到位（0–0.4s，仅面板左侧牌面区域可见），
+   0.4s 后从牌面右缘向外展开（clip-path 从左到右），周边内容随之露出。
+   移动端单列布局不裁剪，直接显示。 */
+.tarot-panel-in {
+  animation: tarot-panel-clip 0.36s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+@keyframes tarot-panel-clip {
+  from {
+    clip-path: inset(0 calc(100% - 15rem) 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@media (max-width: 767px) {
+  .tarot-panel-in {
+    animation: none;
+  }
 }
 
 /* 牌面 FLIP：从卡片 rect 展开到弹窗位置（起点由 JS 写入 --flip-* 变量）。

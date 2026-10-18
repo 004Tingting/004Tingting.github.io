@@ -263,17 +263,18 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
 
       {/* 卡牌详情弹窗：遮罩独立淡入；牌面走 FLIP */}
       {active && (
-        <div
-          className="tarot-veil fixed inset-0 z-40 flex items-center justify-center bg-ink/50 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label={cardName(active, lang)}
-          onClick={closeCard}
-        >
-          <div
-            className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto border border-rule bg-paper p-6 md:p-8"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <>
+          {/* 遮罩：z-40（低于导航卡 z-50），延迟到牌面到位后再淡入 */}
+          <div className="tarot-veil fixed inset-0 z-40 bg-ink/50" onClick={closeCard} aria-hidden="true" />
+
+          {/* 面板层：z-60（高于导航卡）——牌面展开全程不被导航遮挡 */}
+          <div className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={cardName(active, lang)}
+              className="tarot-panel-in pointer-events-auto relative max-h-[92vh] w-full max-w-3xl overflow-y-auto border border-rule bg-paper p-6 md:p-8"
+            >
             <button
               type="button"
               onClick={closeCard}
@@ -337,6 +338,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
             </div>
           </div>
         </div>
+        </>
       )}
     </>
   );
