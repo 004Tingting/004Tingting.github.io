@@ -9,7 +9,10 @@ import Kicker from "@/components/Kicker";
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return getWorks("en").map((w) => ({ slug: w.slug }));
+  /* tarot resolves to the static /en/works/tarot hub page — exclude from md detail routes */
+  return getWorks("en")
+    .filter((w) => w.slug !== "tarot")
+    .map((w) => ({ slug: w.slug }));
 }
 
 export async function generateMetadata({

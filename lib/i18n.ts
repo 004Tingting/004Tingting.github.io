@@ -22,7 +22,7 @@ export const zh = {
       tarot: {
         kicker: "今日塔罗",
         title: "抽一张牌",
-        hint: "一天一张，日期做种子",
+        hint: "她说，这是你的牌。——T. S. 艾略特《荒原》",
       },
     },
   },
@@ -41,9 +41,16 @@ export const zh = {
       kicker: "造物",
       title: "Works",
       intro: "代码、产品与做出来的东西——可交互、可落地的成果。",
-      tarotTitle: "每日塔罗",
-      tarotIntro: "一天一张，日期做种子——同一天打开，抽到的是同一张牌。",
-      tarotNote: "页面先占位，牌面与抽牌逻辑稍后接入。",
+      /* TAROT 项目（/works/tarot 枢纽 + 三个子页） */
+      tarot: {
+        intro: "每日一张牌，连同牌库与解析案例。牌面与抽牌逻辑还在站外，这里先把结构搭好。",
+        subs: {
+          daily: { title: "每日塔罗", summary: "一天一张，日期做种子——同一天打开，抽到的是同一张牌。" },
+          deck: { title: "塔罗牌库", summary: "七十八张牌，逐张过：图像、象征与对应。" },
+          cases: { title: "解析案例", summary: "抽到之后怎么读——按问题记录牌面、位置与判断。" },
+        },
+        placeholder: "页面先占位，牌面与抽牌逻辑稍后接入。",
+      },
     },
   },
   arts: {
@@ -214,7 +221,7 @@ export const en = {
       tarot: {
         kicker: "Daily Tarot",
         title: "Draw a card",
-        hint: "One a day, seeded by date",
+        hint: '"Here, said she, is your card." — T. S. Eliot',
       },
     },
   },
@@ -233,10 +240,23 @@ export const en = {
       kicker: "Works",
       title: "Works",
       intro: "Code, products and things actually made — interactive and shipped.",
-      tarotTitle: "Daily Tarot",
-      tarotIntro:
-        "One card a day, seeded by the date — the same card for everyone who opens it that day.",
-      tarotNote: "Placeholder page. The deck and the draw logic come later.",
+      /* TAROT project (/en/works/tarot hub + three sub pages) */
+      tarot: {
+        intro:
+          "One card a day, with a deck and reading cases. The deck and draw logic live elsewhere — this is the scaffold.",
+        subs: {
+          daily: {
+            title: "Daily Tarot",
+            summary: "One card a day, seeded by the date — the same card for everyone that day.",
+          },
+          deck: { title: "Deck", summary: "All seventy-eight cards, one by one: image, symbol, correspondence." },
+          cases: {
+            title: "Reading Cases",
+            summary: "How to read a draw — question, spread, judgment, written down.",
+          },
+        },
+        placeholder: "Placeholder page. The deck and the draw logic come later.",
+      },
     },
   },
   arts: {

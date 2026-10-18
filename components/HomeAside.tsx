@@ -75,8 +75,8 @@ export default function HomeAside({
 
   return (
     <aside className="hidden xl:block">
-      {/* sticky 内容可能超过视口（加入状态组件后）——超出时内部滚动兜底 */}
-      <div className="sticky top-8 max-h-[calc(100vh-2.5rem)] space-y-5 overflow-y-auto">
+      {/* 不设内部滚动框：随页面主体一起滚动（Ting 2026-10-18：滑动框不适合） */}
+      <div className="space-y-5">
         {/* 编辑部印记：竖排站名 + 期号，纯装饰；顶部朱红条滚动后淡出（与导航同步） */}
         <div className="relative pt-3">
           <FadeRule className="absolute inset-x-0 top-0 h-0.5" />
@@ -102,28 +102,24 @@ export default function HomeAside({
           <TokenMonitor lang={lang} initial={token} variant="aside" />
         </div>
 
-        {/* 每日塔罗：轻入口（牌背 + 一句），点进去是造物下的占位页 */}
+        {/* 每日塔罗：轻入口——仅「迷你牌背 + 抽一张牌」为链接热区，诗句在链接外 */}
         <div className="border-t border-rule pt-3">
           <p className="font-mono text-xs tracking-widest text-muted">
             <span className="text-accent">·</span> {t.tarot.kicker}
           </p>
-          <Link href={`${base}/works/tarot`} className="group mt-2.5 flex items-center gap-3">
-            {/* 迷你牌背：hairline 外框 + 内框 + 中心菱形（与牌面页同语言） */}
+          <Link href={`${base}/works/tarot`} className="group mt-2.5 inline-flex items-center gap-3">
+            {/* 迷你牌背：hairline 外框 + 内框 + 中心菱形（与塔罗页同语言） */}
             <span className="relative block h-14 w-9 shrink-0 rounded-[2px] border border-rule">
               <span className="absolute inset-[3px] border border-rule/70" />
               <span className="absolute inset-0 grid place-items-center">
                 <span className="h-1 w-1 rotate-45 bg-accent" />
               </span>
             </span>
-            <span className="min-w-0">
-              <span className="block font-serif text-base font-semibold leading-snug group-hover:text-accent">
-                {t.tarot.title}
-              </span>
-              <span className="mt-0.5 block font-mono text-xs leading-snug text-muted">
-                {t.tarot.hint}
-              </span>
+            <span className="font-serif text-base font-semibold group-hover:text-accent">
+              {t.tarot.title}
             </span>
           </Link>
+          <p className="mt-2 font-mono text-xs leading-snug text-muted">{t.tarot.hint}</p>
         </div>
 
         {/* 五栏索引 */}

@@ -9,7 +9,10 @@ import Kicker from "@/components/Kicker";
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return getWorks("zh").map((w) => ({ slug: w.slug }));
+  /* tarot 走静态路由 /works/tarot（TAROT 枢纽页），不生成 md 详情页——排除以免同路径冲突 */
+  return getWorks("zh")
+    .filter((w) => w.slug !== "tarot")
+    .map((w) => ({ slug: w.slug }));
 }
 
 export async function generateMetadata({
