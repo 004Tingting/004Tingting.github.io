@@ -61,13 +61,9 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
       return;
     }
 
-    /* 第一拍：面板背景先收（回到牌面区域）+ 文字淡出 + 遮罩淡出 + 导航展开 */
+    /* 第一拍：面板背景先收（回到牌面区域）+ 文字先撤 + 遮罩淡出 + 导航展开 */
     document.querySelector(".tarot-panel-bg")?.classList.add("tarot-panel-bg-out");
-    const content = document.querySelector(".tarot-panel-content") as HTMLElement | null;
-    if (content) {
-      content.style.transition = "opacity 0.16s ease-in";
-      content.style.opacity = "0";
-    }
+    document.querySelector(".tarot-panel-content")?.classList.add("tarot-panel-content-out");
     document.querySelector(".tarot-veil")?.classList.add("tarot-veil-out");
     document.documentElement.classList.remove("tarot-open");
     window.dispatchEvent(new Event("tarot-close"));

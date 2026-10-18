@@ -268,6 +268,13 @@
 - **headless 验证坑**：headless Chrome 的 rAF / 时钟偏快——FLIP 用 `rAF×2` 启动会并帧（过渡根本不触发），`Page.captureScreenshot` 也抓不到中间帧。改用「强制 reflow」（`void el.offsetWidth`）或直接 CSS animation；验证看 `el.getAnimations()`（playState / currentTime），别只信截图
 - **验证手法**（可复用）：headless Chrome + CDP 探针（参考 `.workbuddy/tarot-vt-check.mjs` / `diag-tarot.mjs`）——hook `startViewTransition` 计数、过渡中截图、检查 `view-transition-name` 唯一性；本地起 `python -m http.server` 时必须先 `--no-proxy-server` 启动 Chrome（平台代理会劫持 localhost）
 
+### 26. 动效三坑：面板裁剪 / React state 驱动的壳 / animation-fill-mode 覆盖 inline
+
+- **面板 clip 裁掉飞行元素**（2026-10-18 塔罗）：牌面放在面板内部、面板用 `clip-path` 展开 → 牌面从裁剪区外飞入时**前半段不可见**（误判为遮罩遮挡）。**动画元素必须脱离会被裁剪的容器**——塔罗最终把牌面放到独立 fixed 层（z-70），面板只负责背景 + 文字
+- **React state 驱动的 UI 壳，CSS 类改不到**：Nav 的收紧形态（全宽 ↔ 浮动圆角卡片）由 `compact` **state** 决定；`html.tarot-open` 只能改 CSS 可控的内部元素（标题 / 图标 / 字号），卡片容器的 padding / 边框 / 背景**不响应** → 用 `window.dispatchEvent(new Event("tarot-open"))` 让 Nav 设 state（`compact = scroll || tarotOpen`）
+- **`animation: ... both` 的终态压住 inline style**：关闭时给内容设 `style.opacity = "0"` 无效——`fill-mode: both` 的终态 `opacity: 1` 优先级**高于 inline style**（CSS animation 的优先级规则）。修复：关闭类里先 `animation: none` 再设 opacity（禁止在 fill-mode 动画上直接改 inline 值）
+- **层级口诀**（浮层类动效）：遮罩 < 导航 < 面板 < 飞行元素；一次动效里的「飞行元素」要单独提层，否则任何父级裁剪 / 兄弟层级都会咬它
+
 ## 快速修复清单（下次会话遇到直接抄）
 
 ```bash

@@ -376,6 +376,13 @@ html.tarot-open .nav-gh-info {
     opacity: 1;
   }
 }
+/* 关闭时文字先撤：必须 animation:none——否则 fill-mode:both 的终态 opacity:1
+   会压住 inline opacity:0（CSS animation 优先级高于 inline style） */
+.tarot-panel-content-out {
+  animation: none;
+  opacity: 0;
+  transition: opacity 0.16s ease-in;
+}
 @media (prefers-reduced-motion: reduce) {
   .tarot-panel-bg,
   .tarot-panel-content {
