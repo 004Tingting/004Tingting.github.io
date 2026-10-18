@@ -355,6 +355,37 @@ html.tarot-open {
     animation: none;
   }
 }
+
+/* 关闭：牌面缩回列表卡片位置 + 遮罩淡出（与打开互为反向） */
+.tarot-veil-out {
+  animation: tarot-veil-out 0.24s ease-in both;
+}
+@keyframes tarot-veil-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.tarot-face-out {
+  transform-origin: top left;
+  animation: tarot-face-out 0.36s cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+@keyframes tarot-face-out {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate(var(--flip-x, 0px), var(--flip-y, 0px))
+      scale(var(--flip-sx, 1), var(--flip-sy, 1));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tarot-face-out {
+    animation: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .tarot-veil {
     animation: none;
