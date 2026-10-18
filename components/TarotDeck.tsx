@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { flushSync } from "react-dom";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { dic, type Lang } from "@/lib/i18n";
+import TarotFoilCard from "@/components/TarotFoilCard";
 import {
   ALL_CARDS,
   SUITS,
@@ -14,13 +14,17 @@ import {
 
 type Filter = "all" | "major" | TarotSuit;
 
+/** SSR 安全：服务端退化为 useEffect */
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
 /**
  * 塔罗牌库（demo）：
  * - 筛选 chips（全部 / 大阿卡纳 / 四花色）+ 搜索（中英名 / 拼音全拼 / 首字母 / 关键词）
  * - 78 张网格 + 点击 → 详情状态（?card=<id>，可分享）
- * - 过渡：View Transitions 共享元素——列表卡片平滑放大为弹窗牌面（420ms）；
- *   不支持该 API 或系统「减少动态效果」时直接切换
- * 卡面为扁平占位（分层闪卡效果待接入：替换 CardTile 与弹窗牌面）。
+ * - 过渡（FLIP，不走 View Transitions——避免复用主题擦除）：
+ *   卡片从列表位置放大为弹窗牌面（420ms）；遮罩独立淡入（tarot-veil）；
+ *   导航栏由 html.tarot-open 同步收紧（时长与卡片同拍）。
+ * 卡面：愚者为分层闪卡（TarotFoilCard，占位）；其余为线框占位。
  */
 export default function TarotDeck({ lang }: { lang: Lang }) {
   const tt = dic[lang].sections.works.tarot.deck;
@@ -28,42 +32,59 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
   const [filter, setFilter] = useState<Filter>("all");
   const [active, setActive] = useState<TarotCard | null>(null);
 
-  const openCard = (card: TarotCard) => {
-    const url = `?card=${card.id}`;
-    const doc = document as Document & {
-      startViewTransition?: (cb: () => void) => { finished: Promise<void> };
-    };
-    const el = document.getElementById(`tarot-card-${card.id}`);
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const faceRef = useRef<HTMLDivElement>(null);
+  const fromRectRef = useRef<DOMRect | null>(null);
 
-    if (doc.startViewTransition && !reduce && el) {
-      /* 旧快照：被点卡片带共享 name（source）；新快照：仅弹窗牌面（target）带同名。
-         关键：更新 DOM 时必须先摘掉卡片的 name —— 列表并未卸载，若新旧状态
-         同时存在两个同名元素，浏览器会忽略该 name、共享元素过渡不触发
-         （此前「没有过渡动画」的根因）。 */
-      el.classList.add("tarot-vt-source");
-      const vt = doc.startViewTransition(() => {
-        el.classList.remove("tarot-vt-source");
-        flushSync(() => setActive(card));
-      });
-      void vt.finished.finally(() => el.classList.remove("tarot-vt-source"));
-    } else {
-      setActive(card);
-    }
-    window.history.replaceState(null, "", url);
+  const openCard = (card: TarotCard) => {
+    const el = document.getElementById(`tarot-card-${card.id}`);
+    fromRectRef.current = el?.getBoundingClientRect() ?? null;
+    document.documentElement.classList.add("tarot-open");
+    setActive(card);
+    window.history.replaceState(null, "", `?card=${card.id}`);
   };
 
   const closeCard = () => {
+    document.documentElement.classList.remove("tarot-open");
     setActive(null);
     window.history.replaceState(null, "", window.location.pathname);
   };
+
+  /* FLIP：弹窗挂载后，把牌面从「卡片的位置与尺寸」过渡到最终位置（420ms） */
+  useIsoLayoutEffect(() => {
+    if (!active) return;
+    const node = faceRef.current;
+    const from = fromRectRef.current;
+    fromRectRef.current = null;
+    if (!node || !from) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const to = node.getBoundingClientRect();
+    if (!to.width || !to.height) return;
+    const dx = from.left - to.left;
+    const dy = from.top - to.top;
+    const sx = from.width / to.width;
+    const sy = from.height / to.height;
+
+    /* CSS animation 驱动 FLIP：起点写入变量 + 重启动画类（比 inline transition 稳，
+       不受并帧影响）。transform-origin 与动画定义见 globals.css .tarot-face-anim。 */
+    node.style.setProperty("--flip-x", `${dx}px`);
+    node.style.setProperty("--flip-y", `${dy}px`);
+    node.style.setProperty("--flip-sx", `${sx}`);
+    node.style.setProperty("--flip-sy", `${sy}`);
+    node.classList.remove("tarot-face-anim");
+    void node.offsetWidth; // 强制 reflow：让移除生效后再加，动画才能重播
+    node.classList.add("tarot-face-anim");
+  }, [active]);
 
   /* 首次挂载：?card=<id> 直接打开（分享 / 书签） */
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("card");
     if (!id) return;
     const card = ALL_CARDS.find((c) => c.id === id);
-    if (card) setActive(card);
+    if (card) {
+      document.documentElement.classList.add("tarot-open");
+      setActive(card);
+    }
   }, []);
 
   /* 弹窗：Esc 关闭 + 锁滚动并补偿滚动条宽度（防背景右偏） */
@@ -71,6 +92,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        document.documentElement.classList.remove("tarot-open");
         setActive(null);
         window.history.replaceState(null, "", window.location.pathname);
       }
@@ -212,17 +234,17 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
 
       {filtered.length === 0 && <p className="mt-12 text-muted">{tt.searchEmpty}</p>}
 
-      {/* 卡牌详情弹窗：牌面是共享元素过渡的目标（.tarot-vt-target） */}
+      {/* 卡牌详情弹窗：遮罩独立淡入；牌面走 FLIP */}
       {active && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
+          className="tarot-veil fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
           role="dialog"
           aria-modal="true"
           aria-label={cardName(active, lang)}
           onClick={closeCard}
         >
           <div
-            className="relative w-full max-w-3xl border border-rule bg-paper p-6 md:p-8"
+            className="relative max-h-[92vh] w-full max-w-3xl overflow-y-auto border border-rule bg-paper p-6 md:p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -235,20 +257,24 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
             </button>
 
             <div className="grid gap-6 md:grid-cols-[13rem_minmax(0,1fr)]">
-              {/* 牌面（过渡目标） */}
-              <div className="tarot-vt-target mx-auto w-40 md:mx-0 md:w-full">
-                <div className="relative aspect-[2/3] w-full rounded-[3px] border border-rule bg-paper">
-                  <span className="absolute inset-3 border border-rule/70" />
-                  <span className="absolute inset-x-0 top-4 text-center font-mono text-xs tracking-widest text-muted">
-                    {cardMark(active, lang)}
-                  </span>
-                  <span className="absolute inset-0 grid place-items-center">
-                    <span className="h-3 w-3 rotate-45 border border-accent" />
-                  </span>
-                  <span className="absolute inset-x-2 bottom-4 text-center font-serif text-sm font-semibold leading-tight">
-                    {cardName(active, lang)}
-                  </span>
-                </div>
+              {/* 牌面：FLIP 的目标节点；愚者用分层闪卡，其余线框占位 */}
+              <div ref={faceRef} data-tarot-face className="mx-auto w-40 md:mx-0 md:w-full">
+                {active.id === "major-0" ? (
+                  <TarotFoilCard />
+                ) : (
+                  <div className="relative aspect-[2/3] w-full rounded-[3px] border border-rule bg-paper">
+                    <span className="absolute inset-3 border border-rule/70" />
+                    <span className="absolute inset-x-0 top-4 text-center font-mono text-xs tracking-widest text-muted">
+                      {cardMark(active, lang)}
+                    </span>
+                    <span className="absolute inset-0 grid place-items-center">
+                      <span className="h-3 w-3 rotate-45 border border-accent" />
+                    </span>
+                    <span className="absolute inset-x-2 bottom-4 text-center font-serif text-sm font-semibold leading-tight">
+                      {cardName(active, lang)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* 内容 */}

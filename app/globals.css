@@ -254,11 +254,11 @@ body {
      内容中心随之下跳（cdp-probe8 实测 2.7px）——固定 px 并纳入同一套过渡后消除 */
   line-height: 2rem;
   transition:
-    font-size 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    line-height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    font-size var(--nav-fx) cubic-bezier(0.4, 0, 0.2, 1),
+    line-height var(--nav-fx) cubic-bezier(0.4, 0, 0.2, 1),
     color 0.2s ease;
 }
-.nav-is-compact .nav-brand {
+:is(.nav-is-compact, html.tarot-open) .nav-brand {
   line-height: 1.75rem; /* 与 text-lg 原生一致 */
 }
 .nav-gh-icon {
@@ -268,33 +268,33 @@ body {
   transform: scale(1);
   visibility: visible;
   transition:
-    width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.25s ease,
-    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    width var(--nav-fx) cubic-bezier(0.4, 0, 0.2, 1),
+    margin-left var(--nav-fx) cubic-bezier(0.4, 0, 0.2, 1),
+    opacity var(--nav-fx) ease,
+    transform var(--nav-fx) cubic-bezier(0.4, 0, 0.2, 1),
     visibility 0s linear 0s,
     color 0.2s ease;
 }
-.nav-is-compact .nav-gh-icon {
+:is(.nav-is-compact, html.tarot-open) .nav-gh-icon {
   width: 0;
   margin-left: -1rem; /* -16px：抵消多出的 flex 间距，收紧态标题落位与既有版式一致 */
   opacity: 0;
   transform: scale(0.72);
   visibility: hidden;
-  /* 同拍：与上方同 0.25s / 同曲线；仅 visibility 在淡出完成后（0.25s）翻转 */
+  /* 同拍：与上方同时长 / 同曲线；仅 visibility 在淡出完成后翻转 */
   transition:
-    width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.25s ease,
-    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 0s linear 0.25s,
+    width var(--nav-fx) cubic-bezier(0.4, 0, 0.2, 1),
+    margin-left var(--nav-fx) cubic-bezier(0.4, 0, 0.2, 1),
+    opacity var(--nav-fx) ease,
+    transform var(--nav-fx) cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear var(--nav-fx),
     color 0.2s ease;
 }
 .nav-gh-info {
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity var(--nav-fx) ease;
 }
-.nav-is-compact .nav-gh-info {
+:is(.nav-is-compact, html.tarot-open) .nav-gh-info {
   opacity: 1;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -305,19 +305,114 @@ body {
   }
 }
 
-/* ---------- 塔罗牌库：卡片 → 详情弹窗的共享元素过渡（View Transitions） ---------- */
-/* .tarot-vt-source 由脚本临时加到被点的卡片上；.tarot-vt-target 是弹窗里的牌面。
-   两者共用 view-transition-name，startViewTransition 时浏览器把卡片的
-   位置 / 尺寸平滑过渡到弹窗牌面（配合 ?card= URL 的状态切换）。 */
-.tarot-vt-source,
-.tarot-vt-target {
-  view-transition-name: tarot-card;
+/* ---------- 塔罗牌库：卡片 → 详情弹窗过渡（FLIP，不走 View Transitions） ----------
+   为什么不用 VT：站点主题切换用 VT（::view-transition-new(root) 的擦除 keyframes），
+   牌库若也走 VT，背景会套用同一套擦除 → 出现「滑动变暗」。改用 FLIP（transform 动画，
+   真实 DOM，620ms 内结束）：
+     · 卡片 → 弹窗牌面：JS 测两端 rect，transform 插值（420ms，见 TarotDeck.tsx）
+     · 背景遮罩：独立 opacity 淡入（tarot-veil，240ms）——渐暗/渐亮，不碰主题切换
+     · 导航栏：html.tarot-open 触发与滚动收紧相同的样式，时长与卡片同拍（--nav-fx）
+   不支持的场景（reduced-motion）直接显示，无动画。 */
+
+/* 导航收紧/展开的过渡时长：滚动收紧 0.25s；塔罗弹窗打开时与卡片过渡同拍 0.42s */
+:root {
+  --nav-fx: 0.25s;
 }
-::view-transition-group(tarot-card) {
-  animation-duration: 420ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+html.tarot-open {
+  --nav-fx: 0.42s;
 }
-::view-transition-old(tarot-card),
-::view-transition-new(tarot-card) {
-  animation-duration: 420ms;
+
+@keyframes tarot-veil-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.tarot-veil {
+  animation: tarot-veil-in 0.24s ease-out both;
+}
+
+/* 牌面 FLIP：从卡片 rect 展开到弹窗位置（起点由 JS 写入 --flip-* 变量）。
+   用 CSS animation（而非 inline transition）保证插值由样式引擎执行，
+   低刷新 / headless 环境也不会被并帧跳过。 */
+.tarot-face-anim {
+  transform-origin: top left;
+  animation: tarot-face-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes tarot-face-in {
+  from {
+    transform: translate(var(--flip-x, 0px), var(--flip-y, 0px))
+      scale(var(--flip-sx, 1), var(--flip-sy, 1));
+  }
+  to {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tarot-face-anim {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tarot-veil {
+    animation: none;
+  }
+}
+
+/* ---------- 塔罗闪卡（占位：愚者）——分层拆解 + 指针倾斜 + 视差 + rainbow 箔面 ----------
+   参考 widgets 工作区 preview.html（rider-waite-smith 拆层图）；
+   artwork / edge / number / title 为压缩后的 webp（public/tarot/major-00）。 */
+.tarot-foil-artwork {
+  transform: translate(var(--ax, 0px), var(--ay, 0px)) scale(1.06);
+  transform-origin: 50.1% 46.5%;
+}
+.tarot-foil-number {
+  transform: translate(var(--nx, 0px), var(--ny, 0px));
+}
+.tarot-foil-title {
+  transform: translate(var(--tx, 0px), var(--ty, 0px));
+}
+.tarot-foil-rainbow {
+  mix-blend-mode: color-dodge;
+  opacity: var(--rainbow, 0.5);
+  background-image: linear-gradient(
+    -30deg,
+    hsl(0, 57%, 30%),
+    hsl(40, 53%, 32%),
+    hsl(90, 60%, 30%),
+    hsl(180, 60%, 30%),
+    hsl(180, 60%, 30%),
+    hsl(210, 57%, 32%),
+    hsl(280, 55%, 26%),
+    hsl(0, 57%, 30%),
+    hsl(40, 53%, 32%),
+    hsl(90, 60%, 30%),
+    hsl(180, 60%, 30%),
+    hsl(180, 60%, 30%),
+    hsl(210, 57%, 32%),
+    hsl(280, 55%, 26%),
+    hsl(0, 57%, 30%),
+    hsl(40, 53%, 32%),
+    hsl(90, 60%, 30%),
+    hsl(180, 60%, 30%),
+    hsl(180, 60%, 30%),
+    hsl(210, 57%, 32%),
+    hsl(280, 55%, 26%),
+    hsl(0, 57%, 30%)
+  );
+  background-size: 400% 400%;
+  background-position: var(--bx, 50%) var(--by, 50%);
+}
+.tarot-foil-card.live img {
+  will-change: transform;
+}
+.tarot-foil-card.live .tarot-foil-rainbow {
+  will-change: background-position;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tarot-foil-artwork {
+    transform: none;
+  }
 }
