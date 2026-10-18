@@ -39,6 +39,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
     const el = document.getElementById(`tarot-card-${card.id}`);
     fromRectRef.current = el?.getBoundingClientRect() ?? null;
     document.documentElement.classList.add("tarot-open");
+    window.dispatchEvent(new Event("tarot-open"));
     setActive(card);
     window.history.replaceState(null, "", `?card=${card.id}`);
   };
@@ -50,33 +51,46 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
 
     const finish = () => {
       document.documentElement.classList.remove("tarot-open");
+      window.dispatchEvent(new Event("tarot-close"));
       setActive(null);
       window.history.replaceState(null, "", window.location.pathname);
     };
 
-    /* 反向 FLIP：牌面缩回列表卡片的位置与尺寸；遮罩同步淡出；导航同时展开 */
     if (!node || !cardEl || reduce) {
       finish();
       return;
     }
-    const from = node.getBoundingClientRect();
-    const to = cardEl.getBoundingClientRect();
-    if (!from.width || !to.width) {
-      finish();
-      return;
+
+    /* 第一拍：面板背景先收（回到牌面区域）+ 文字淡出 + 遮罩淡出 + 导航展开 */
+    document.querySelector(".tarot-panel-bg")?.classList.add("tarot-panel-bg-out");
+    const content = document.querySelector(".tarot-panel-content") as HTMLElement | null;
+    if (content) {
+      content.style.transition = "opacity 0.16s ease-in";
+      content.style.opacity = "0";
     }
-    node.style.setProperty("--flip-x", `${to.left - from.left}px`);
-    node.style.setProperty("--flip-y", `${to.top - from.top}px`);
-    node.style.setProperty("--flip-sx", `${to.width / from.width}`);
-    node.style.setProperty("--flip-sy", `${to.height / from.height}`);
-    node.classList.remove("tarot-face-anim");
-    node.classList.add("tarot-face-out");
     document.querySelector(".tarot-veil")?.classList.add("tarot-veil-out");
     document.documentElement.classList.remove("tarot-open");
-    window.setTimeout(finish, 360);
+    window.dispatchEvent(new Event("tarot-close"));
+
+    /* 第二拍：背景收完后再让牌面缩回列表卡片 */
+    window.setTimeout(() => {
+      const from = node.getBoundingClientRect();
+      const to = cardEl.getBoundingClientRect();
+      if (!from.width || !to.width) {
+        finish();
+        return;
+      }
+      node.style.setProperty("--flip-x", `${to.left - from.left}px`);
+      node.style.setProperty("--flip-y", `${to.top - from.top}px`);
+      node.style.setProperty("--flip-sx", `${to.width / from.width}`);
+      node.style.setProperty("--flip-sy", `${to.height / from.height}`);
+      node.classList.remove("tarot-face-anim");
+      node.classList.add("tarot-face-out");
+      window.setTimeout(finish, 360);
+    }, 220);
   };
 
-  /* FLIP：弹窗挂载后，把牌面从「卡片的位置与尺寸」过渡到最终位置（420ms） */
+  /* FLIP：fixed 牌面层对齐槽位 rect，随后从「卡片位置与尺寸」过渡到槽位（420ms） */
   useIsoLayoutEffect(() => {
     if (!active) return;
     const node = faceRef.current;
@@ -85,8 +99,28 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
     if (!node || !from) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const to = node.getBoundingClientRect();
+    const slot = document.querySelector("[data-face-slot]") as HTMLElement | null;
+    if (!slot) return;
+    const to = slot.getBoundingClientRect();
     if (!to.width || !to.height) return;
+
+    /* fixed 牌面层定位到槽位（尺寸与位置随槽位） */
+    node.style.left = `${to.left}px`;
+    node.style.top = `${to.top}px`;
+    node.style.width = `${to.width}px`;
+    node.style.height = `${to.height}px`;
+
+    /* 面板背景的展开起点 = 牌面 rect（相对面板边框盒） */
+    const panelBg = document.querySelector(".tarot-panel-bg") as HTMLElement | null;
+    const panel = panelBg?.parentElement ?? null;
+    if (panelBg && panel) {
+      const pr = panel.getBoundingClientRect();
+      panelBg.style.setProperty("--bg-t", `${to.top - pr.top}px`);
+      panelBg.style.setProperty("--bg-b", `${pr.bottom - to.bottom}px`);
+      panelBg.style.setProperty("--bg-l", `${to.left - pr.left}px`);
+      panelBg.style.setProperty("--bg-r", `${pr.right - to.right}px`);
+    }
+
     const dx = from.left - to.left;
     const dy = from.top - to.top;
     const sx = from.width / to.width;
@@ -110,6 +144,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
     const card = ALL_CARDS.find((c) => c.id === id);
     if (card) {
       document.documentElement.classList.add("tarot-open");
+      window.dispatchEvent(new Event("tarot-open"));
       setActive(card);
     }
   }, []);
@@ -118,11 +153,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        document.documentElement.classList.remove("tarot-open");
-        setActive(null);
-        window.history.replaceState(null, "", window.location.pathname);
-      }
+      if (e.key === "Escape") closeCard();
     };
     window.addEventListener("keydown", onKey);
     const prevPad = document.body.style.paddingRight;
@@ -261,83 +292,93 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
 
       {filtered.length === 0 && <p className="mt-12 text-muted">{tt.searchEmpty}</p>}
 
-      {/* 卡牌详情弹窗：遮罩独立淡入；牌面走 FLIP */}
+      {/* 卡牌详情：牌面独立 fixed 层（z-70，不被面板裁剪）+ 面板（z-60，背景第二拍展开） */}
       {active && (
         <>
-          {/* 遮罩：z-40（低于导航卡 z-50），延迟到牌面到位后再淡入 */}
+          {/* 遮罩：z-40（低于导航），延迟到牌面到位后淡入 */}
           <div className="tarot-veil fixed inset-0 z-40 bg-ink/50" onClick={closeCard} aria-hidden="true" />
 
-          {/* 面板层：z-60（高于导航卡）——牌面展开全程不被导航遮挡 */}
+          {/* 牌面：fixed 独立层——第一拍就可见，FLIP 全程不被面板/导航裁剪 */}
+          <div ref={faceRef} data-tarot-face className="pointer-events-none fixed z-[70]" aria-hidden="true">
+            {active.id === "major-0" ? (
+              <TarotFoilCard />
+            ) : (
+              <div className="relative aspect-[2100/3600] w-full rounded-[3px] border border-rule bg-paper">
+                <span className="absolute inset-3 border border-rule/70" />
+                <span className="absolute inset-x-0 top-4 text-center font-mono text-xs tracking-widest text-muted">
+                  {cardMark(active, lang)}
+                </span>
+                <span className="absolute inset-0 grid place-items-center">
+                  <span className="h-3 w-3 rotate-45 border border-accent" />
+                </span>
+                <span className="absolute inset-x-2 bottom-4 text-center font-serif text-sm font-semibold leading-tight">
+                  {cardName(active, lang)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* 面板：z-60；背景层从牌面区域向外展开（--bg-* 由脚本写入），文字第二拍淡入 */}
           <div className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center p-4">
             <div
               role="dialog"
               aria-modal="true"
               aria-label={cardName(active, lang)}
-              className="tarot-panel-in pointer-events-auto relative max-h-[92vh] w-full max-w-3xl overflow-y-auto border border-rule bg-paper p-6 md:p-8"
+              className="pointer-events-auto relative max-h-[92vh] w-full max-w-3xl overflow-hidden"
             >
-            <button
-              type="button"
-              onClick={closeCard}
-              aria-label={tt.close}
-              className="absolute right-4 top-3 font-mono text-sm text-muted hover:text-accent"
-            >
-              ✕
-            </button>
+              <div className="tarot-panel-bg absolute inset-0 border border-rule bg-paper" aria-hidden="true" />
+              <div className="tarot-panel-content relative max-h-[92vh] overflow-y-auto p-6 md:p-8">
+                <button
+                  type="button"
+                  onClick={closeCard}
+                  aria-label={tt.close}
+                  className="absolute right-4 top-3 font-mono text-sm text-muted hover:text-accent"
+                >
+                  ✕
+                </button>
 
-            <div className="grid gap-6 md:grid-cols-[13rem_minmax(0,1fr)]">
-              {/* 牌面：FLIP 的目标节点；愚者用分层闪卡，其余线框占位 */}
-              <div ref={faceRef} data-tarot-face className="mx-auto w-40 md:mx-0 md:w-full">
-                {active.id === "major-0" ? (
-                  <TarotFoilCard />
-                ) : (
-                  <div className="relative aspect-[2100/3600] w-full rounded-[3px] border border-rule bg-paper">
-                    <span className="absolute inset-3 border border-rule/70" />
-                    <span className="absolute inset-x-0 top-4 text-center font-mono text-xs tracking-widest text-muted">
-                      {cardMark(active, lang)}
-                    </span>
-                    <span className="absolute inset-0 grid place-items-center">
-                      <span className="h-3 w-3 rotate-45 border border-accent" />
-                    </span>
-                    <span className="absolute inset-x-2 bottom-4 text-center font-serif text-sm font-semibold leading-tight">
-                      {cardName(active, lang)}
-                    </span>
+                <div className="grid gap-6 md:grid-cols-[13rem_minmax(0,1fr)]">
+                  {/* 牌面槽位：只占位（真实牌面在 fixed 层，位置由脚本按此 rect 对齐） */}
+                  <div
+                    data-face-slot
+                    className="mx-auto aspect-[2100/3600] w-40 md:mx-0 md:w-full"
+                    aria-hidden="true"
+                  />
+
+                  {/* 内容 */}
+                  <div className="min-w-0">
+                    <p className="font-mono text-xs tracking-widest text-muted">
+                      <span className="text-accent">·</span>{" "}
+                      {active.arcana === "major" ? tt.arcanaMajor : tt.arcanaMinor}
+                      {active.suit
+                        ? ` / ${lang === "zh" ? suitMeta(active.suit)?.name : suitMeta(active.suit)?.nameEn}`
+                        : ""}
+                    </p>
+                    <h2 className="mt-2 font-serif text-3xl font-bold">{cardName(active, lang)}</h2>
+                    <p className="mt-1 font-mono text-xs text-muted">
+                      {lang === "zh" ? active.nameEn : active.name}
+                    </p>
+
+                    <ul className="mt-4 flex flex-wrap gap-2">
+                      {(lang === "zh" ? active.keywords : active.keywordsEn).map((w) => (
+                        <li key={w} className="border border-rule px-2 py-0.5 font-mono text-xs text-muted">
+                          {w}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <p className="mt-6 border-t border-rule pt-4 text-sm leading-relaxed text-muted">
+                      {tt.readingNote}
+                    </p>
+
+                    <p className="mt-4 font-mono text-[11px] text-muted/70">
+                      {lang === "zh" ? "可分享：" : "Permalink: "}?card={active.id}
+                    </p>
                   </div>
-                )}
-              </div>
-
-              {/* 内容 */}
-              <div className="min-w-0">
-                <p className="font-mono text-xs tracking-widest text-muted">
-                  <span className="text-accent">·</span>{" "}
-                  {active.arcana === "major" ? tt.arcanaMajor : tt.arcanaMinor}
-                  {active.suit
-                    ? ` / ${lang === "zh" ? suitMeta(active.suit)?.name : suitMeta(active.suit)?.nameEn}`
-                    : ""}
-                </p>
-                <h2 className="mt-2 font-serif text-3xl font-bold">{cardName(active, lang)}</h2>
-                <p className="mt-1 font-mono text-xs text-muted">
-                  {lang === "zh" ? active.nameEn : active.name}
-                </p>
-
-                <ul className="mt-4 flex flex-wrap gap-2">
-                  {(lang === "zh" ? active.keywords : active.keywordsEn).map((w) => (
-                    <li key={w} className="border border-rule px-2 py-0.5 font-mono text-xs text-muted">
-                      {w}
-                    </li>
-                  ))}
-                </ul>
-
-                <p className="mt-6 border-t border-rule pt-4 text-sm leading-relaxed text-muted">
-                  {tt.readingNote}
-                </p>
-
-                <p className="mt-4 font-mono text-[11px] text-muted/70">
-                  {lang === "zh" ? "可分享：" : "Permalink: "}?card={active.id}
-                </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
         </>
       )}
     </>

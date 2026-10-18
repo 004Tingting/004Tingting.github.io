@@ -340,22 +340,45 @@ html.tarot-open .nav-gh-info {
   animation: tarot-veil-in 0.24s ease-out 0.4s both;
 }
 
-/* 面板展开（第二拍）：牌面先到位（0–0.4s，仅面板左侧牌面区域可见），
-   0.4s 后从牌面右缘向外展开（clip-path 从左到右），周边内容随之露出。
-   移动端单列布局不裁剪，直接显示。 */
-.tarot-panel-in {
-  animation: tarot-panel-clip 0.36s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+/* 面板背景（第二拍）：只在牌面区域起（--bg-* 由脚本按牌面 rect 写入），向外展开。
+   第一拍时面板背景完全不可见——只有牌面在飞。 */
+.tarot-panel-bg {
+  animation: tarot-bg-in 0.36s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
 }
-@keyframes tarot-panel-clip {
+@keyframes tarot-bg-in {
   from {
-    clip-path: inset(0 calc(100% - 15rem) 0 0);
+    clip-path: inset(var(--bg-t, 0px) var(--bg-r, 100%) var(--bg-b, 0px) var(--bg-l, 0px));
   }
   to {
     clip-path: inset(0 0 0 0);
   }
 }
-@media (max-width: 767px) {
-  .tarot-panel-in {
+.tarot-panel-bg-out {
+  animation: tarot-bg-out 0.22s ease-in both;
+}
+@keyframes tarot-bg-out {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(var(--bg-t, 0px) var(--bg-r, 100%) var(--bg-b, 0px) var(--bg-l, 0px));
+  }
+}
+/* 面板内容（文字）：第二拍淡入，第一拍不可见 */
+.tarot-panel-content {
+  animation: tarot-content-in 0.28s ease-out 0.44s both;
+}
+@keyframes tarot-content-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tarot-panel-bg,
+  .tarot-panel-content {
     animation: none;
   }
 }

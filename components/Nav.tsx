@@ -52,7 +52,10 @@ export default function Nav({ lang }: { lang: Lang }) {
   const routes = ROUTES[lang];
 
   // 滚动收紧：离开页顶后导航变浮动圆角卡片，logo 与留白同步收缩
-  const [compact, setCompact] = useState(false);
+  const [compactScroll, setCompact] = useState(false);
+  /** 塔罗详情弹窗打开时强制收紧（事件由 TarotDeck 派发）——顶部打开也能收紧 */
+  const [tarotOpen, setTarotOpen] = useState(false);
+  const compact = compactScroll || tarotOpen;
   // 中部信息：文章详情页 = 标题 + 进度；其他页 = 页面标题
   const [info, setInfo] = useState<{ title: string; pct: number | null }>({ title: "", pct: null });
   /** DOM 引用缓存：文章页结构在一次路由内不变，避免每个滚动帧重复 querySelector */
@@ -115,6 +118,18 @@ export default function Nav({ lang }: { lang: Lang }) {
     cache.h1 = null;
     cache.ready = false;
   }, [pathname]);
+
+  /* 塔罗详情弹窗：打开时强制收紧导航（页面在顶部也生效） */
+  useEffect(() => {
+    const onOpen = () => setTarotOpen(true);
+    const onClose = () => setTarotOpen(false);
+    window.addEventListener("tarot-open", onOpen);
+    window.addEventListener("tarot-close", onClose);
+    return () => {
+      window.removeEventListener("tarot-open", onOpen);
+      window.removeEventListener("tarot-close", onClose);
+    };
+  }, []);
 
   // 语言切换：zh ↔ en 对等路径
   const otherHref =
