@@ -3,10 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { dic } from "@/lib/i18n";
 import Kicker from "@/components/Kicker";
+import TarotDeck from "@/components/TarotDeck";
 
 export const dynamicParams = false;
 
-const SUBS = ["daily", "deck", "cases"] as const;
+const SUBS = ["deck", "daily", "cases"] as const;
 type Sub = (typeof SUBS)[number];
 
 export function generateStaticParams() {
@@ -23,12 +24,29 @@ export async function generateMetadata({
   return item ? { title: `${item.title} · TAROT`, description: item.summary } : {};
 }
 
-/** TAROT 子页（占位）：daily / deck / cases——牌面与正文待接入，替换牌背占位区即可 */
+/** TAROT 子页：deck = 牌库 demo（搜索 + 网格 + 弹窗预览）；daily / cases 为占位 */
 export default async function TarotSubPage({ params }: { params: Promise<{ sub: string }> }) {
   const { sub } = await params;
   const tt = dic.zh.sections.works.tarot;
   const item = tt.subs[sub as Sub];
   if (!item) notFound();
+
+  /* 牌库：78 张列表（客户端交互组件） */
+  if (sub === "deck") {
+    return (
+      <div className="mx-auto max-w-5xl px-6 py-16">
+        <Kicker>TAROT</Kicker>
+        <h1 className="mt-4 font-serif text-5xl font-bold">{item.title}</h1>
+        <p className="mt-6 max-w-2xl text-muted">{item.summary}</p>
+        <TarotDeck lang="zh" />
+        <p className="mt-16 border-t border-rule pt-6 font-mono text-sm">
+          <Link href="/works/tarot" className="hover:text-accent">
+            ← TAROT
+          </Link>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">

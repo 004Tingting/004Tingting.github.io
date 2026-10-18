@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   description: "每日一张牌，连同牌库与解析案例。",
 };
 
-/** 子页顺序：每日 / 牌库 / 案例 */
-const SUBS = ["daily", "deck", "cases"] as const;
+/** 子页顺序：牌库 / 每日 / 案例（2026-10-18 Ting 调整） */
+const SUBS = ["deck", "daily", "cases"] as const;
 
 /**
  * TAROT 枢纽页（造物 03）。

@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   description: "One card a day, with a deck and reading cases.",
 };
 
-/** Sub page order: daily / deck / cases */
-const SUBS = ["daily", "deck", "cases"] as const;
+/** Sub page order: deck / daily / cases (Ting 2026-10-18) */
+const SUBS = ["deck", "daily", "cases"] as const;
 
 /**
  * TAROT hub page (Works 03).
