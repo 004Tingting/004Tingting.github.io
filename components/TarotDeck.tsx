@@ -37,9 +37,13 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (doc.startViewTransition && !reduce && el) {
-      /* 旧快照：被点卡片带共享 name；新快照：弹窗牌面带同名 → 卡片「长」成详情 */
+      /* 旧快照：被点卡片带共享 name（source）；新快照：仅弹窗牌面（target）带同名。
+         关键：更新 DOM 时必须先摘掉卡片的 name —— 列表并未卸载，若新旧状态
+         同时存在两个同名元素，浏览器会忽略该 name、共享元素过渡不触发
+         （此前「没有过渡动画」的根因）。 */
       el.classList.add("tarot-vt-source");
       const vt = doc.startViewTransition(() => {
+        el.classList.remove("tarot-vt-source");
         flushSync(() => setActive(card));
       });
       void vt.finished.finally(() => el.classList.remove("tarot-vt-source"));
