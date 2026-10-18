@@ -257,6 +257,15 @@
 - **解法**：单独跑 `node scripts/fetch-monthly.mjs`（通常一次成功）→ 再构建发布
 - **判别口诀**：**查 Steam 数据一律按 appid**——`GetOwnedGames` 按名字搜对新上架 / 本地化名不可靠（`Arknights: Endfield` 首次按名字查零命中即此坑；appid 4732690）
 
+### 25. View Transitions 共享元素：同名 `view-transition-name` 导致过渡静默失效
+
+- **现象**（2026-10-18，塔罗牌库）：写了 `startViewTransition` + 共享 `view-transition-name`，点击卡片却毫无过渡（页面瞬切）
+- **原因**：弹窗打开后列表**并未卸载**——被点卡片（临时 `.tarot-vt-source`）与弹窗牌面（`.tarot-vt-target`）**同时**带 `view-transition-name: tarot-card`。规范要求同一状态内 name 唯一，浏览器直接忽略该 name → 共享元素过渡不触发（只剩几乎不可见的 root 淡化）
+- **解法**：在 `updateCallback` 内**先摘掉旧元素的 name，再 `flushSync` 渲染新状态**——旧快照已拍（含卡片 name），新快照只剩弹窗牌面
+- **判别口诀**：VT 没效果 → ① 查新旧快照里 name 是否唯一 ② 查 `typeof document.startViewTransition` ③ 查 `prefers-reduced-motion`
+- **附带坑**：`bash scripts/deploy.sh | head -N` 会在 head 关闭时 **SIGPIPE 中断部署**（构建完没推送）；长流程一律 `bash scripts/deploy.sh > log 2>&1; tail log` 并检查 `$?`
+- **验证手法**（可复用）：headless Chrome + CDP 探针（参考 `.workbuddy/tarot-vt-check.mjs`）——hook `startViewTransition` 计数、过渡中间帧截图、检查 `view-transition-name` 唯一性；本地起 `python -m http.server` 时必须先 `--no-proxy-server` 启动 Chrome（平台代理会劫持 localhost）
+
 ## 快速修复清单（下次会话遇到直接抄）
 
 ```bash
