@@ -102,6 +102,30 @@ export default function HomeAside({
           <TokenMonitor lang={lang} initial={token} variant="aside" />
         </div>
 
+        {/* 每日塔罗：轻入口（牌背 + 一句），点进去是造物下的占位页 */}
+        <div className="border-t border-rule pt-3">
+          <p className="font-mono text-xs tracking-widest text-muted">
+            <span className="text-accent">·</span> {t.tarot.kicker}
+          </p>
+          <Link href={`${base}/works/tarot`} className="group mt-2.5 flex items-center gap-3">
+            {/* 迷你牌背：hairline 外框 + 内框 + 中心菱形（与牌面页同语言） */}
+            <span className="relative block h-14 w-9 shrink-0 rounded-[2px] border border-rule">
+              <span className="absolute inset-[3px] border border-rule/70" />
+              <span className="absolute inset-0 grid place-items-center">
+                <span className="h-1 w-1 rotate-45 bg-accent" />
+              </span>
+            </span>
+            <span className="min-w-0">
+              <span className="block font-serif text-base font-semibold leading-snug group-hover:text-accent">
+                {t.tarot.title}
+              </span>
+              <span className="mt-0.5 block font-mono text-xs leading-snug text-muted">
+                {t.tarot.hint}
+              </span>
+            </span>
+          </Link>
+        </div>
+
         {/* 五栏索引 */}
         <nav className="border-t border-rule pt-3">
           <p className="font-mono text-xs tracking-widest text-muted">

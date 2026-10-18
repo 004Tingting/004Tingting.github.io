@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ["/research/", "/en/research/"],
     ["/chronicles/", "/en/chronicles/"],
     ["/works/", "/en/works/"],
+    ["/works/tarot/", "/en/works/tarot/"],
     ["/arts/", "/en/arts/"],
     ["/arts/music/", "/en/arts/music/"],
     ["/arts/games/", "/en/arts/games/"],

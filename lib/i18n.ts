@@ -18,6 +18,12 @@ export const zh = {
       latestShort: "近作",
       colophon: "成都 · 中国",
       est: "始于 2026",
+      /* 每日塔罗入口（侧栏小卡） */
+      tarot: {
+        kicker: "今日塔罗",
+        title: "抽一张牌",
+        hint: "一天一张，日期做种子",
+      },
     },
   },
   sections: {
@@ -35,6 +41,9 @@ export const zh = {
       kicker: "造物",
       title: "Works",
       intro: "代码、产品与做出来的东西——可交互、可落地的成果。",
+      tarotTitle: "每日塔罗",
+      tarotIntro: "一天一张，日期做种子——同一天打开，抽到的是同一张牌。",
+      tarotNote: "页面先占位，牌面与抽牌逻辑稍后接入。",
     },
   },
   arts: {
@@ -201,6 +210,12 @@ export const en = {
       latestShort: "Recent",
       colophon: "Chengdu, China",
       est: "Est. 2026",
+      /* Daily tarot entry (aside mini card) */
+      tarot: {
+        kicker: "Daily Tarot",
+        title: "Draw a card",
+        hint: "One a day, seeded by date",
+      },
     },
   },
   sections: {
@@ -218,6 +233,10 @@ export const en = {
       kicker: "Works",
       title: "Works",
       intro: "Code, products and things actually made — interactive and shipped.",
+      tarotTitle: "Daily Tarot",
+      tarotIntro:
+        "One card a day, seeded by the date — the same card for everyone who opens it that day.",
+      tarotNote: "Placeholder page. The deck and the draw logic come later.",
     },
   },
   arts: {
