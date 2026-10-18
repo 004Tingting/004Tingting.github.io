@@ -264,7 +264,9 @@
 - **解法**：在 `updateCallback` 内**先摘掉旧元素的 name，再 `flushSync` 渲染新状态**——旧快照已拍（含卡片 name），新快照只剩弹窗牌面
 - **判别口诀**：VT 没效果 → ① 查新旧快照里 name 是否唯一 ② 查 `typeof document.startViewTransition` ③ 查 `prefers-reduced-motion`
 - **附带坑**：`bash scripts/deploy.sh | head -N` 会在 head 关闭时 **SIGPIPE 中断部署**（构建完没推送）；长流程一律 `bash scripts/deploy.sh > log 2>&1; tail log` 并检查 `$?`
-- **验证手法**（可复用）：headless Chrome + CDP 探针（参考 `.workbuddy/tarot-vt-check.mjs`）——hook `startViewTransition` 计数、过渡中间帧截图、检查 `view-transition-name` 唯一性；本地起 `python -m http.server` 时必须先 `--no-proxy-server` 启动 Chrome（平台代理会劫持 localhost）
+- **后续（同日，塔罗最终方案）**：VT 修好后仍被弃用——root 快照会**复用站点主题擦除的 `::view-transition-new(root)` keyframes**（clip-path 擦入），弹窗遮罩呈现「滑动变暗」而非渐暗。最终改 **FLIP**：CSS animation（`--flip-*` 变量 + `.tarot-face-anim`）+ 遮罩独立 opacity 淡入 + 导航 `html.tarot-open`（`--nav-fx` 同拍）。**教训：站点已把 VT 用于主题切换时，任何新的 VT 调用都会带上那套 root 动画**
+- **headless 验证坑**：headless Chrome 的 rAF / 时钟偏快——FLIP 用 `rAF×2` 启动会并帧（过渡根本不触发），`Page.captureScreenshot` 也抓不到中间帧。改用「强制 reflow」（`void el.offsetWidth`）或直接 CSS animation；验证看 `el.getAnimations()`（playState / currentTime），别只信截图
+- **验证手法**（可复用）：headless Chrome + CDP 探针（参考 `.workbuddy/tarot-vt-check.mjs` / `diag-tarot.mjs`）——hook `startViewTransition` 计数、过渡中截图、检查 `view-transition-name` 唯一性；本地起 `python -m http.server` 时必须先 `--no-proxy-server` 启动 Chrome（平台代理会劫持 localhost）
 
 ## 快速修复清单（下次会话遇到直接抄）
 
