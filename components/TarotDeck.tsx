@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { dic, type Lang } from "@/lib/i18n";
 import {
   ALL_CARDS,
@@ -15,9 +16,10 @@ type Filter = "all" | "major" | TarotSuit;
 
 /**
  * 塔罗牌库（demo）：
- * - 筛选 chips（全部 / 大阿卡纳 / 权杖 / 圣杯 / 宝剑 / 星币）
- * - 搜索：中文名、英文名、拼音全拼、拼音首字母、关键词
- * - 78 张网格（3/4/5/6 列）+ 点击翻开预览（3D 翻牌；URL ?card=<id> 可分享）
+ * - 筛选 chips（全部 / 大阿卡纳 / 四花色）+ 搜索（中英名 / 拼音全拼 / 首字母 / 关键词）
+ * - 78 张网格 + 点击 → 详情状态（?card=<id>，可分享）
+ * - 过渡：View Transitions 共享元素——列表卡片平滑放大为弹窗牌面（420ms）；
+ *   不支持该 API 或系统「减少动态效果」时直接切换
  * 卡面为扁平占位（分层闪卡效果待接入：替换 CardTile 与弹窗牌面）。
  */
 export default function TarotDeck({ lang }: { lang: Lang }) {
@@ -25,11 +27,26 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [active, setActive] = useState<TarotCard | null>(null);
-  const [flipped, setFlipped] = useState(false);
 
   const openCard = (card: TarotCard) => {
-    setActive(card);
-    window.history.replaceState(null, "", `?card=${card.id}`);
+    const url = `?card=${card.id}`;
+    const doc = document as Document & {
+      startViewTransition?: (cb: () => void) => { finished: Promise<void> };
+    };
+    const el = document.getElementById(`tarot-card-${card.id}`);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (doc.startViewTransition && !reduce && el) {
+      /* 旧快照：被点卡片带共享 name；新快照：弹窗牌面带同名 → 卡片「长」成详情 */
+      el.classList.add("tarot-vt-source");
+      const vt = doc.startViewTransition(() => {
+        flushSync(() => setActive(card));
+      });
+      void vt.finished.finally(() => el.classList.remove("tarot-vt-source"));
+    } else {
+      setActive(card);
+    }
+    window.history.replaceState(null, "", url);
   };
 
   const closeCard = () => {
@@ -45,12 +62,9 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
     if (card) setActive(card);
   }, []);
 
-  /* 弹窗：Esc 关闭 + 锁滚动并补偿滚动条宽度（防背景右偏）+ 翻牌时序 */
+  /* 弹窗：Esc 关闭 + 锁滚动并补偿滚动条宽度（防背景右偏） */
   useEffect(() => {
-    if (!active) {
-      setFlipped(false);
-      return;
-    }
+    if (!active) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setActive(null);
@@ -62,12 +76,10 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
     const sw = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = "hidden";
     if (sw > 0) document.body.style.paddingRight = `${sw}px`;
-    const timer = window.setTimeout(() => setFlipped(true), 90);
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
       document.body.style.paddingRight = prevPad;
-      window.clearTimeout(timer);
     };
   }, [active]);
 
@@ -196,7 +208,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
 
       {filtered.length === 0 && <p className="mt-12 text-muted">{tt.searchEmpty}</p>}
 
-      {/* 卡牌预览弹窗：牌面 3D 翻开（先见牌背，再翻到正面） */}
+      {/* 卡牌详情弹窗：牌面是共享元素过渡的目标（.tarot-vt-target） */}
       {active && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
@@ -219,33 +231,19 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
             </button>
 
             <div className="grid gap-6 md:grid-cols-[13rem_minmax(0,1fr)]">
-              {/* 翻牌容器：perspective + preserve-3d；reduced-motion 直接显示牌面 */}
-              <div className="mx-auto w-40 [perspective:1000px] md:mx-0 md:w-full">
-                <div
-                  className={`relative aspect-[2/3] w-full transition-transform duration-500 ease-out [transform-style:preserve-3d] ${
-                    flipped ? "[transform:rotateY(180deg)]" : ""
-                  } motion-reduce:transition-none`}
-                >
-                  {/* 牌背（初始朝向） */}
-                  <div className="absolute inset-0 rounded-[3px] border border-rule bg-paper [backface-visibility:hidden] motion-reduce:hidden">
-                    <span className="absolute inset-3 border border-rule/70" />
-                    <span className="absolute inset-0 grid place-items-center">
-                      <span className="h-3 w-3 rotate-45 bg-accent" />
-                    </span>
-                  </div>
-                  {/* 牌面（翻转 180° 后朝向观者） */}
-                  <div className="absolute inset-0 rounded-[3px] border border-rule bg-paper [backface-visibility:hidden] [transform:rotateY(180deg)] motion-reduce:[transform:none]">
-                    <span className="absolute inset-3 border border-rule/70" />
-                    <span className="absolute inset-x-0 top-4 text-center font-mono text-xs tracking-widest text-muted">
-                      {cardMark(active, lang)}
-                    </span>
-                    <span className="absolute inset-0 grid place-items-center">
-                      <span className="h-3 w-3 rotate-45 border border-accent" />
-                    </span>
-                    <span className="absolute inset-x-2 bottom-4 text-center font-serif text-sm font-semibold leading-tight">
-                      {cardName(active, lang)}
-                    </span>
-                  </div>
+              {/* 牌面（过渡目标） */}
+              <div className="tarot-vt-target mx-auto w-40 md:mx-0 md:w-full">
+                <div className="relative aspect-[2/3] w-full rounded-[3px] border border-rule bg-paper">
+                  <span className="absolute inset-3 border border-rule/70" />
+                  <span className="absolute inset-x-0 top-4 text-center font-mono text-xs tracking-widest text-muted">
+                    {cardMark(active, lang)}
+                  </span>
+                  <span className="absolute inset-0 grid place-items-center">
+                    <span className="h-3 w-3 rotate-45 border border-accent" />
+                  </span>
+                  <span className="absolute inset-x-2 bottom-4 text-center font-serif text-sm font-semibold leading-tight">
+                    {cardName(active, lang)}
+                  </span>
                 </div>
               </div>
 
@@ -291,7 +289,13 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
 function CardTile({ card, lang, onOpen }: { card: TarotCard; lang: Lang; onOpen: () => void }) {
   const name = cardName(card, lang);
   return (
-    <button type="button" onClick={onOpen} aria-label={name} className="group block w-full text-left">
+    <button
+      type="button"
+      id={`tarot-card-${card.id}`}
+      onClick={onOpen}
+      aria-label={name}
+      className="group block w-full text-left"
+    >
       <span className="relative block aspect-[2/3] w-full rounded-[2px] border border-rule bg-paper transition-colors group-hover:border-accent">
         <span className="absolute inset-1.5 border border-rule/60" />
         <span className="absolute inset-x-0 top-2.5 text-center font-mono text-[10px] tracking-widest text-muted">

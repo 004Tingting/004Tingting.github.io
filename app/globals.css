@@ -304,3 +304,20 @@ body {
     transition: none;
   }
 }
+
+/* ---------- 塔罗牌库：卡片 → 详情弹窗的共享元素过渡（View Transitions） ---------- */
+/* .tarot-vt-source 由脚本临时加到被点的卡片上；.tarot-vt-target 是弹窗里的牌面。
+   两者共用 view-transition-name，startViewTransition 时浏览器把卡片的
+   位置 / 尺寸平滑过渡到弹窗牌面（配合 ?card= URL 的状态切换）。 */
+.tarot-vt-source,
+.tarot-vt-target {
+  view-transition-name: tarot-card;
+}
+::view-transition-group(tarot-card) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(tarot-card),
+::view-transition-new(tarot-card) {
+  animation-duration: 420ms;
+}
