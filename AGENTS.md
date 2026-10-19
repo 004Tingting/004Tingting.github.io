@@ -39,7 +39,7 @@ app/
 ├── sitemap.ts / robots.ts
 ├── feed.xml/route.ts     # 中文 RSS（en 版在 (en)/en/feed.xml/route.ts）
 └── favicon.svg
-components/               # Nav / Footer / ThemeToggle / Kicker / ArticleList / ArticleDetail / WorkList / MarkdownBody / Giscus / NowPlayingLive / EmbedPlayer / LifeEntryList / GameSourceList / Analytics / TokenMonitor
+components/               # Nav / Footer / ThemeToggle / Kicker / ArticleList / ArticleDetail / WorkList / MarkdownBody / Giscus / NowPlayingLive / EmbedPlayer / LifeEntryList / GameSourceList / Analytics / TokenMonitor / DotMatrix / TarotDeck / TarotFoilCard
 content/
 ├── research/{zh,en}/*.md     # 研思文章
 ├── chronicles/{zh,en}/*.md   # 纪事文章
