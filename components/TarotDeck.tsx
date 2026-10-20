@@ -91,15 +91,15 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
     const node = faceRef.current;
     const from = fromRectRef.current;
     fromRectRef.current = null;
-    if (!node || !from) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!node) return;
 
     const slot = document.querySelector("[data-face-slot]") as HTMLElement | null;
     if (!slot) return;
     const to = slot.getBoundingClientRect();
     if (!to.width || !to.height) return;
 
-    /* fixed 牌面层定位到槽位（尺寸与位置随槽位） */
+    /* fixed 牌面层定位到槽位（尺寸与位置随槽位）——必须先定位，
+       否则牌面层是 0×0 不可见（?card= 深链打开时没有起始卡片 rect，此步尤其关键） */
     node.style.left = `${to.left}px`;
     node.style.top = `${to.top}px`;
     node.style.width = `${to.width}px`;
@@ -115,6 +115,10 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
       panelBg.style.setProperty("--bg-l", `${to.left - pr.left}px`);
       panelBg.style.setProperty("--bg-r", `${pr.right - to.right}px`);
     }
+
+    /* 深链 / 无起始卡片 / reduced-motion：定位完就结束，不做 FLIP */
+    if (!from) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const dx = from.left - to.left;
     const dy = from.top - to.top;
@@ -293,7 +297,9 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
           {/* 遮罩：z-40（低于导航），延迟到牌面到位后淡入 */}
           <div className="tarot-veil fixed inset-0 z-40 bg-ink/50" onClick={closeCard} aria-hidden="true" />
 
-          {/* 牌面：fixed 独立层——第一拍就可见，FLIP 全程不被面板/导航裁剪 */}
+          {/* 牌面：fixed 独立层——第一拍就可见，FLIP 全程不被面板/导航裁剪。
+              外层保持 pointer-events-none（不挡遮罩/面板点击），
+              内层 TarotFoilCard 自带 pointer-events-auto 以接收 hover 视差。 */}
           <div ref={faceRef} data-tarot-face className="pointer-events-none fixed z-[70]" aria-hidden="true">
             <TarotFoilCard cardId={active.id} />
           </div>
