@@ -8,14 +8,14 @@ Ting 的个人网站——一本双语「个人杂志」，五栏：研思 / 造
 
 | 文件 | 内容 |
 |---|---|
-| `AGENTS.md` | **项目上下文与硬性约定（AI 助手开工先读）** |
+| `AGENTS.md` | **项目上下文与硬性约定（开工先读）** |
 | `STYLE.md` | **去 AI 味写作指南（活文档）——写站点内容前必读** |
 | `HANDOFF.md` | 会话交接：最新状态、待办、环境注意（本地文档，不入库） |
 | `WORKLOG.md` | 工作日志（单文件多条目，最新在上；本地文档，不入库） |
 | `PLAN.md` | 建站规划与里程碑（历史文档，信息架构已按 M6 演进） |
 | `DESIGN.md` | 设计规格：字体、色板、双语策略、页面线框、五栏体系 |
 | `PITFALLS.md` | 踩坑记录：环境 / 构建 / 部署 / 内容的全部坑与解法 |
-| `.workbuddy/memory/` | AI 会话的当日详细档案与项目长期记忆（本地） |
+| `.worklog/memory/` | AI 会话的当日详细档案与项目长期记忆（本地） |
 
 - **技术栈**：Next.js（App Router + TypeScript，静态导出）+ Tailwind CSS 4
 - **部署**：GitHub Pages，**gh-pages 分支模式**（`bash scripts/deploy.sh` 一键发布）
@@ -72,7 +72,7 @@ bash scripts/deploy.sh   # 一键：构建 → 推 gh-pages 分支 → 触发 Pa
 > 旧的自动模式（push main 触发 Actions 构建部署）配置保留在 `.github/workflows/deploy.yml`，
 > 但已改为仅手动触发。若日后切回：`gh api -X PUT repos/004Tingting/004Tingting.github.io/pages -f build_type=workflow`
 
-**内容改动后**：改 `content/**` → 跑 `scripts/deploy.sh`（或让 Buddy 代跑）。
+**内容改动后**：改 `content/**` → 跑 `scripts/deploy.sh`（或让助手代跑）。
 **只想本地看效果**：`python scripts/preview.py 8000`
 
 ## 实时「正在听」（本地脚本）
@@ -84,7 +84,7 @@ npm run live                    # 启动监听：每 15 秒检查一次，Ctrl+C
 npm run live -- --interval 10   # 自定义间隔
 ```
 
-> **Windows 用户注意**：Node 装在 WorkBuddy 的隔离目录里，**你自己的终端（CMD/PowerShell）里 `npm` 不在 PATH 中**，直接跑会提示"命令未找到"。
+> **Windows 用户注意**：Node 装在工具自带目录里，**你自己的终端（CMD/PowerShell）里 `npm` 不在 PATH 中**，直接跑会提示"命令未找到"。
 > **推荐做法：双击项目根目录的 `start-live.cmd`** —— 它会自动找 Node、校验配置、启动监听。
 >
 > 想用命令行也行（完整路径）：
@@ -122,4 +122,4 @@ npm run live -- --interval 10   # 自定义间隔
 - **口径**：token 用 M/B 紧凑显示（悬停看精确值）；货币英文页为美元、中文页为人民币折算（1 美元 = 7.2 元，仅供参考）；时间英文页为美国东部（EDT/EST）、中文页为北京时间
 - **安全**：hub 密钥只在本机脚本与 widget 里，不进前端、不进仓库；公开端点与快照均已剥离设备与账号标识
 
-> hub 部署全过程、凭据存档与维护命令见 `.workbuddy/token-monitor-kit/`（本地目录，含密钥文件，**勿提交**）。
+> hub 部署全过程、凭据存档与维护命令见 `.worklog/token-monitor-kit/`（本地目录，含密钥文件，**勿提交**）。

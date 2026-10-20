@@ -6,7 +6,7 @@
 /out/
 
 # workspace memory (local only)
-/.workbuddy/
+/.worklog/
 
 # working docs at root (local only, kept out of the public repo)
 /HANDOFF.md
@@ -26,3 +26,8 @@ npm-debug.log*
 
 # epic oauth credentials (local only)
 /.epic-auth.json
+
+# takeover prompt (local only)
+/接管提示.md
+/自动化清单.md
+/周期提醒清单.md

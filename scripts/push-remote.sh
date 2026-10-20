@@ -11,7 +11,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# WorkBuddy 会话内：平台代理会掐断 GitHub 请求，统一清掉
+# 本机会话内：平台代理会掐断 GitHub 请求，统一清掉
 unset HTTPS_PROXY HTTP_PROXY https_proxy http_proxy
 export GIT_TERMINAL_PROMPT=0
 export GCM_INTERACTIVE=never
@@ -42,7 +42,7 @@ if git -c credential.helper= push -q "https://x-access-token:${TOKEN}@github.com
 else
   echo "  ⚠ 直推失败（网络 / 证书吊销检查），转 SSH-over-443 通道…"
   # ② SSH-over-443 临时部署密钥（注册 → 推送 → 即删；trap 保证失败也回收）
-  KEYDIR=".workbuddy/tmp-push-key"
+  KEYDIR=".worklog/tmp-push-key"
   KEYID=""
   cleanup() {
     if [ -n "$KEYID" ]; then

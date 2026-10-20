@@ -2,7 +2,7 @@
 title Now Playing - Last.fm Pusher
 cd /d "%~dp0"
 
-rem Fallback runtime: WorkBuddy's bundled Node (not on the user PATH).
+rem Fallback runtime: 工具自带的 Node (not on the user PATH).
 set "FALLBACK=C:\Users\SaiKo\.workbuddy\binaries\node\versions\22.22.2-6\node.exe"
 set "NODE_EXE="
 

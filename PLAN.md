@@ -1,6 +1,6 @@
 # personal-site 建站规划
 
-> 2026-10-05 · Buddy 起草 · Ting 拍板
+> 2026-10-05 · 助手起草 · Ting 拍板
 
 > ⚠️ **本文档是初版规划（博客时代）**。信息架构已按 **M6 五栏重构**演进为 研思 / 造物 / 游艺 / 纪事 / 关于，
 > 最新结构以 `AGENTS.md` 与 `DESIGN.md` 为准；下文「站点地图」「内容规划」保留作历史记录，里程碑进度另见根目录 `HANDOFF.md`。
@@ -16,7 +16,7 @@
 | 内容格式 | Markdown + frontmatter | 博客和作品集都是写文件即内容 |
 | 站点语言 | 中英双语 | zh 默认 + /en，渐进式：框架双语、内容允许单语 |
 | 视觉主调 | 编辑杂志风 | 设计规格详见 DESIGN.md |
-| 身份 | Ting（不实名、无照片） | about 第一人称 |
+| 叙述人称 | 第一人称 | about 用第一人称 |
 | 首页形态 | 门户型 | 介绍 + 最新文章 + 精选项目 |
 
 ## 1. 站点地图
@@ -129,7 +129,7 @@ push main ──► Actions 触发 ──► npm ci && npm run build ──► o
 
 - 仓库名用 `<你的GitHub用户名>.github.io`：域名最干净，且免 `basePath` 配置
   （若用别的仓库名，需在 `next.config.ts` 配 `basePath: '/仓库名'`）
-- 用官方 `actions/deploy-pages`，workflow 我来写
+- 用官方 `actions/deploy-pages`，workflow 由助手编写
 - 预留自定义域名：以后买域名，仓库加一个 CNAME 文件即可
 
 ## 7. 风险与对策

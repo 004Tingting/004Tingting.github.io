@@ -13,7 +13,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# WorkBuddy 会话内：平台内部代理会掐断 gh / git 的 GitHub 请求，统一清掉
+# 本机会话内：平台内部代理会掐断 gh / git 的 GitHub 请求，统一清掉
 unset HTTPS_PROXY HTTP_PROXY https_proxy http_proxy
 
 # 禁止 git 交互式凭据提示 —— 双保险：即使 token 获取失败也只会报错，不弹 GUI 对话框
@@ -24,7 +24,7 @@ REPO="004Tingting/004Tingting.github.io"
 REMOTE="https://github.com/${REPO}.git"
 
 echo "▸ 1/3 构建静态产物…"
-# 规避 WorkBuddy 沙箱的两道拦截（详见 PITFALLS #1 / #2）：
+# 规避沙箱的两道拦截（详见 PITFALLS #1 / #2）：
 #   EPERM：.next/trace 必须已存在且为空 → 预清空 trace
 #   safe-delete：构建的删除量会撞阈值 → 预先清空 .next 的 4 个易过期子目录 + 旧 out/，让构建「只写不删」
 python - <<'PY' 2>/dev/null || true
@@ -53,7 +53,7 @@ git -c user.name="004Tingting" -c user.email="SaiKouTING004@outlook.com" \
 cd ..
 
 # 推送：优先用 gh 的 token 直接推送
-# 原因：本机系统级配置了 credential.helper=helper-selector（WorkBuddy PortableGit），
+# 原因：本机系统级配置了 credential.helper=helper-selector（构建环境自带的 PortableGit），
 #       它会在每次凭据请求时弹出 GUI「选择 credential helper」对话框；
 #       把 token 嵌进 URL 可完全绕过 credential helper 机制。
 TOKEN=""
@@ -66,7 +66,7 @@ if [ -z "$TOKEN" ] && command -v gh >/dev/null 2>&1; then
 fi
 
 # 关键：用 `-c credential.helper=` 在命令行覆盖（优先级最高），彻底禁用 credential helper。
-# 否则会被系统级 `credential.helper=helper-selector`（WorkBuddy PortableGit 注入）接管
+# 否则会被系统级 `credential.helper=helper-selector`（构建环境自带的 PortableGit 注入）接管
 # → 弹 GUI 对话框 / 命令卡 1~2 分钟后被强杀（认证与保存凭据两个阶段各触发一次）。
 # 直推失败自动走备用通道（2026-10-17 加固：schannel 吊销检查故障时 HTTPS 直推必失败）：
 #   ① 直推 HTTPS → ② API 通道（Git Data 差分推 out/，只依赖 api.github.com）
@@ -108,7 +108,7 @@ else
 fi
 
 echo "▸ 3/3 触发 Pages 构建…"
-# 注意：WorkBuddy 会话内需清代理（平台内部代理会掐断 GitHub 请求）
+# 注意：本机会话内需清代理（平台内部代理会掐断 GitHub 请求）
 if command -v gh >/dev/null 2>&1; then
   GH="gh"
 elif [ -x "/c/Program Files/GitHub CLI/gh.exe" ]; then

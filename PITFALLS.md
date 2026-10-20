@@ -1,14 +1,14 @@
 # 建站踩坑记录（PITFALLS）
 
 > 2026-10-06 · 从零搭建本站过程中真实踩过的坑，按分类记录：现象 → 原因 → 解决。
-> 环境：Windows + WorkBuddy 会话 + Next.js 15 静态导出 + GitHub Pages。
+> 环境：Windows + 本机会话 + Next.js 15 静态导出 + GitHub Pages。
 
-## 一、开发环境（WorkBuddy 会话特有）
+## 一、开发环境（本机会话特有）
 
 ### 1. 沙箱拦截 Next 构建的文件写入（EPERM）
 
 - **现象**：`EPERM: operation not permitted, open 'P:\personal-site\.next\trace'`，随后导出阶段 `open 'out\404.html'` 同样被拒
-- **原因**：WorkBuddy 沙箱的 node 文件系统代理（`node-brokered-fs-shim`）拦截了 Next 构建多进程的写入方式；并非真实权限问题（手动 `touch` / `node fs.writeFileSync` 同路径均成功）
+- **原因**：沙箱的 node 文件系统代理（`node-brokered-fs-shim`）拦截了 Next 构建多进程的写入方式；并非真实权限问题（手动 `touch` / `node fs.writeFileSync` 同路径均成功）
 - **精确定位**：Next 15.5 的 `node_modules/next/dist/trace/report/to-json.js` 第 76 行
   `RotatingWriteStream` 构造里 `fs.createWriteStream(file, { flags: 'a' })`。
 - **✅ 最终解法（2026-10-07 实测锁定，见 #2 的完整配方）**：
@@ -23,8 +23,8 @@
 - **原因**：沙箱安全 shim 按**删除操作计数**（阈值 50）。`next build` 重建 `.next` 时会删除大量过期文件（`.rsc`、chunks、字体等）→ 撞墙
 - **✅ 终极配方（2026-10-07 实测两次一次通过）**——让构建「只写不删」+ 前台非沙箱：
   ```bash
-  # 必须【前台】执行 + dangerouslyDisableSandbox=true（用户批准后完全绕过 shim）
-  # 后台任务（run_in_background）拿不到绕行，删除照常被拦！
+  # 必须【前台】执行 + 关闭沙箱（经用户批准）（用户批准后完全绕过 shim）
+  # 后台运行的任务拿不到绕行，删除照常被拦！
 
   # ① 前台非沙箱 python：清空易过期子目录 + 删旧 out/
   python -c "
@@ -41,8 +41,8 @@
 - **关键认知**（全部实测）：
   | 操作方式 | 删除是否被计数/拦截 |
   |---|---|
-  | 前台 + dangerouslyDisableSandbox（已批准） | ❌ 不计数（485 文件 rmtree 通过） |
-  | 后台任务（run_in_background） | ✅ 计数 → 396 文件即被拦 |
+  | 前台 + 关闭沙箱（已批准） | ❌ 不计数（485 文件 rmtree 通过） |
+  | 后台运行的任务 | ✅ 计数 → 396 文件即被拦 |
   | `next build`（有无沙箱标志） | ✅ 计数（重建 `.next` 的删除都算） |
 - `next dev` 在普通终端运行；预览用 `python scripts/preview.py 8000`
 
@@ -159,7 +159,7 @@
 ### 18. git 凭据弹窗 / push 卡死（credential-helper-selector）
 
 - **现象**：`git push` 弹出 GUI 对话框「Select a credential helper（manager / wincred / no helper）」，或**无任何输出卡住 1~2 分钟后被强杀**；一次 push 可能触发两次
-- **原因**：WorkBuddy 的 PortableGit 在**系统级**写入了 `credential.helper=helper-selector`，优先级高于全局配置（GCM）。git 在「认证」与「保存凭据」两个阶段都会调用 helper → 两次弹窗/卡顿
+- **原因**：工具自带的 PortableGit 在**系统级**写入了 `credential.helper=helper-selector`，优先级高于全局配置（GCM）。git 在「认证」与「保存凭据」两个阶段都会调用 helper → 两次弹窗/卡顿
 - **排查方法**（一眼定位）：
   ```bash
   GIT_TRACE=1 git push <url> <branch>   # 会看到 run_command: 'git credential-helper-selector store'
@@ -266,7 +266,7 @@
 - **附带坑**：`bash scripts/deploy.sh | head -N` 会在 head 关闭时 **SIGPIPE 中断部署**（构建完没推送）；长流程一律 `bash scripts/deploy.sh > log 2>&1; tail log` 并检查 `$?`
 - **后续（同日，塔罗最终方案）**：VT 修好后仍被弃用——root 快照会**复用站点主题擦除的 `::view-transition-new(root)` keyframes**（clip-path 擦入），弹窗遮罩呈现「滑动变暗」而非渐暗。最终改 **FLIP**：CSS animation（`--flip-*` 变量 + `.tarot-face-anim`）+ 遮罩独立 opacity 淡入 + 导航 `html.tarot-open`（`--nav-fx` 同拍）。**教训：站点已把 VT 用于主题切换时，任何新的 VT 调用都会带上那套 root 动画**
 - **headless 验证坑**：headless Chrome 的 rAF / 时钟偏快——FLIP 用 `rAF×2` 启动会并帧（过渡根本不触发），`Page.captureScreenshot` 也抓不到中间帧。改用「强制 reflow」（`void el.offsetWidth`）或直接 CSS animation；验证看 `el.getAnimations()`（playState / currentTime），别只信截图
-- **验证手法**（可复用）：headless Chrome + CDP 探针（参考 `.workbuddy/tarot-vt-check.mjs` / `diag-tarot.mjs`）——hook `startViewTransition` 计数、过渡中截图、检查 `view-transition-name` 唯一性；本地起 `python -m http.server` 时必须先 `--no-proxy-server` 启动 Chrome（平台代理会劫持 localhost）
+- **验证手法**（可复用）：headless Chrome + CDP 探针（参考 `.worklog/tarot-vt-check.mjs` / `diag-tarot.mjs`）——hook `startViewTransition` 计数、过渡中截图、检查 `view-transition-name` 唯一性；本地起 `python -m http.server` 时必须先 `--no-proxy-server` 启动 Chrome（平台代理会劫持 localhost）
 
 ### 26. 动效三坑：面板裁剪 / React state 驱动的壳 / animation-fill-mode 覆盖 inline
 
