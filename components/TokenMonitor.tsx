@@ -352,7 +352,8 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
             {online ? t.online : t.offline} · {t.updatedAt} {updatedAt ? fmtHubDate(updatedAt, lang) : "—"}
           </span>
         </div>
-        <div className={`mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3 ${pendingCls ?? ""}`}>
+        {/* 三块点阵屏横排：等宽三列，屏面撑满各列（原 11rem 偏小，2026-10-21 Ting 要求放大） */}
+        <div className={`mt-6 grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-3 ${pendingCls ?? ""}`}>
           {cols.map((c) => (
             <div key={c.key} className="min-w-0">
               <DotMatrix
@@ -364,7 +365,7 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
                 groupColors={c.groupColors}
                 animate="always"
                 scopeId={c.scope}
-                className="block w-full max-w-[11rem]"
+                className="block w-full"
               />
             </div>
           ))}
