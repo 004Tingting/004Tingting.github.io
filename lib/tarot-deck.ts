@@ -14,7 +14,7 @@ export type TarotCard = {
   nameEn: string;
   arcana: "major" | "minor";
   suit?: TarotSuit;
-  /** 大阿卡纳 0–21；小阿卡纳 1–14（1 = 首牌，11–14 = 侍从/骑士/王后/国王） */
+  /** 大阿卡纳 0–21；小阿卡纳 1–14（1 = 一，11–14 = 侍从/骑士/王后/国王） */
   number: number;
   /** 中文关键词（2 个） */
   keywords: string[];
@@ -110,9 +110,9 @@ export const SUITS: Array<{
   { id: "pentacles", name: "星币", nameEn: "Pentacles", element: "土", elementEn: "Earth", keywords: ["物质", "劳作"], keywordsEn: ["Matter", "Craft"], py: "xingbi", ini: "xb" },
 ];
 
-/** 牌面数字（1 = 首牌；11–14 = 侍从 / 骑士 / 王后 / 国王）；py = [全拼, 首字母] */
+/** 牌面数字（1 = 一；11–14 = 侍从 / 骑士 / 王后 / 国王）；py = [全拼, 首字母] */
 const RANKS: Array<{ zh: string; en: string; keyZh: string; keyEn: string; py: string; ini: string }> = [
-  { zh: "首牌", en: "Ace", keyZh: "起点", keyEn: "Seed", py: "shoupai", ini: "sp" },
+  { zh: "一", en: "Ace", keyZh: "起点", keyEn: "Seed", py: "yi", ini: "y" },
   { zh: "二", en: "Two", keyZh: "权衡", keyEn: "Weighing", py: "er", ini: "e" },
   { zh: "三", en: "Three", keyZh: "开展", keyEn: "Growth", py: "san", ini: "s" },
   { zh: "四", en: "Four", keyZh: "稳定", keyEn: "Stability", py: "si", ini: "s" },
