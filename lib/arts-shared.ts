@@ -3,7 +3,7 @@ import type { Lang } from "@/lib/i18n";
 /* 游艺（/arts）内部条目：状态与类型用枚举存 frontmatter，展示标签统一走 lib/i18n.ts */
 
 export type GameStatus = "playing" | "completed" | "dropped";
-export type ScreenType = "tv" | "anime" | "movie" | "novel";
+export type ScreenType = "tv" | "anime" | "movie" | "novel" | "manga";
 export type ScreenStatus = "watching" | "completed" | "dropped";
 export type ExerciseKind = "run" | "bodyweight" | "other";
 
@@ -99,7 +99,7 @@ export type LastfmData = {
 };
 
 export const GAME_STATUSES: GameStatus[] = ["playing", "completed", "dropped"];
-export const SCREEN_TYPES: ScreenType[] = ["tv", "anime", "movie", "novel"];
+export const SCREEN_TYPES: ScreenType[] = ["tv", "anime", "movie", "novel", "manga"];
 export const EXERCISE_KINDS: ExerciseKind[] = ["run", "bodyweight", "other"];
 
 export function asGameStatus(v: unknown): GameStatus {
@@ -111,7 +111,7 @@ export function asExerciseKind(v: unknown): ExerciseKind | null {
 }
 
 export function asScreenType(v: unknown): ScreenType {
-  return v === "tv" || v === "anime" || v === "movie" || v === "novel" ? v : "tv";
+  return v === "tv" || v === "anime" || v === "movie" || v === "novel" || v === "manga" ? v : "tv";
 }
 
 export function asScreenStatus(v: unknown): ScreenStatus {
@@ -426,6 +426,7 @@ export function summarize(
       anime: screen.filter((s) => s.type === "anime").length,
       movie: screen.filter((s) => s.type === "movie").length,
       novel: screen.filter((s) => s.type === "novel").length,
+      manga: screen.filter((s) => s.type === "manga").length,
     },
     screenHours: screen.reduce((s, e) => s + (e.hours ?? 0), 0),
     coverCount: covers.length,

@@ -18,6 +18,7 @@ import {
   type NetEaseMonthly,
   type NowPlaying,
   type ScreenEntry,
+  type ScreenType,
   type ExerciseEntry,
   type StatsHistory,
   type TokenDay,
@@ -565,4 +566,76 @@ export function getMonthlyTrends(lang: Lang): MonthlyTrends {
       screen: sumOf(lastSnap?.screen),
     },
   };
+}
+
+/* ---------- 看板横截面聚合（2026-10-21 新增：丰富 /arts/stats 的展示） ---------- */
+
+/**
+ * 游戏平台时长分布（堆叠条用）。
+ * 口径与总时长一致：手动条目 + Steam 全库 + WeGame + Epic 各算一次；
+ * Steam 里被 STEAM_MERGE 合并的同款已并入手动条目，故从 Steam 侧扣除，避免重复。
+ */
+export function getGamePlatformSplit(
+  lang: Lang,
+): Array<{ key: "manual" | "steam" | "wegame" | "epic"; hours: number }> {
+  let last: StatsHistory["snapshots"][string] | undefined;
+  try {
+    const history = JSON.parse(fs.readFileSync(STATS_HISTORY_FILE, "utf-8")) as StatsHistory;
+    const months = Object.keys(history.snapshots).sort();
+    last = history.snapshots[months[months.length - 1]];
+  } catch {
+    last = undefined;
+  }
+  const sum = (rec: Record<string, number> | undefined) =>
+    rec ? Object.values(rec).reduce((s, v) => s + v, 0) : 0;
+
+  const manual = getGames(lang).reduce((s, g) => s + (g.hours ?? 0), 0);
+  const steamAll = sum(last?.steam);
+  const mergedSteam = Object.keys(STEAM_MERGE[lang]).reduce((s, k) => s + (last?.steam?.[k] ?? 0), 0);
+
+  return [
+    { key: "manual" as const, hours: Math.round(manual * 10) / 10 },
+    { key: "steam" as const, hours: Math.round((steamAll - mergedSteam) * 10) / 10 },
+    { key: "wegame" as const, hours: Math.round(sum(last?.wegame) * 10) / 10 },
+    { key: "epic" as const, hours: Math.round(sum(last?.epic) * 10) / 10 },
+  ];
+}
+
+/** 影卷按类型聚合（横条用）：类型 / 条目数 / 累计小时，按小时倒序 */
+export function getScreenByType(lang: Lang): Array<{ type: ScreenType; count: number; hours: number }> {
+  const acc = new Map<ScreenType, { count: number; hours: number }>();
+  for (const e of getScreen(lang)) {
+    const cur = acc.get(e.type) ?? { count: 0, hours: 0 };
+    cur.count += 1;
+    cur.hours += e.hours ?? 0;
+    acc.set(e.type, cur);
+  }
+  return [...acc.entries()]
+    .map(([type, v]) => ({ type, count: v.count, hours: Math.round(v.hours * 100) / 100 }))
+    .sort((a, b) => b.hours - a.hours);
+}
+
+/**
+ * 常听歌手（横条用）：从最新快照的 netease 记录聚合。
+ * 快照键形如「歌名|歌手」，值为累计小时。按小时倒序取前 limit。
+ */
+export function getTopArtists(limit = 6): Array<{ name: string; hours: number }> {
+  let last: StatsHistory["snapshots"][string] | undefined;
+  try {
+    const history = JSON.parse(fs.readFileSync(STATS_HISTORY_FILE, "utf-8")) as StatsHistory;
+    const months = Object.keys(history.snapshots).sort();
+    last = history.snapshots[months[months.length - 1]];
+  } catch {
+    return [];
+  }
+  const acc = new Map<string, number>();
+  for (const [key, hours] of Object.entries(last?.netease ?? {})) {
+    const artist = key.includes("|") ? key.split("|")[1] : "";
+    if (!artist || hours <= 0) continue;
+    acc.set(artist, (acc.get(artist) ?? 0) + hours);
+  }
+  return [...acc.entries()]
+    .map(([name, hours]) => ({ name, hours: Math.round(hours * 10) / 10 }))
+    .sort((a, b) => b.hours - a.hours)
+    .slice(0, limit);
 }

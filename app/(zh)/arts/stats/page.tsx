@@ -1,11 +1,24 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getGameHoursFull, getCovers, getExercise, getGames, getMonthlyTrends, getScreen, getStats, getTokenMonitor } from "@/lib/arts";
+import {
+  getCovers,
+  getExercise,
+  getGameHoursFull,
+  getGamePlatformSplit,
+  getGames,
+  getMonthlyTrends,
+  getScreen,
+  getScreenByType,
+  getStats,
+  getTokenMonitor,
+  getTopArtists,
+} from "@/lib/arts";
 import { fmtScreenHours } from "@/lib/arts-shared";
 import Kicker from "@/components/Kicker";
 import MonthlyTrend from "@/components/MonthlyTrend";
 import TokenMonitor from "@/components/TokenMonitor";
+import { PlatformBars, RankBar } from "@/components/StatBars";
 
 export const metadata: Metadata = { title: "看板" };
 
@@ -56,6 +69,17 @@ export default function StatsPage() {
 
   // 游戏总时长统一口径：人工 frontmatter + Steam + WeGame + Epic（快照合并，见 getMonthlyTrends）
   const gameTotal = m.baselines.games ?? s.gameHours;
+
+  /* 横截面聚合（2026-10-21 新增） */
+  const platformSplit = getGamePlatformSplit("zh");
+  const platformLabels = {
+    manual: "手动记录",
+    steam: "Steam",
+    wegame: "WeGame",
+    epic: "Epic",
+  };
+  const screenByType = getScreenByType("zh");
+  const topArtists = getTopArtists(6);
 
   const big = [
     // 游戏：人工精选记录 + Steam 全库（自动）
@@ -142,6 +166,18 @@ export default function StatsPage() {
         </div>
       </section>
 
+      {/* 游戏：平台分布（堆叠条）——同一份总时长按来源切开 */}
+      <section className="mt-14 border-t border-rule pt-10">
+        <Kicker>{st.platformKicker}</Kicker>
+        <p className="mt-3 max-w-2xl text-sm text-muted">{st.platformIntro}</p>
+        <div className="mt-6 max-w-2xl">
+          <PlatformBars
+            items={platformSplit.map((p) => ({ label: platformLabels[p.key], hours: p.hours }))}
+            unit={st.hours}
+          />
+        </div>
+      </section>
+
       {/* 游戏：时长排行（前 6，全榜见链接） */}
       <section className="mt-14 border-t border-rule pt-10">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -164,6 +200,27 @@ export default function StatsPage() {
             {st.gameFullLink}
           </Link>
         </p>
+      </section>
+
+      {/* 影卷：按类型分布（横条）——比「最新 6 部」更能体现体量，且不随时间失效 */}
+      <section className="mt-12 border-t border-rule pt-10">
+        <Kicker>{st.screenTypeKicker}</Kicker>
+        <p className="mt-3 max-w-2xl text-sm text-muted">{st.screenTypeIntro}</p>
+        {screenByType.length > 0 ? (
+          <div className="mt-2 max-w-2xl">
+            <RankBar
+              items={screenByType.map((x) => ({
+                label: t.screenTypes[x.type],
+                hours: x.hours,
+                meta: `${x.count} ${st.entries}`,
+              }))}
+              unit={st.hours}
+              format={(v) => v.toFixed(2)}
+            />
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-muted">{st.noData}</p>
+        )}
       </section>
 
       {/* 影卷：时长排行 */}
@@ -227,6 +284,22 @@ export default function StatsPage() {
           </div>
         </div>
         <p className="mt-4 max-w-2xl text-xs text-muted">{st.musicNote}</p>
+
+        {/* 常听歌手：从网易云播放记录按歌手聚合 */}
+        <div className="mt-10 border-t border-rule/60 pt-8">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="font-serif text-sm font-semibold">{st.artistKicker}</h3>
+            <span className="font-mono text-[11px] text-muted">{st.hours}</span>
+          </div>
+          <p className="mt-2 max-w-2xl text-xs text-muted">{st.artistIntro}</p>
+          {topArtists.length > 0 ? (
+            <div className="mt-2 max-w-2xl">
+              <RankBar items={topArtists.map((a) => ({ label: a.name, hours: a.hours }))} unit={st.hours} />
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-muted">{st.noData}</p>
+          )}
+        </div>
       </section>
 
       {/* Token 用量：hub 多端聚合（摘要栅格自带明细页链接） */}

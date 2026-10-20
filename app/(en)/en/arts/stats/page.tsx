@@ -1,11 +1,24 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { dic } from "@/lib/i18n";
-import { getGameHoursFull, getCovers, getExercise, getGames, getMonthlyTrends, getScreen, getStats, getTokenMonitor } from "@/lib/arts";
+import {
+  getCovers,
+  getExercise,
+  getGameHoursFull,
+  getGamePlatformSplit,
+  getGames,
+  getMonthlyTrends,
+  getScreen,
+  getScreenByType,
+  getStats,
+  getTokenMonitor,
+  getTopArtists,
+} from "@/lib/arts";
 import { fmtScreenHours } from "@/lib/arts-shared";
 import Kicker from "@/components/Kicker";
 import MonthlyTrend from "@/components/MonthlyTrend";
 import TokenMonitor from "@/components/TokenMonitor";
+import { PlatformBars, RankBar } from "@/components/StatBars";
 
 export const metadata: Metadata = { title: "Stats" };
 
@@ -56,6 +69,17 @@ export default function StatsPage() {
 
   // Unified game-hours scope: manual frontmatter + Steam + WeGame + Epic (snapshot merge, see getMonthlyTrends)
   const gameTotal = m.baselines.games ?? s.gameHours;
+
+  /* Cross-section aggregates (added 2026-10-21) */
+  const platformSplit = getGamePlatformSplit("en");
+  const platformLabels = {
+    manual: "Manual",
+    steam: "Steam",
+    wegame: "WeGame",
+    epic: "Epic",
+  };
+  const screenByType = getScreenByType("en");
+  const topArtists = getTopArtists(6);
 
   const big = [
     // Games: curated manual entries + full Steam library (auto)
@@ -142,6 +166,18 @@ export default function StatsPage() {
         </div>
       </section>
 
+      {/* Games: platform split (stacked bar) — the same total, cut by source */}
+      <section className="mt-14 border-t border-rule pt-10">
+        <Kicker>{st.platformKicker}</Kicker>
+        <p className="mt-3 max-w-2xl text-sm text-muted">{st.platformIntro}</p>
+        <div className="mt-6 max-w-2xl">
+          <PlatformBars
+            items={platformSplit.map((p) => ({ label: platformLabels[p.key], hours: p.hours }))}
+            unit={st.hours}
+          />
+        </div>
+      </section>
+
       {/* Games: hours ranking (top 6, full list via link) */}
       <section className="mt-14 border-t border-rule pt-10">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -164,6 +200,27 @@ export default function StatsPage() {
             {st.gameFullLink}
           </Link>
         </p>
+      </section>
+
+      {/* Screen: by type (bars) — shows volume better than "latest 6" and doesn't age out */}
+      <section className="mt-12 border-t border-rule pt-10">
+        <Kicker>{st.screenTypeKicker}</Kicker>
+        <p className="mt-3 max-w-2xl text-sm text-muted">{st.screenTypeIntro}</p>
+        {screenByType.length > 0 ? (
+          <div className="mt-2 max-w-2xl">
+            <RankBar
+              items={screenByType.map((x) => ({
+                label: t.screenTypes[x.type],
+                hours: x.hours,
+                meta: `${x.count} ${st.entries}`,
+              }))}
+              unit={st.hours}
+              format={(v) => v.toFixed(2)}
+            />
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-muted">{st.noData}</p>
+        )}
       </section>
 
       {/* Screen: by hours */}
@@ -227,6 +284,22 @@ export default function StatsPage() {
           </div>
         </div>
         <p className="mt-4 max-w-2xl text-xs text-muted">{st.musicNote}</p>
+
+        {/* Most played artists: aggregated from NetEase play records */}
+        <div className="mt-10 border-t border-rule/60 pt-8">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="font-serif text-sm font-semibold">{st.artistKicker}</h3>
+            <span className="font-mono text-[11px] text-muted">{st.hours}</span>
+          </div>
+          <p className="mt-2 max-w-2xl text-xs text-muted">{st.artistIntro}</p>
+          {topArtists.length > 0 ? (
+            <div className="mt-2 max-w-2xl">
+              <RankBar items={topArtists.map((a) => ({ label: a.name, hours: a.hours }))} unit={st.hours} />
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-muted">{st.noData}</p>
+          )}
+        </div>
       </section>
 
       {/* Token usage: hub multi-device aggregation (summary grid carries its own details link) */}

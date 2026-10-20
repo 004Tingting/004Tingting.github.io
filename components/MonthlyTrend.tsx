@@ -4,12 +4,21 @@ import type { Lang } from "@/lib/i18n";
  * 月度趋势折线（杂志风 SVG，构建时渲染，零依赖零客户端 JS）。
  * - 折线/数据点用唯一强调色，基线与刻度用 hairline/灰
  * - 每个数据点内嵌 <title>，浏览器原生 hover 提示
- * - 全零序列显示「积累中」占位；若传 baseline（差分基线月的当前累计），
- *   则在末月位置画单点 + 数值标注——积累期也有信息量
+ *
+ * 数据不足时的降级（2026-10-21）：
+ *   折线图的前提是「有时间序列」。快照差分自 2026-10 起积累，首月只有 1–2 个非零点，
+ *   画满 640×170 的画布会显得很空。所以：
+ *     · 非零月 ≥ 3 → 正常折线
+ *     · 非零月 1–2  → 紧凑条：显示「首月 → 本月」与增量，不再画空画布
+ *     · 全零 + 有基线 → 单点 + 累计值（积累期仍有信息量）
+ *     · 全零无基线 → 一句「积累中」
  */
 const W = 640;
 const H = 170;
 const PAD = { l: 8, r: 8, t: 22, b: 28 };
+
+/** 折线需要至少这么多个非零月才有意义 */
+const MIN_POINTS = 3;
 
 const MONTH_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -50,10 +59,62 @@ export default function MonthlyTrend({
 }: Props) {
   const n = months.length;
   const maxV = Math.max(...values, 0);
-  const hasData = maxV > 0 && n > 1;
-  const showBaseline = !hasData && baseline !== null && baseline > 0;
-  const baseX = W - PAD.r;
-  const baseY = H / 2 - 8;
+  const nonZero = values.filter((v) => v > 0).length;
+  const hasLine = maxV > 0 && n > 1 && nonZero >= MIN_POINTS;
+  /* 紧凑形态的两种触发：
+     · 有 1–2 个非零月（数据太少画不出趋势）
+     · 全零但有基线（快照差分的首月——有累计值可看，但没有时间序列）
+     两者都不该占满 640×170 的空画布。 */
+  const isCompact = !hasLine && (maxV > 0 || (baseline !== null && baseline > 0));
+  const showBaseline = maxV <= 0 && baseline !== null && baseline > 0;
+
+  /* ---------- 紧凑形态：不画空画布，给「有数据的那几个月 + 合计」 ---------- */
+  if (isCompact) {
+    const idx = values.map((v, i) => (v > 0 ? i : -1)).filter((i) => i >= 0);
+    const hasMonths = idx.length > 0;
+    const first = hasMonths ? idx[0] : -1;
+    const last = hasMonths ? idx[idx.length - 1] : -1;
+    const total = hasMonths ? values.reduce((s, v) => s + v, 0) : (baseline as number);
+    /* 全零 + 基线：没有「有记录的月份」，说明差分还没开始积累，右侧写「积累中」 */
+    const rangeText = hasMonths
+      ? `${monthLabel(months[first], lang)}${last !== first ? ` → ${monthLabel(months[last], lang)}` : ""}`
+      : emptyNote;
+    return (
+      <div>
+        <div className="flex items-baseline justify-between gap-2">
+          <h3 className="font-serif text-sm font-semibold">{label}</h3>
+          <span className="font-mono text-[11px] text-muted">{unit}</span>
+        </div>
+        <div className="mt-3 border-t border-rule/60 pt-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="font-mono text-xs text-muted">{rangeText}</span>
+            <span className="font-serif text-xl font-bold">
+              {fmtValue(Math.round(total * 100) / 100)}
+              <span className="ml-1 font-mono text-xs font-normal text-muted">{unit.replace(/\/.*$/, "")}</span>
+            </span>
+          </div>
+          {/* 极简进度条：总量相对基线的占比（无基线则满格） */}
+          <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-rule/50">
+            <span
+              className="block h-full rounded-full bg-accent/70"
+              style={{
+                width: `${Math.max(6, Math.min(100, baseline && baseline > 0 ? (total / baseline) * 100 : 100))}%`,
+              }}
+            />
+          </div>
+          <p className="mt-2 font-mono text-[11px] text-muted">
+            {hasMonths
+              ? lang === "zh"
+                ? `${nonZero} 个月有记录${baseline && baseline > 0 ? ` · 累计 ${fmtValue(baseline)}` : ""}`
+                : `${nonZero} month${nonZero > 1 ? "s" : ""} with data${baseline && baseline > 0 ? ` · total ${fmtValue(baseline)}` : ""}`
+              : lang === "zh"
+                ? `累计 ${fmtValue(total)} · 差分自本月起积累`
+                : `Total ${fmtValue(total)} · diffs start this month`}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const x = (i: number) =>
     n <= 1 ? (PAD.l + (W - PAD.l - PAD.r) / 2) : PAD.l + (i * (W - PAD.l - PAD.r)) / (n - 1);
@@ -61,13 +122,17 @@ export default function MonthlyTrend({
 
   const pts = values.map((v, i) => ({ x: x(i), y: y(v), v, m: months[i] }));
   const line = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-  const area = hasData
+  const area = hasLine
     ? `${x(0).toFixed(1)},${H - PAD.b} ${line} ${x(n - 1).toFixed(1)},${H - PAD.b}`
     : "";
 
   const peak = pts.reduce((a, b) => (b.v > a.v ? b : a), pts[0] ?? { x: 0, y: 0, v: 0, m: "" });
   const step = Math.max(1, Math.ceil(n / 6));
   const tickIdx = pts.map((_, i) => i).filter((i) => i % step === 0 || i === n - 1);
+
+  /* 基线单点位置（仅 showBaseline 时用） */
+  const baseX = W - PAD.r;
+  const baseY = H / 2 - 8;
 
   return (
     <div>
@@ -85,7 +150,7 @@ export default function MonthlyTrend({
         {/* 基线 hairline */}
         <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} className="stroke-rule" strokeWidth="1" />
 
-        {hasData ? (
+        {hasLine ? (
           <>
             {/* 面积（轻着色） */}
             <polygon points={area} className="fill-accent/10" />

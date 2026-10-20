@@ -152,6 +152,14 @@ export const zh = {
         "含 Steam 全库（官方接口，构建时自动同步）与人工记录的精选条目（手机 / WeGame 等）；时长生成于站点构建时。",
       screenFullLink: "查看全部影卷 →",
       musicNote: "听歌数据来自网易云官方（含手机与电脑）；Last.fm 仅记录本机播放，暂不入图。",
+      /* 2026-10-21 新增：看板横截面区块 */
+      platformKicker: "平台分布",
+      platformIntro: "同一份游戏总时长，按来源切开看。",
+      screenTypeKicker: "影卷 · 按类型",
+      screenTypeIntro: "电影、番剧、剧集、小说与漫画，各自占多少。",
+      artistKicker: "常听歌手",
+      artistIntro: "按累计收听时长排，来自网易云播放记录。",
+      noData: "暂无数据。",
     },
     exercise: {
       kicker: "运动",
@@ -166,7 +174,7 @@ export const zh = {
     },
     gameStatus: { playing: "在玩", completed: "通关", dropped: "弃坑" },
     screenStatus: { watching: "在看", completed: "看完", dropped: "弃了" },
-    screenTypes: { tv: "剧", anime: "番", movie: "影", novel: "小说" },
+    screenTypes: { tv: "剧", anime: "番", movie: "影", novel: "小说", manga: "漫画" },
   },
   about: {
     kicker: "关于",
@@ -373,6 +381,14 @@ export const en = {
         "Includes the full Steam library (synced via the official API at build time) and manually logged titles (mobile / WeGame, etc.).",
       screenFullLink: "View all Watch & Read →",
       musicNote: "Listening data comes from official NetEase stats (phone & desktop); Last.fm only captures desktop playback and stays off the chart.",
+      /* 2026-10-21 新增：看板横截面区块 */
+      platformKicker: "By platform",
+      platformIntro: "The same total game hours, split by where they came from.",
+      screenTypeKicker: "Watch & Read · by type",
+      screenTypeIntro: "Films, anime, TV, novels and manga — how much each takes up.",
+      artistKicker: "Most played artists",
+      artistIntro: "Ranked by accumulated listening hours, from NetEase play records.",
+      noData: "No data yet.",
     },
     exercise: {
       kicker: "Exercise",
@@ -388,7 +404,7 @@ export const en = {
     },
     gameStatus: { playing: "Playing", completed: "Beaten", dropped: "Dropped" },
     screenStatus: { watching: "Watching", completed: "Finished", dropped: "Dropped" },
-    screenTypes: { tv: "TV", anime: "Anime", movie: "Film", novel: "Novel" },
+    screenTypes: { tv: "TV", anime: "Anime", movie: "Film", novel: "Novel", manga: "Manga" },
   },
   about: {
     kicker: "About",
