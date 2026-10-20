@@ -325,7 +325,7 @@ html.tarot-open {
 html.tarot-open .nav-brand,
 html.tarot-open .nav-gh-icon,
 html.tarot-open .nav-gh-info {
-  transition-delay: 0.4s;
+  transition-delay: 0.42s;
 }
 
 @keyframes tarot-veil-in {
@@ -336,37 +336,59 @@ html.tarot-open .nav-gh-info {
     opacity: 1;
   }
 }
+/* 第二拍的统一时间基准：牌面飞行 0.42s，所以第二拍必须等它**完全到位**才开始。
+   之前写 0.4s，比牌面早 20ms——白框（面板背景）会在牌面落位前露出。 */
 .tarot-veil {
-  animation: tarot-veil-in 0.24s ease-out 0.4s both;
+  animation: tarot-veil-in 0.24s ease-out 0.42s both;
 }
 
 /* 面板背景（第二拍）：只在牌面区域起（--bg-* 由脚本按牌面 rect 写入），向外展开。
-   第一拍时面板背景完全不可见——只有牌面在飞。 */
+   第一拍时面板背景必须完全不可见——只有牌面在飞。
+
+   ⚠️ 这里必须用 opacity 把「延迟期」压成 0：
+   `animation: ... 0.42s both` 的 both 会在 0–0.42s 的延迟内一直持有 from 关键帧，
+   而 from 的 clip-path 恰好裁出牌面槽位大小 —— 于是卡牌还在飞的路上，
+   目标槽位处就已经先出现一块白纸（Ting 2026-10-21 截图指出的白框）。
+   clip-path 只负责「展开」，可见性交给 opacity：延迟期 opacity 0，
+   动画一开始（牌面到位）瞬间置 1，此时 clip 仍在牌面 rect，视觉上无缝。 */
 .tarot-panel-bg {
-  animation: tarot-bg-in 0.36s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+  animation: tarot-bg-in 0.36s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both;
 }
 @keyframes tarot-bg-in {
-  from {
+  0% {
     clip-path: inset(var(--bg-t, 0px) var(--bg-r, 100%) var(--bg-b, 0px) var(--bg-l, 0px));
+    opacity: 0;
   }
-  to {
+  0.01% {
+    opacity: 1;
+  }
+  100% {
     clip-path: inset(0 0 0 0);
+    opacity: 1;
   }
 }
+/* 收回：背景从全尺寸缩回牌面 rect（0.22s），随后卡牌才飞回列表。
+   末尾把 opacity 收到 0 —— 否则 both 会把「缩到牌面 rect 的白纸」钉在原处，
+   卡牌飞走后留下一个白框。 */
 .tarot-panel-bg-out {
   animation: tarot-bg-out 0.22s ease-in both;
 }
 @keyframes tarot-bg-out {
-  from {
+  0% {
     clip-path: inset(0 0 0 0);
+    opacity: 1;
   }
-  to {
+  96% {
+    opacity: 1;
+  }
+  100% {
     clip-path: inset(var(--bg-t, 0px) var(--bg-r, 100%) var(--bg-b, 0px) var(--bg-l, 0px));
+    opacity: 0;
   }
 }
 /* 面板内容（文字）：第二拍淡入，第一拍不可见 */
 .tarot-panel-content {
-  animation: tarot-content-in 0.28s ease-out 0.44s both;
+  animation: tarot-content-in 0.28s ease-out 0.46s both;
 }
 @keyframes tarot-content-in {
   from {

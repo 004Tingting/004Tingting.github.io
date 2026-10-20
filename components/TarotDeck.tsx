@@ -85,6 +85,25 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
     }, 220);
   };
 
+  /* 弹窗打开时锁滚动 + 补偿滚动条宽度（防背景右偏）。
+     ⚠️ 必须在「测量牌面槽位」的 effect **之前**声明并执行：
+     加 padding-right 会让面板整体左移（滚动条宽度，通常 8–17px）。
+     若先测槽位再补偿，牌面会永久偏离槽位一条白边——
+     Ting 2026-10-21 截图里的白框即此（实测 dx=8px 恒定偏差）。
+     React 同一组件内 effect 按声明顺序执行，故本段置于测量 effect 之上。 */
+  useIsoLayoutEffect(() => {
+    if (!active) return;
+    const prevPad = document.body.style.paddingRight;
+    const prevOverflow = document.body.style.overflow;
+    const sw = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = "hidden";
+    if (sw > 0) document.body.style.paddingRight = `${sw}px`;
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.paddingRight = prevPad;
+    };
+  }, [active]);
+
   /* FLIP：fixed 牌面层对齐槽位 rect，随后从「卡片位置与尺寸」过渡到槽位（420ms） */
   useIsoLayoutEffect(() => {
     if (!active) return;
@@ -148,22 +167,14 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
     }
   }, []);
 
-  /* 弹窗：Esc 关闭 + 锁滚动并补偿滚动条宽度（防背景右偏） */
+  /* Esc 关闭 */
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeCard();
     };
     window.addEventListener("keydown", onKey);
-    const prevPad = document.body.style.paddingRight;
-    const sw = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = "hidden";
-    if (sw > 0) document.body.style.paddingRight = `${sw}px`;
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = prevPad;
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [active]);
 
   const filtered = useMemo(() => {
