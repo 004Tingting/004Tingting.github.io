@@ -147,12 +147,12 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 |---|---|
 | 路由 | `content/works/*/tarot.md`（order 3，仅列表元数据、正文空）→ `[slug]/page.tsx` 的 `generateStaticParams` **排除 tarot**；`/works/tarot` 为静态枢纽页，子页 `/works/tarot/[sub]`（**deck / daily / cases**，`dynamicParams=false`） |
 | 数据 | `lib/tarot-deck.ts`：韦特 78 张（id / 中英名 / 编号 / 双关键词 / 拼音全拼 + 首字母）；纯静态数据，客户端可安全 import |
-| 组件 | `components/TarotDeck.tsx`（client：筛选 chips + 搜索（中英 / 拼音 / 背音首字母 / 关键词）+ 网格 + 详情弹窗 + `?card=` 分享）；`components/TarotFoilCard.tsx`（愚者闪卡：artwork / edge / rainbow 箔 / number / title 五层 + 指针倾斜 16° + 反向视差） |
+| 组件 | `components/TarotDeck.tsx`（client：筛选 chips + 搜索（中英 / 拼音 / 背音首字母 / 关键词）+ 网格 + 详情弹窗 + `?card=` 分享）；`components/TarotFoilCard.tsx`（**78 张通用**闪卡：artwork / edge / rainbow 箔 / number / title 五层 + 指针倾斜 16° + 反向视差；缺层 `onError` 隐藏） |
 | 详情动效 | **两拍 FLIP**：第 1 拍牌面**单独在 fixed 层（z-70）**从列表卡片飞到槽位（`.tarot-face-anim`，0.4s）；第 2 拍面板背景 `tarot-bg-in` 从牌面 rect 向外 clip 展开 + 文字淡入（`tarot-panel-content`）+ 遮罩淡入 + 导航收紧；关闭反向（背景先收 0.22s → 牌面缩回 0.36s，文字先撤） |
 | 层级 | 遮罩 `z-40` < 导航 `z-50` < 面板 `z-60` < 牌面 `z-70` —— 牌面飞行全程不被裁剪，导航收紧完整可见 |
 | 导航收紧 | 由 `tarot-open` / `tarot-close` **事件**驱动 Nav state（`compact = scroll || tarotOpen`）——Nav 卡片形态是 React state 决定的，纯 CSS 改不到 |
-| 资源 | `public/tarot/major-00/*.webp`（305KB，压缩自 widgets 工作区原图）；列表页愚者为静态四层叠加，视差**仅**在详情内产生 |
-| 待接入 | 其余 77 张牌面（Ting 的插件打包文件）；高清资源建议 GitHub Releases + 点击按需加载（**不要构建时拉**，见 PITFALLS #26） |
+| 资源 | `public/tarot/<card-id>/{artwork,edge,number,title,thumb}.webp`——**78 张全部接入**（2026-10-21）。由 `scripts/sync-tarot-assets.mjs` 从 `P:\widgets\assets\rider-waite-smith\processed` 同步：分层 480px/q80（9.03 MB）+ 拍平缩略图 240px（2.22 MB），合计 **11.24 MB / 333 文件**。层覆盖 artwork 78 / edge 78 / number 54 / title 45（**缺层不生成文件**，前端 `onError` 隐藏）。列表页只用 `thumb.webp`（单张 ≈29KB），分层仅在打开弹窗时加载 |
+| 待接入 | 牌义正文（`TarotDeck` 弹窗 `readingNote` 仍是统一占位；等 `P:\TAROT` 笔记学完再写，届时每张牌一条数据）；「学习笔记」子页（Ting 2026-10-21 定：牌义入站，学习笔记作为塔罗的另一部分） |
 
 ## 环境注意事项（本机会话内，详细见 PITFALLS.md）
 
