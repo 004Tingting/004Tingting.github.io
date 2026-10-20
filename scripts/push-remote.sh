@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-# 健壮推送：当前 HEAD → 远端分支（自动备用通道）
-#   ① 直推 HTTPS（gh token 嵌入 URL，绕过 credential helper）
-#   ② 直推失败自动转 SSH-over-443 临时部署密钥通道（gh api 注册 → ssh 推送 → 用完即删）
+# 健壮推送：当前 HEAD → 远端分支（多级降级）
+#   ① 直推 HTTPS（gh token 嵌入 URL，绕过 credential helper）——失败自动重试
+#   ② 仍失败才转 SSH-over-443 临时部署密钥通道（gh api 注册 → ssh 推送 → 用完即删）
 #
-# 背景：2026-10-17 本机 git 的 Windows schannel 吊销检查故障（CRYPT_E_NO_REVOCATION_CHECK，
-#       `-c http.schannelCheckRevoke=false` 与 openssl 后端均无效）导致直推失败——
-#       SSH-over-443 为已验证的备用通道（详见 WORKLOG 2026-10-17 / MEMORY 环境注意）。
+# 为什么加重试（2026-10-21）：
+#   实测直推的失败是**间歇性网络抖动**（`Failed to connect to github.com port 443`），
+#   连续 10 次实测 0 失败、另一时段 1 次即败——不是配置问题。
+#   旧脚本「失败一次就建临时密钥」，导致每次抖动都往 GitHub 注册一把部署密钥
+#   → GitHub 每次发一封「added a deploy key」邮件。
+#   加重试后绝大多数抖动在第 1–3 次就恢复，不再无谓地建钥。
 #
 # 用法（项目根目录）：bash scripts/push-remote.sh <branch>     # 例：bash scripts/push-remote.sh main
 set -euo pipefail
@@ -19,6 +22,10 @@ export GCM_INTERACTIVE=never
 BRANCH="${1:?用法: bash scripts/push-remote.sh <branch>（如 main / gh-pages）}"
 REPO="004Tingting/004Tingting.github.io"
 SHA="$(git rev-parse --short HEAD)"
+
+# 直推重试次数（1 + 3 次重试 = 最多 4 次尝试）
+PUSH_ATTEMPTS="${PUSH_ATTEMPTS:-4}"
+PUSH_RETRY_SLEEP="${PUSH_RETRY_SLEEP:-3}"
 
 # gh CLI（优先完整路径，PATH 里的可能是 stub）
 GH="/c/Program Files/GitHub CLI/gh.exe"
@@ -35,32 +42,61 @@ fi
 
 echo "▸ 推送 ${BRANCH}（${SHA}）…"
 
-# ① 直推 HTTPS
-if git -c credential.helper= push -q "https://x-access-token:${TOKEN}@github.com/${REPO}.git" \
-  "HEAD:refs/heads/${BRANCH}" 2>/dev/null; then
-  echo "  ✓ 直推成功"
-else
-  echo "  ⚠ 直推失败（网络 / 证书吊销检查），转 SSH-over-443 通道…"
-  # ② SSH-over-443 临时部署密钥（注册 → 推送 → 即删；trap 保证失败也回收）
-  KEYDIR=".worklog/tmp-push-key"
-  KEYID=""
-  cleanup() {
-    if [ -n "$KEYID" ]; then
-      "$GH" api -X DELETE "repos/${REPO}/keys/${KEYID}" --silent 2>/dev/null || true
+# ① 直推 HTTPS（带重试）
+PUSHED=""
+for attempt in $(seq 1 "$PUSH_ATTEMPTS"); do
+  if git -c credential.helper= push -q \
+    "https://x-access-token:${TOKEN}@github.com/${REPO}.git" \
+    "HEAD:refs/heads/${BRANCH}" 2>/dev/null; then
+    PUSHED="直推"
+    [ "$attempt" -gt 1 ] && echo "  ✓ 直推成功（第 ${attempt} 次尝试）" || echo "  ✓ 直推成功"
+    break
+  fi
+  if [ "$attempt" -lt "$PUSH_ATTEMPTS" ]; then
+    echo "  … 第 ${attempt} 次直推失败，${PUSH_RETRY_SLEEP}s 后重试"
+    sleep "$PUSH_RETRY_SLEEP"
+  fi
+done
+
+if [ -z "$PUSHED" ]; then
+  # ② SSH-over-443 通道。优先复用「固定部署密钥」（scripts/setup-push-key.sh 注册的那把）——
+  #    固定密钥只在首次注册时触发一封 GitHub 邮件；临时密钥则每次兜底都会新建一封。
+  FIXED_KEY=".worklog/push-key"
+  if [ -f "$FIXED_KEY" ]; then
+    echo "  ⚠ 直推 ${PUSH_ATTEMPTS} 次均失败，转 SSH-over-443 通道（复用固定部署密钥）…"
+    KEYWIN="$(cygpath -m "$(pwd)/$FIXED_KEY" 2>/dev/null || echo "$(pwd)/$FIXED_KEY")"
+    if GIT_SSH_COMMAND="ssh -i $KEYWIN -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -p 443" \
+      git push -q "git@ssh.github.com:${REPO}.git" "HEAD:refs/heads/${BRANCH}" 2>/dev/null; then
+      echo "  ✓ SSH 通道推送成功（固定密钥）"
+      PUSHED="SSH-固定"
+    else
+      echo "  ⚠ 固定密钥推送失败，降级为临时密钥…"
     fi
+  fi
+
+  # 固定密钥不可用 / 失败 → 临时密钥兜底（会新建一封邮件，仅此时发生）
+  if [ -z "$PUSHED" ]; then
+    echo "  ⚠ 转 SSH-over-443 临时密钥通道（本次会新建一把部署密钥）…"
+    KEYDIR=".worklog/tmp-push-key"
+    KEYID=""
+    cleanup() {
+      if [ -n "$KEYID" ]; then
+        "$GH" api -X DELETE "repos/${REPO}/keys/${KEYID}" --silent 2>/dev/null || true
+      fi
+      rm -f "$KEYDIR" "$KEYDIR.pub"
+    }
+    trap cleanup EXIT
     rm -f "$KEYDIR" "$KEYDIR.pub"
-  }
-  trap cleanup EXIT
-  rm -f "$KEYDIR" "$KEYDIR.pub"
-  ssh-keygen -t ed25519 -f "$KEYDIR" -N "" -q -C "tmp-push-${BRANCH}"
-  KEYID="$("$GH" api -X POST "repos/${REPO}/keys" \
-    -f title="tmp-push-$(date +%s)" \
-    -f key="$(cat "$KEYDIR.pub")" \
-    -F read_only=false --jq '.id')"
-  KEYWIN="$(cygpath -m "$(pwd)/$KEYDIR" 2>/dev/null || echo "$(pwd)/$KEYDIR")"
-  GIT_SSH_COMMAND="ssh -i $KEYWIN -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -p 443" \
-    git push -q "git@ssh.github.com:${REPO}.git" "HEAD:refs/heads/${BRANCH}"
-  echo "  ✓ SSH 通道推送成功"
+    ssh-keygen -t ed25519 -f "$KEYDIR" -N "" -q -C "tmp-push-${BRANCH}"
+    KEYID="$("$GH" api -X POST "repos/${REPO}/keys" \
+      -f title="tmp-push-$(date +%s)" \
+      -f key="$(cat "$KEYDIR.pub")" \
+      -F read_only=false --jq '.id')"
+    KEYWIN="$(cygpath -m "$(pwd)/$KEYDIR" 2>/dev/null || echo "$(pwd)/$KEYDIR")"
+    GIT_SSH_COMMAND="ssh -i $KEYWIN -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -p 443" \
+      git push -q "git@ssh.github.com:${REPO}.git" "HEAD:refs/heads/${BRANCH}"
+    echo "  ✓ SSH 通道推送成功（临时密钥，已回收）"
+  fi
 fi
 
 # 备用通道推送后 origin/* 引用不会自动更新，手动对齐
