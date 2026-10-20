@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 点阵屏（LED 矩阵风，零依赖纯 SVG + CSS 动画，2026-10-15；同日二稿改多组轮换）。
  *
  * 在若干组 5×7 字模间定时轮换（当前：STRIVE → 累计 tokens → 04TING.，每组 5s）：
@@ -236,6 +236,7 @@ export default function DotMatrix({
   gutter,
   state = "run",
   boot = false,
+  scopeId,
 }: {
   /** 轮换显示的内容（渲染自动大写；建议 ≤7 字符，超长会整体缩小） */
   items: string[];
@@ -271,6 +272,10 @@ export default function DotMatrix({
   /** 开机自检：整屏先全亮，再按列逐列退回底点（一次性）。
    *  `true` 用默认节奏（fadeMs 520 / colStepMs 18）；也可传 { fadeMs, colStepMs } 调。 */
   boot?: boolean | { fadeMs?: number; colStepMs?: number };
+  /** 同页面多实例时的作用域后缀（如 "a"/"b"/"c"）。
+   *  默认按「组数」命名（dm-n2），同页两块组数相同会共用 keyframes 与 class 名 → 互相覆盖。
+   *  需要一页放多块同组数的屏时，给每块传不同的 scopeId。 */
+  scopeId?: string;
 }) {
   const list = items.length > 0 ? items : [""];
   const n = list.length;
@@ -337,8 +342,10 @@ export default function DotMatrix({
 
   /* ---------- 错点（glitch） ---------- */
   const seg = 100 / n;
-  const name = `dm-swap-${n}`;
-  const scope = `.dm-n${n} `;
+  /* 作用域后缀：同页多块同组数的屏必须各自唯一，否则 keyframes 与 class 名冲突 */
+  const sfx = scopeId ? `-${scopeId}` : "";
+  const name = `dm-swap-${n}${sfx}`;
+  const scope = `.dm-n${n}${sfx} `;
   const glitchDots: ReactNode[] = [];
   const victimShift = new Map<number, number>(); // cell * n + k → 额外延迟（缺孔）
   let glitchCss = "";
@@ -413,7 +420,7 @@ export default function DotMatrix({
     if (glitchDots.length > 0) {
       const dur = effP * cycle;
       const gp = Math.min(99, (gl.holdMs / dur) * 100); // 错点窗口占动画周期的百分比
-      const gName = `dm-glitch-${n}-${effP}`;
+      const gName = `dm-glitch-${n}${sfx}-${effP}`;
       /* 组色覆盖（站点补丁 2026-10-17）：错点跟随所属组的配色——数值组的鬼点也随 accent，
          不再是固定墨色；未启用组色时保持原样（默认路径逐字节不变） */
       const glGroupRules = needGroupFill
@@ -478,11 +485,11 @@ ${glGroupRules}@media (prefers-reduced-motion: reduce) {
       return `  ${from}% { fill: ${fillOf(k)}; }
   ${to}% { fill: ${fillOf(k)}; }`;
     }).join("\n");
-    cssParts.push(`@keyframes dm-both-${n}-c {
+    cssParts.push(`@keyframes dm-both-${n}${sfx}-c {
 ${bothStops}
   100% { fill: ${fillOf(n - 1)}; }
 }`);
-    cssParts.push(`${scope}.dm-both { fill: var(--color-ink); animation: dm-both-${n}-c ${n * ITEM_MS}ms linear infinite; }`);
+    cssParts.push(`${scope}.dm-both { fill: var(--color-ink); animation: dm-both-${n}${sfx}-c ${n * ITEM_MS}ms linear infinite; }`);
   } else {
     cssParts.push(`${scope}.dm-both { fill: var(--color-ink); }`);
   }
@@ -532,7 +539,7 @@ ${bothStops}
   0% { opacity: 1; }
   100% { opacity: 0.13; }
 }`);
-    cssParts.push(`.dm-n${n}.dm-boot .dm-off { animation: ${bootName} ${bootFade}ms ease-out both; }`);
+    cssParts.push(`.dm-n${n}${sfx}.dm-boot .dm-off { animation: ${bootName} ${bootFade}ms ease-out both; }`);
   }
 
   /* reduced-motion：定格 primary 组；新增的装饰动画一并停掉 */
@@ -541,7 +548,7 @@ ${bothStops}
   if (gu.on && gu.heartbeat) rm.push(`  ${scope}.dm-hb { animation: none; opacity: 0.6; }`);
   if (gu.on && gu.online === false) rm.push(`  ${scope}.dm-on-off { animation: none; opacity: 1; }`);
   if (idle) rm.push(`  ${scope}.dm-idle { animation: none; opacity: 0.13; }`);
-  if (bootOn) rm.push(`  .dm-n${n}.dm-boot .dm-off { animation: none; opacity: 0.13; }`);
+  if (bootOn) rm.push(`  .dm-n${n}${sfx}.dm-boot .dm-off { animation: none; opacity: 0.13; }`);
   if (needGroupFill) rm.push(`  ${scope}.dm-both { animation: none; fill: ${fillOf(fixedPrimary)}; }`);
   cssParts.push(`@media (prefers-reduced-motion: reduce) {
 ${rm.join("\n")}
@@ -660,7 +667,7 @@ ${rm.join("\n")}
   return (
     <svg
       viewBox={`0 0 ${cols * PITCH} ${ROWS * PITCH}`}
-      className={[className, `dm-n${n}`, bootOn ? "dm-boot" : ""].filter(Boolean).join(" ")}
+      className={[className, `dm-n${n}${sfx}`, bootOn ? "dm-boot" : ""].filter(Boolean).join(" ")}
       style={rootStyle}
       role="img"
       aria-label={label ?? list.join(" / ")}

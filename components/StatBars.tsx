@@ -26,10 +26,12 @@ export function PlatformBars({
   items,
   unit,
   format = (v) => v.toFixed(1),
+  totalLabel = "合计",
 }: {
   items: SplitItem[];
   unit: string;
   format?: (v: number) => string;
+  totalLabel?: string;
 }) {
   const total = items.reduce((s, it) => s + it.hours, 0);
   if (total <= 0) return null;
@@ -59,7 +61,7 @@ export function PlatformBars({
         );
       })}
       <div className="flex items-center gap-3 border-t border-rule/60 pt-2">
-        <span className="w-24 shrink-0 font-mono text-[11px] text-muted">合计</span>
+        <span className="w-24 shrink-0 font-mono text-[11px] text-muted">{totalLabel}</span>
         <span className="flex-1" />
         <span className="w-24 shrink-0 text-right font-mono text-xs">
           {format(total)} {unit}

@@ -25,6 +25,7 @@ import { TOKEN_MONITOR } from "@/lib/site";
 import { dic, type Lang } from "@/lib/i18n";
 import MonthlyTrend from "@/components/MonthlyTrend";
 import DotMatrix from "@/components/DotMatrix";
+import Kicker from "@/components/Kicker";
 import {
   fmtCost,
   fmtDayTick,
@@ -211,7 +212,7 @@ type Props = {
   lang: Lang;
   /** 服务端合并视图（getTokenMonitor）——实时槽位的离线兜底 + 静态图表数据 */
   initial: TokenMonitorData;
-  variant: "aside" | "grid" | "full";
+  variant: "aside" | "grid" | "full" | "tri";
 };
 
 export default function TokenMonitor({ lang, initial, variant }: Props) {
@@ -312,6 +313,72 @@ export default function TokenMonitor({ lang, initial, variant }: Props) {
   const pendingCls = pending ? "tm-pending" : undefined;
 
   /* ---------- 侧栏紧凑卡 ---------- */
+  /* ---------- 看板底部：三块点阵屏横排（DAY / MON / TOTAL） ----------
+     Ting 2026-10-21 定：
+       · 三块横排于一排，分别显示 日 / 月 / 累计 的 tokens
+       · 每块在「英文标签」与「数字」之间交替闪屏（英文与数字交替）
+       · **不要**首页那种心跳（不启用 gutter.heartbeat）
+       · hub 在线时数值用豆绿色（--color-accent 之外的专用色），离线回落墨色 */
+  if (variant === "tri") {
+    const online = lastOk !== false;
+    /** 豆绿色（hub 在线时的数值配色）；离线回落墨色 */
+    const LIVE_GREEN = "#7bb661";
+    const mk = (p: TokenPeriod | null, labelEn: string, labelZh: string) => {
+      const value = p ? fmtTokensCompact(p.totalTokens) : "0";
+      const items = [labelEn, value];
+      return {
+        items,
+        primary: 1,
+        title: p ? `${labelZh} ${fmtTokensFull(p.totalTokens)} tokens` : undefined,
+        label: `${labelZh} ${value} tokens`,
+        groupColors: [undefined, online ? LIVE_GREEN : undefined],
+      };
+    };
+    const cols = [
+      { ...mk(periods?.today ?? null, "DAY", t.today), key: "day", scope: "day" },
+      { ...mk(periods?.month ?? null, "MON", t.month), key: "mon", scope: "mon" },
+      { ...mk(periods?.allTime ?? null, "TOTAL", t.allTime), key: "total", scope: "total" },
+    ];
+
+    return (
+      <section className="mt-14 border-t border-rule pt-10">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <Kicker>{t.kicker}</Kicker>
+          <span className="font-mono text-[11px] text-muted">
+            <span
+              className="mr-1 inline-block h-1.5 w-1.5 rounded-full align-middle"
+              style={{ background: online ? LIVE_GREEN : "var(--color-rule)" }}
+            />
+            {online ? t.online : t.offline} · {t.updatedAt} {updatedAt ? fmtHubDate(updatedAt, lang) : "—"}
+          </span>
+        </div>
+        <div className={`mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3 ${pendingCls ?? ""}`}>
+          {cols.map((c) => (
+            <div key={c.key} className="min-w-0">
+              <DotMatrix
+                items={c.items}
+                primary={c.primary}
+                title={c.title}
+                label={c.label}
+                lang={lang}
+                groupColors={c.groupColors}
+                animate="always"
+                scopeId={c.scope}
+                className="block w-full max-w-[11rem]"
+              />
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 font-mono text-[11px] text-muted">
+          <Link href={`/${lang === "zh" ? "" : "en/"}arts/stats/tokens`} className="text-accent hover:underline">
+            {lang === "zh" ? "Token 明细 →" : "Token details →"}
+          </Link>
+        </p>
+        <NoScriptFallback />
+      </section>
+    );
+  }
+
   if (variant === "aside") {
     /* 主显示（2026-10-15 二稿）：点阵屏在 单词 / 累计 tokens / 标签 三组间定时重组轮换；
        不参与骨架——动画即时可见，数字随轮询静默更新（点阵逐帧本来就在变）。

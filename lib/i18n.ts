@@ -155,7 +155,9 @@ export const zh = {
       /* 2026-10-21 新增：看板横截面区块 */
       platformKicker: "平台分布",
       platformIntro: "同一份游戏总时长，按来源切开看。",
-      screenTypeKicker: "影卷 · 按类型",
+      platformOther: "其他",
+      totalRow: "合计",
+      screenTypeKicker: "按类型",
       screenTypeIntro: "电影、番剧、剧集、小说与漫画，各自占多少。",
       artistKicker: "常听歌手",
       artistIntro: "按累计收听时长排，来自网易云播放记录。",
@@ -174,7 +176,7 @@ export const zh = {
     },
     gameStatus: { playing: "在玩", completed: "通关", dropped: "弃坑" },
     screenStatus: { watching: "在看", completed: "看完", dropped: "弃了" },
-    screenTypes: { tv: "剧", anime: "番", movie: "影", novel: "小说", manga: "漫画" },
+    screenTypes: { tv: "剧集", anime: "番剧", movie: "电影", novel: "小说", manga: "漫画" },
   },
   about: {
     kicker: "关于",
@@ -384,7 +386,9 @@ export const en = {
       /* 2026-10-21 新增：看板横截面区块 */
       platformKicker: "By platform",
       platformIntro: "The same total game hours, split by where they came from.",
-      screenTypeKicker: "Watch & Read · by type",
+      platformOther: "Other",
+      totalRow: "Total",
+      screenTypeKicker: "By type",
       screenTypeIntro: "Films, anime, TV, novels and manga — how much each takes up.",
       artistKicker: "Most played artists",
       artistIntro: "Ranked by accumulated listening hours, from NetEase play records.",
