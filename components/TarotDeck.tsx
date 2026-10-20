@@ -6,7 +6,6 @@ import TarotFoilCard from "@/components/TarotFoilCard";
 import {
   ALL_CARDS,
   SUITS,
-  cardMark,
   cardName,
   type TarotCard,
   type TarotSuit,
@@ -296,22 +295,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
 
           {/* 牌面：fixed 独立层——第一拍就可见，FLIP 全程不被面板/导航裁剪 */}
           <div ref={faceRef} data-tarot-face className="pointer-events-none fixed z-[70]" aria-hidden="true">
-            {active.id === "major-0" ? (
-              <TarotFoilCard />
-            ) : (
-              <div className="relative aspect-[2100/3600] w-full rounded-[3px] border border-rule bg-paper">
-                <span className="absolute inset-3 border border-rule/70" />
-                <span className="absolute inset-x-0 top-4 text-center font-mono text-xs tracking-widest text-muted">
-                  {cardMark(active, lang)}
-                </span>
-                <span className="absolute inset-0 grid place-items-center">
-                  <span className="h-3 w-3 rotate-45 border border-accent" />
-                </span>
-                <span className="absolute inset-x-2 bottom-4 text-center font-serif text-sm font-semibold leading-tight">
-                  {cardName(active, lang)}
-                </span>
-              </div>
-            )}
+            <TarotFoilCard cardId={active.id} />
           </div>
 
           {/* 面板：z-60；背景层从牌面区域向外展开（--bg-* 由脚本写入），文字第二拍淡入 */}
@@ -381,7 +365,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
   );
 }
 
-/** 单张牌缩略（扁平占位；hover 仅边框微变，不做 3D 效果） */
+/** 单张牌缩略（真实牌面拍平成一张 thumb.webp；hover 仅边框微变，不做 3D 效果） */
 function CardTile({ card, lang, onOpen }: { card: TarotCard; lang: Lang; onOpen: () => void }) {
   const name = cardName(card, lang);
   return (
@@ -392,52 +376,16 @@ function CardTile({ card, lang, onOpen }: { card: TarotCard; lang: Lang; onOpen:
       aria-label={name}
       className="group block w-full text-left"
     >
-      {card.id === "major-0" ? (
-        /* 愚者：真实牌面（静态、无视差；视差只在详情弹窗里产生） */
-        <span className="relative block aspect-[2100/3600] w-full overflow-hidden rounded-[2px] border border-rule bg-paper transition-colors group-hover:border-accent">
-          <img
-            src="/tarot/major-00/artwork.webp"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-            draggable={false}
-          />
-          <img
-            src="/tarot/major-00/edge.webp"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-            draggable={false}
-          />
-          <img
-            src="/tarot/major-00/number.webp"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-            draggable={false}
-          />
-          <img
-            src="/tarot/major-00/title.webp"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-            draggable={false}
-          />
-        </span>
-      ) : (
-        <span className="relative block aspect-[2100/3600] w-full rounded-[2px] border border-rule bg-paper transition-colors group-hover:border-accent">
-          <span className="absolute inset-1.5 border border-rule/60" />
-          <span className="absolute inset-x-0 top-2.5 text-center font-mono text-[10px] tracking-widest text-muted">
-            {cardMark(card, lang)}
-          </span>
-          <span className="absolute inset-0 grid place-items-center">
-            <span className="h-2 w-2 rotate-45 border border-accent/80" />
-          </span>
-          <span className="absolute inset-x-1 bottom-2 text-center font-serif text-[11px] font-semibold leading-tight">
-            {name}
-          </span>
-        </span>
-      )}
+      <span className="relative block aspect-[2100/3600] w-full overflow-hidden rounded-[2px] border border-rule bg-paper transition-colors group-hover:border-accent">
+        <img
+          src={`/tarot/${card.id}/thumb.webp`}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+        />
+      </span>
     </button>
   );
 }

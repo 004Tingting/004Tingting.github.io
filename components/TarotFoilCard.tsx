@@ -10,16 +10,25 @@ const TITLE = 22; // 标题视差（px，同向）
 const TRAVEL = 1; // rainbow 扫幅系数
 
 /**
- * 塔罗闪卡（占位：愚者）。
+ * 塔罗闪卡（78 张通用）。
  * 分层拆解（artwork / edge / rainbow 箔 / number / title）+ 指针倾斜 + 视差；
- * 离开时弹性回正、所有层精确归位。资源：public/tarot/major-00/*.webp（压缩自 widgets 工作区）。
+ * 离开时弹性回正、所有层精确归位。
+ * 资源：public/tarot/<card-id>/*.webp（scripts/sync-tarot-assets.mjs 从 widgets 工作区同步）。
+ * 层缺失即不渲染该层：数字牌 2–10 无 title（印版无牌名带），5 张缺 number。
  * reduced-motion：不绑定倾斜，仅静态展示。
  */
-export default function TarotFoilCard({ className = "" }: { className?: string }) {
+export default function TarotFoilCard({
+  cardId,
+  className = "",
+}: {
+  cardId: string;
+  className?: string;
+}) {
   const stageRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const rectRef = useRef<DOMRect | null>(null);
   const rafRef = useRef(0);
+  const base = `/tarot/${cardId}`;
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -92,31 +101,37 @@ export default function TarotFoilCard({ className = "" }: { className?: string }
         {/* 牌面（反向视差 + 放大裁切） */}
         <img
           className="tarot-foil-artwork pointer-events-none absolute inset-0 h-full w-full select-none"
-          src="/tarot/major-00/artwork.webp"
+          src={`${base}/artwork.webp`}
           alt=""
           draggable={false}
         />
         {/* 边框层 */}
         <img
           className="pointer-events-none absolute inset-0 h-full w-full select-none"
-          src="/tarot/major-00/edge.webp"
+          src={`${base}/edge.webp`}
           alt=""
           draggable={false}
         />
         {/* rainbow 箔面（color-dodge，随指针扫动） */}
         <div className="tarot-foil-rainbow pointer-events-none absolute inset-0" />
-        {/* 序号 / 标题浮层（同向视差） */}
+        {/* 序号 / 标题浮层（同向视差）——层不存在时文件缺失，onError 隐藏 */}
         <img
           className="tarot-foil-number pointer-events-none absolute inset-0 h-full w-full select-none"
-          src="/tarot/major-00/number.webp"
+          src={`${base}/number.webp`}
           alt=""
           draggable={false}
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
         />
         <img
           className="tarot-foil-title pointer-events-none absolute inset-0 h-full w-full select-none"
-          src="/tarot/major-00/title.webp"
+          src={`${base}/title.webp`}
           alt=""
           draggable={false}
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
         />
       </div>
     </div>
