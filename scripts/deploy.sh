@@ -8,7 +8,8 @@
 # 用法：bash scripts/deploy.sh
 # 说明：本地产物与线上完全一致（同一套源码 + 同一次构建）。
 # 推送自带备用通道（2026-10-17 加固）：gh-pages 直推失败 → API 通道（scripts/push-pages-api.mjs，
-#   只依赖 api.github.com）；快照推送 → scripts/push-remote.sh（直推失败自动转 SSH-over-443 临时密钥）。
+#   只依赖 api.github.com，**不涉及 SSH 密钥**）；快照推送 → scripts/push-remote.sh
+#   （直推带 4 次重试，仍失败才用固定部署密钥走 SSH-over-443，见该脚本头部说明）。
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -97,11 +98,11 @@ if [ -n "$(git status --porcelain $SNAPSHOT_FILES 2>/dev/null)" ]; then
   git -c user.name="004Tingting" -c user.email="SaiKouTING004@outlook.com" \
     commit -q -m "stats: monthly snapshot $(date '+%Y-%m-%d %H:%M')"
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
-  # 健全推送（直推 → SSH-over-443 备用通道），见 scripts/push-remote.sh
+  # 健全推送（直推带重试 → 固定部署密钥 SSH 备用），见 scripts/push-remote.sh
   if bash scripts/push-remote.sh "$BRANCH"; then
     echo "  ✓ 快照已回提交并推送（${BRANCH}）"
   else
-    echo "  ⚠ 快照推送失败（两通道均未成功），可稍后 bash scripts/push-remote.sh ${BRANCH}"
+    echo "  ⚠ 快照推送失败（所有通道均未成功），可稍后 bash scripts/push-remote.sh ${BRANCH}"
   fi
 else
   echo "  （快照无变更）"

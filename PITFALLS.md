@@ -243,6 +243,20 @@
 - **注意**：按 URL（非 origin 名）推送后本地 `origin/main` 跟踪引用不更新，会误显示 ahead——用 `gh api repos/.../commits/main` 核对远端真实 tip
 - **教训**：`git add`/`git add -A` 前先 `git status` 审阅——曾把另一并行会话的未提交改动一并卷入，也漏过 `scripts/` 目录导致功能缺行
 
+#### 22.1 每次部署都收到「added a deploy key」邮件（2026-10-21 修）
+
+- **现象**：每跑一次 `deploy.sh` / `push-remote.sh`，GitHub 就发一封邮件说「你添加了一个 deploy key」
+- **根因两条，叠加**：
+  1. `push-remote.sh` 直推**失败一次**就转 SSH 通道，而 SSH 通道每次都 `ssh-keygen` 新建密钥、推完 `trap` 立即 `DELETE`——**每次兜底 = 一次注册 + 一封邮件**
+  2. 直推失败其实是**间歇性网络抖动**（`Failed to connect to github.com port 443`），不是配置问题。实测：同一台机器连续 10 次直推 **0 失败**，另一时段 1 次即败
+- **改法**：
+  - 直推加 **4 次重试**（`PUSH_ATTEMPTS` / `PUSH_RETRY_SLEEP` 环境变量可调）——绝大多数抖动在 1–3 次内恢复，不再无谓建钥
+  - SSH 备用通道**优先复用固定部署密钥** `.worklog/push-key`（`bash scripts/setup-push-key.sh` 一次性注册，幂等）——固定密钥只在**首次注册**时触发一封邮件
+  - 临时密钥降级为「固定密钥也失败」时的最后手段
+- **判别**：看到邮件先看标题里的 key 名——`tmp-push-<时间戳>` = 临时密钥（旧逻辑）；`deploy-fixed-<日期>` = 固定密钥
+- **撤销固定密钥**：`bash scripts/setup-push-key.sh --revoke`（或 GitHub → Settings → Deploy keys 手动删）
+- **注意**：`deploy.sh` 的 **gh-pages 那条走的是 API 通道（`push-pages-api.mjs`），不涉及 SSH 密钥**，不会发邮件；邮件只来自 `main` 分支的快照推送
+
 ### 23. 创建 GitHub Actions 工作流文件被 404 拒（OAuth token 缺 `workflow` scope）
 
 - **现象**（2026-10-14）：向新建仓库推送 `.github/workflows/*.yml`——Contents API `PUT contents/.github/workflows/refresh.yml` 返回 **404 Not Found**（重试 5 次均 404）；POST `/git/trees` 同样 404；最后 `git push` 才给出明确报错：`refusing to allow an OAuth App to create or update workflow ... without 'workflow' scope`
