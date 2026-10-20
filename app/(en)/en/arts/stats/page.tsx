@@ -24,8 +24,9 @@ export const metadata: Metadata = { title: "Stats" };
  * (zero deps, zero client JS).
  *
  * Layout (set 2026-10-21): grouped by **top-level block** (music → games → screen →
- * exercise, matching the /arts nav order), with sub-blocks inside each. Every block
- * shares the same max-w-2xl content width so bars line up with the overview numbers.
+ * exercise, matching the /arts nav order), with sub-blocks inside each. Every chart
+ * block fills the page container (max-w-5xl + px-6) so it lines up with the nav bar;
+ * only prose keeps max-w-prose for reading width.
  */
 export default function StatsPage() {
   const t = dic.en.arts;
@@ -68,10 +69,10 @@ export default function StatsPage() {
     <div className="mx-auto max-w-5xl px-6 py-16">
       <Kicker>{st.kicker}</Kicker>
       <h1 className="mt-4 font-serif text-5xl font-bold">{st.title}</h1>
-      <p className="mt-6 max-w-2xl text-muted">{st.intro}</p>
+      <p className="mt-6 max-w-prose text-muted">{st.intro}</p>
 
       {/* Overview numbers (same width as every block below) */}
-      <div className="mt-12 grid max-w-2xl grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4">
+      <div className="mt-12 grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4">
         {big.map((b) => (
           <div key={b.label}>
             <p className="font-mono text-xs tracking-widest text-muted">
@@ -89,7 +90,7 @@ export default function StatsPage() {
       <section className="mt-16 border-t border-rule pt-10">
         <h2 className="font-serif text-2xl font-bold">{t.music.kicker}</h2>
 
-        <div className="mt-6 max-w-2xl">
+        <div className="mt-6">
           <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
             <span className="font-serif text-sm">{st.totalListen}</span>
             <span className="font-mono text-sm text-muted">
@@ -108,7 +109,7 @@ export default function StatsPage() {
           </div>
         </div>
 
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
           <p className="mt-2 text-xs text-muted">{st.monthlyIntro}</p>
           <div className="mt-5">
@@ -125,7 +126,7 @@ export default function StatsPage() {
           </div>
         </div>
 
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.artistKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.hours}</span>
@@ -138,14 +139,14 @@ export default function StatsPage() {
           )}
         </div>
 
-        <p className="mt-4 max-w-2xl text-xs text-muted">{st.musicNote}</p>
+        <p className="mt-4 max-w-prose text-xs text-muted">{st.musicNote}</p>
       </section>
 
       {/* ==================== Games ==================== */}
       <section className="mt-16 border-t border-rule pt-10">
         <h2 className="font-serif text-2xl font-bold">{t.games.kicker}</h2>
 
-        <div className="mt-6 max-w-2xl">
+        <div className="mt-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.platformKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.hours}</span>
@@ -160,7 +161,7 @@ export default function StatsPage() {
           </div>
         </div>
 
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.byHours}</h3>
             <span className="font-mono text-[11px] text-muted">
@@ -183,7 +184,7 @@ export default function StatsPage() {
           </p>
         </div>
 
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
@@ -207,7 +208,7 @@ export default function StatsPage() {
       <section className="mt-16 border-t border-rule pt-10">
         <h2 className="font-serif text-2xl font-bold">{t.screen.kicker}</h2>
 
-        <div className="mt-6 max-w-2xl">
+        <div className="mt-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.screenTypeKicker}</h3>
             <span className="font-mono text-[11px] text-muted">
@@ -230,7 +231,7 @@ export default function StatsPage() {
           )}
         </div>
 
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <h3 className="font-serif text-sm font-semibold">{st.byHours}</h3>
           {screen.length > 0 ? (
             <RankBar
@@ -248,7 +249,7 @@ export default function StatsPage() {
           </p>
         </div>
 
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
@@ -273,7 +274,7 @@ export default function StatsPage() {
       <section className="mt-16 border-t border-rule pt-10">
         <h2 className="font-serif text-2xl font-bold">{t.exercise.kicker}</h2>
 
-        <div className="mt-6 max-w-2xl">
+        <div className="mt-6">
           <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
             <span className="font-serif text-sm">{st.entries}</span>
             <span className="font-mono text-sm text-muted">
@@ -294,7 +295,7 @@ export default function StatsPage() {
           </div>
         </div>
 
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>

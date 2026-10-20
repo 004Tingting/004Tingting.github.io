@@ -25,7 +25,8 @@ export const metadata: Metadata = { title: "看板" };
  * 版面结构（Ting 2026-10-21 定）：
  *   按**大块**（音律 → 游戏 → 影卷 → 运动，与 /arts 导航同序）组织，
  *   大块下再放**小块**（如「平台分布」「时长排行」）。
- *   所有区块统一 max-w-2xl 内容宽度，与总览数字对齐。
+ *   所有图表区块**撑满页面容器**（max-w-5xl + px-6），与导航栏左右边界对齐；
+ *   只有说明文字用 max-w-prose 保持阅读宽度。
  */
 export default function StatsPage() {
   const t = dic.zh.arts;
@@ -68,10 +69,10 @@ export default function StatsPage() {
     <div className="mx-auto max-w-5xl px-6 py-16">
       <Kicker>{st.kicker}</Kicker>
       <h1 className="mt-4 font-serif text-5xl font-bold">{st.title}</h1>
-      <p className="mt-6 max-w-2xl text-muted">{st.intro}</p>
+      <p className="mt-6 max-w-prose text-muted">{st.intro}</p>
 
       {/* 总览数字（与下方所有区块同宽） */}
-      <div className="mt-12 grid max-w-2xl grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4">
+      <div className="mt-12 grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4">
         {big.map((b) => (
           <div key={b.label}>
             <p className="font-mono text-xs tracking-widest text-muted">
@@ -90,7 +91,7 @@ export default function StatsPage() {
         <h2 className="font-serif text-2xl font-bold">{t.music.kicker}</h2>
 
         {/* 小块：收听概览 */}
-        <div className="mt-6 max-w-2xl">
+        <div className="mt-6">
           <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
             <span className="font-serif text-sm">{st.totalListen}</span>
             <span className="font-mono text-sm text-muted">
@@ -110,7 +111,7 @@ export default function StatsPage() {
         </div>
 
         {/* 小块：月度趋势 */}
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
           <p className="mt-2 text-xs text-muted">{st.monthlyIntro}</p>
           <div className="mt-5">
@@ -128,7 +129,7 @@ export default function StatsPage() {
         </div>
 
         {/* 小块：常听歌手 */}
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.artistKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.hours}</span>
@@ -141,7 +142,7 @@ export default function StatsPage() {
           )}
         </div>
 
-        <p className="mt-4 max-w-2xl text-xs text-muted">{st.musicNote}</p>
+        <p className="mt-4 max-w-prose text-xs text-muted">{st.musicNote}</p>
       </section>
 
       {/* ==================== 游戏 ==================== */}
@@ -149,7 +150,7 @@ export default function StatsPage() {
         <h2 className="font-serif text-2xl font-bold">{t.games.kicker}</h2>
 
         {/* 小块：平台分布 */}
-        <div className="mt-6 max-w-2xl">
+        <div className="mt-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.platformKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.hours}</span>
@@ -165,7 +166,7 @@ export default function StatsPage() {
         </div>
 
         {/* 小块：时长排行 */}
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.byHours}</h3>
             <span className="font-mono text-[11px] text-muted">
@@ -189,7 +190,7 @@ export default function StatsPage() {
         </div>
 
         {/* 小块：月度趋势 */}
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
@@ -214,7 +215,7 @@ export default function StatsPage() {
         <h2 className="font-serif text-2xl font-bold">{t.screen.kicker}</h2>
 
         {/* 小块：按类型 */}
-        <div className="mt-6 max-w-2xl">
+        <div className="mt-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.screenTypeKicker}</h3>
             <span className="font-mono text-[11px] text-muted">
@@ -238,7 +239,7 @@ export default function StatsPage() {
         </div>
 
         {/* 小块：时长排行 */}
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <h3 className="font-serif text-sm font-semibold">{st.byHours}</h3>
           {screen.length > 0 ? (
             <RankBar
@@ -257,7 +258,7 @@ export default function StatsPage() {
         </div>
 
         {/* 小块：月度趋势 */}
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
@@ -283,7 +284,7 @@ export default function StatsPage() {
         <h2 className="font-serif text-2xl font-bold">{t.exercise.kicker}</h2>
 
         {/* 小块：累计 */}
-        <div className="mt-6 max-w-2xl">
+        <div className="mt-6">
           <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
             <span className="font-serif text-sm">{st.entries}</span>
             <span className="font-mono text-sm text-muted">
@@ -305,7 +306,7 @@ export default function StatsPage() {
         </div>
 
         {/* 小块：月度趋势 */}
-        <div className="mt-10 max-w-2xl">
+        <div className="mt-10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
