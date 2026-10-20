@@ -95,12 +95,26 @@ async function findNetEaseCover(title, artist) {
 const hashName = (s) => crypto.createHash("md5").update(s).digest("hex").slice(0, 12);
 
 // ---- 封面映射表：最近 50 首，每次构建重建 ----
+// 关键保护：网易云搜索接口会限流（405「操作频繁」），一旦全失败，
+// 旧逻辑会「先删目录再重建」→ 得到空表 + 全站无封面。
+// 现在改为：先建到临时目录，只有拿到至少 1 张才替换；否则保留旧文件与旧映射。
 const coverMap = {};
 const all = [head, ...recent].slice(0, 50);
 const seen = new Set();
+
+let prevMap = {};
+try {
+  if (fs.existsSync(coversJson)) {
+    prevMap = JSON.parse(fs.readFileSync(coversJson, "utf-8"));
+  }
+} catch {
+  /* 旧文件损坏就当没有 */
+}
+
 if (all.length) {
-  fs.rmSync(coversDir, { recursive: true, force: true }); // 少量文件，避免无限累积
-  fs.mkdirSync(coversDir, { recursive: true });
+  const tmpDir = `${coversDir}.tmp`;
+  fs.rmSync(tmpDir, { recursive: true, force: true });
+  fs.mkdirSync(tmpDir, { recursive: true });
 
   for (const t of all) {
     const key = `${t.title}|${t.artist}`;
@@ -115,7 +129,7 @@ if (all.length) {
       const img = await fetch(thumb);
       if (!img.ok) continue;
       const file = `${hashName(key)}.jpg`;
-      fs.writeFileSync(path.join(coversDir, file), Buffer.from(await img.arrayBuffer()));
+      fs.writeFileSync(path.join(tmpDir, file), Buffer.from(await img.arrayBuffer()));
       coverMap[key] = `/covers/${file}`;
     } catch {
       /* 单张失败不影响整体 */
@@ -124,7 +138,20 @@ if (all.length) {
     await new Promise((r) => setTimeout(r, 60));
   }
 
-  fs.writeFileSync(coversJson, `${JSON.stringify(coverMap, null, 2)}\n`);
+  const fetched = Object.keys(coverMap).length;
+  if (fetched > 0) {
+    fs.rmSync(coversDir, { recursive: true, force: true });
+    fs.renameSync(tmpDir, coversDir);
+    fs.writeFileSync(coversJson, `${JSON.stringify(coverMap, null, 2)}\n`);
+    console.log(`  封面映射：${fetched} 张（已更新）`);
+  } else {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    // 全失败：沿用旧映射与旧图片，避免线上突然全站无封面
+    Object.assign(coverMap, prevMap);
+    console.warn(
+      `  ⚠ 封面全部拉取失败（网易云接口可能限流）→ 沿用旧映射 ${Object.keys(prevMap).length} 张，未覆盖 covers.json`,
+    );
+  }
 }
 
 head.cover = coverMap[`${head.title}|${head.artist}`] ?? "";
