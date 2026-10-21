@@ -151,6 +151,7 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 | 详情动效 | **两拍 FLIP**：第 1 拍牌面**单独在 fixed 层（z-70）**从列表卡片飞到槽位（`.tarot-face-anim`，0.4s）；第 2 拍面板背景 `tarot-bg-in` 从牌面 rect 向外 clip 展开 + 文字淡入（`tarot-panel-content`）+ 遮罩淡入 + 导航收紧；关闭反向（背景先收 0.22s → 牌面缩回 0.36s，文字先撤） |
 | 抓牌逻辑 | 牌被打开时**原位留空**（符合「抓起牌」直觉）：`CardTile` 的 `picked` prop → 缩略图 `opacity-0`（200ms 过渡）+ 虚线空槽 + `pointer-events-none` + `aria-pressed`。空槽保持到牌面飞回落位（220+360ms），`finish()` 置空 `active` 时缩略图才淡入 |
 | 视差绑定时机 | **必须等 FLIP 飞行动画结束（430ms）再绑指针监听**——组件在弹窗打开瞬间挂载，此时量到的 `getBoundingClientRect()` 是动画中间态（实测位置偏 69/55px），缓存它会让第一次打开视差错位。绑定后若指针已在卡上（`:hover`）补一次 `onEnter`；`onMove` 里 `rect` 为空时就地补量 |
+| 入场/出场过渡 | **CSS 自定义属性不可过渡**（未注册 `@property`），所以给「用到变量的层」加过渡：进场挂 `.entering`（`ENTER_MS=260`）、离开挂 `.leaving`（`LEAVE_MS=260`），窗口结束移除。卡片 `transform` 另走自己的 0.32s 弹性回正。`prefers-reduced-motion` 下 `transition: none`。对应 widgets 预览页第 10/11 个滑块 |
 | 层级 | 遮罩 `z-40` < 导航 `z-50` < 面板 `z-60` < 牌面 `z-70` —— 牌面飞行全程不被裁剪，导航收紧完整可见 |
 | 导航收紧 | 由 `tarot-open` / `tarot-close` **事件**驱动 Nav state（`compact = scroll || tarotOpen`）——Nav 卡片形态是 React state 决定的，纯 CSS 改不到 |
 | 资源 | `public/tarot/<card-id>/{artwork,edge,number,title,thumb}.webp`——**78 张全部接入**（2026-10-21）。由 `scripts/sync-tarot-assets.mjs` 从 `P:\widgets\assets\rider-waite-smith\processed` 同步：分层 480px/q80（9.03 MB）+ 拍平缩略图 240px（2.22 MB），合计 **11.24 MB / 333 文件**。层覆盖 artwork 78 / edge 78 / number 54 / title 45（**缺层不生成文件**，前端 `onError` 隐藏）。列表页只用 `thumb.webp`（单张 ≈29KB），分层仅在打开弹窗时加载 |
