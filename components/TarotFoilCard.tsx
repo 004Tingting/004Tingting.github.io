@@ -67,6 +67,14 @@ export default function TarotFoilCard({
     };
   }, [base]);
 
+  /* 指针交互：倾斜 + 视差 + 箔面扫动。
+   *
+   * ⚠️ 必须等 FLIP 飞行动画结束（0.42s）再绑定（2026-10-21 修）：
+   * 组件在弹窗打开瞬间就挂载，但此时牌面正从列表卡片飞向槽位（`.tarot-face-anim`），
+   * `getBoundingClientRect()` 拿到的是**动画中间态**（实测位置偏 75/60px、尺寸小 6/11px）。
+   * onEnter 一旦缓存了这个错误 rect，后续所有视差计算都基于错基准——
+   * 表现为「第一次打开有概率视差不对/不灵」，关掉重开（此时没有飞行）就正常。
+   * 修法：等动画结束再挂监听；指针已在卡面上时，主动补一次 enter 以立即生效。 */
   useEffect(() => {
     const stage = stageRef.current;
     const card = cardRef.current;
@@ -74,8 +82,13 @@ export default function TarotFoilCard({
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let settleTimer = 0;
+    let bound = false;
+    let disposed = false;
+    /** 牌面飞行期间（.tarot-face-anim 存在）不绑定 */
+    const FLIP_MS = 430; // .tarot-face-anim 是 0.42s，留 10ms 余量
 
     const onEnter = () => {
+      /* 每次进入都重新量——飞行期间量到的是中间态，所以只在绑定后调用 */
       rectRef.current = stage.getBoundingClientRect();
       card.classList.add("live");
       card.style.transition = "transform 80ms ease-out";
@@ -85,7 +98,9 @@ export default function TarotFoilCard({
     };
 
     const onMove = (e: PointerEvent) => {
-      const rect = rectRef.current ?? stage.getBoundingClientRect();
+      /* 兜底：rect 尚未缓存时（例如动画刚结束、指针已在卡上）就地补量 */
+      if (!rectRef.current) rectRef.current = stage.getBoundingClientRect();
+      const rect = rectRef.current;
       if (!rect.width || !rect.height) return;
       const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
@@ -118,10 +133,30 @@ export default function TarotFoilCard({
       }, 340);
     };
 
-    stage.addEventListener("pointerenter", onEnter);
-    stage.addEventListener("pointermove", onMove, { passive: true });
-    stage.addEventListener("pointerleave", onLeave);
+    const bind = () => {
+      if (bound || disposed) return;
+      bound = true;
+      stage.addEventListener("pointerenter", onEnter);
+      stage.addEventListener("pointermove", onMove, { passive: true });
+      stage.addEventListener("pointerleave", onLeave);
+      /* 指针可能已经停在卡面上（飞行期间就移过来了）：补一次 enter，
+         否则要等指针移出再移入才生效——这正是「第一次有概率不灵」的直观感受 */
+      if (stage.matches(":hover")) onEnter();
+    };
+
+    /* 正在播 FLIP 就等它结束，否则立即绑定 */
+    const flipping = card.closest(".tarot-face-anim") !== null;
+    let timer = 0;
+    if (flipping) {
+      timer = window.setTimeout(bind, FLIP_MS);
+    } else {
+      bind();
+    }
+
     return () => {
+      disposed = true;
+      if (timer) window.clearTimeout(timer);
+      if (!bound) return;
       stage.removeEventListener("pointerenter", onEnter);
       stage.removeEventListener("pointermove", onMove);
       stage.removeEventListener("pointerleave", onLeave);
