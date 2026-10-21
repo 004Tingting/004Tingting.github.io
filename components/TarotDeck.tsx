@@ -81,6 +81,8 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
       node.style.setProperty("--flip-sy", `${to.height / from.height}`);
       node.classList.remove("tarot-face-anim");
       node.classList.add("tarot-face-out");
+      /* 牌面缩回到位的同时把卡片「放回」牌库：空槽在飞回途中保持，
+         落位那一帧才让缩略图淡入（220 + 360 = 580ms，与 tarot-face-out 时长一致） */
       window.setTimeout(finish, 360);
     }, 220);
   };
@@ -254,7 +256,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
           <p className="mt-1 text-sm text-muted">{tt.majorNote}</p>
           <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
             {majors.map((card) => (
-              <CardTile key={card.id} card={card} lang={lang} onOpen={() => openCard(card)} />
+              <CardTile key={card.id} card={card} lang={lang} onOpen={() => openCard(card)} picked={active?.id === card.id} />
             ))}
           </div>
         </section>
@@ -293,7 +295,7 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
               {list.map((card) => (
-                <CardTile key={card.id} card={card} lang={lang} onOpen={() => openCard(card)} />
+                <CardTile key={card.id} card={card} lang={lang} onOpen={() => openCard(card)} picked={active?.id === card.id} />
               ))}
             </div>
           </section>
@@ -382,8 +384,25 @@ export default function TarotDeck({ lang }: { lang: Lang }) {
   );
 }
 
-/** 单张牌缩略（真实牌面拍平成一张 thumb.webp；hover 仅边框微变，不做 3D 效果） */
-function CardTile({ card, lang, onOpen }: { card: TarotCard; lang: Lang; onOpen: () => void }) {
+/**
+ * 单张牌缩略（真实牌面拍平成一张 thumb.webp；hover 仅边框微变，不做 3D 效果）。
+ *
+ * `picked` = 这张牌正被「抓在手里」（详情已打开）：
+ * 牌面淡出、原位留一个虚线空槽——符合「抓起牌」的直觉，
+ * 关闭动画结束（active 置空）时自动放回。牌面淡出用 200ms 过渡，
+ * 与牌面浮层的起飞同拍，避免瞬间消失的突兀感。
+ */
+function CardTile({
+  card,
+  lang,
+  onOpen,
+  picked,
+}: {
+  card: TarotCard;
+  lang: Lang;
+  onOpen: () => void;
+  picked: boolean;
+}) {
   const name = cardName(card, lang);
   return (
     <button
@@ -391,13 +410,23 @@ function CardTile({ card, lang, onOpen }: { card: TarotCard; lang: Lang; onOpen:
       id={`tarot-card-${card.id}`}
       onClick={onOpen}
       aria-label={name}
-      className="group block w-full text-left"
+      aria-pressed={picked}
+      /* 已抓起的牌不可重复点开（原位只剩空槽） */
+      className={`group block w-full text-left ${picked ? "pointer-events-none" : ""}`}
     >
-      <span className="relative block aspect-[2100/3600] w-full overflow-hidden rounded-[2px] border border-rule bg-paper transition-colors group-hover:border-accent">
+      <span
+        className={`relative block aspect-[2100/3600] w-full overflow-hidden rounded-[2px] bg-paper transition-colors ${
+          picked
+            ? "border border-dashed border-rule/70"
+            : "border border-rule group-hover:border-accent"
+        }`}
+      >
         <img
           src={`/tarot/${card.id}/thumb.webp`}
           alt=""
-          className="absolute inset-0 h-full w-full object-cover"
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${
+            picked ? "opacity-0" : "opacity-100"
+          }`}
           loading="lazy"
           decoding="async"
           draggable={false}

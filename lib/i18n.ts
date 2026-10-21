@@ -161,6 +161,8 @@ export const zh = {
       screenTypeIntro: "电影、番剧、剧集、小说与漫画，各自占多少。",
       artistKicker: "常听歌手",
       artistIntro: "按累计收听时长排，来自网易云播放记录。",
+      overviewKicker: "收听概览",
+      totalsKicker: "累计",
       noData: "暂无数据。",
     },
     exercise: {
@@ -392,6 +394,8 @@ export const en = {
       screenTypeIntro: "Films, anime, TV, novels and manga — how much each takes up.",
       artistKicker: "Most played artists",
       artistIntro: "Ranked by accumulated listening hours, from NetEase play records.",
+      overviewKicker: "Overview",
+      totalsKicker: "Totals",
       noData: "No data yet.",
     },
     exercise: {

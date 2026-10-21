@@ -90,43 +90,54 @@ export default function StatsPage() {
       <section className="mt-16 border-t border-rule pt-10">
         <h2 className="font-serif text-2xl font-bold">{t.music.kicker}</h2>
 
-        <div className="mt-6">
-          <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
-            <span className="font-serif text-sm">{st.totalListen}</span>
-            <span className="font-mono text-sm text-muted">
-              {m.neteaseTotalHours !== null ? m.neteaseTotalHours.toFixed(1) : "—"} {st.hours}
-            </span>
+        {/* Two columns: left = overview, right = monthly trend (trend always right) */}
+        <div className="mt-6 grid gap-x-10 gap-y-10 lg:grid-cols-2">
+          <div>
+            <h3 className="font-serif text-sm font-semibold">{st.overviewKicker}</h3>
+            <div className="mt-4">
+              <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
+                <span className="font-serif text-sm">{st.totalListen}</span>
+                <span className="font-mono text-sm text-muted">
+                  {m.neteaseTotalHours !== null ? m.neteaseTotalHours.toFixed(1) : "—"} {st.hours}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
+                <span className="font-serif text-sm">{st.recentListen}</span>
+                <span className="font-mono text-sm text-muted">
+                  {m.music.reduce((sum, v) => sum + v, 0).toFixed(1)} {st.hours}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between gap-3 py-2.5">
+                <span className="font-serif text-sm">{st.coversLabel}</span>
+                <span className="font-mono text-sm text-muted">{s.coverCount}</span>
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-muted">{st.musicNote}</p>
           </div>
-          <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
-            <span className="font-serif text-sm">{st.recentListen}</span>
-            <span className="font-mono text-sm text-muted">
-              {m.music.reduce((sum, v) => sum + v, 0).toFixed(1)} {st.hours}
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-3 py-2.5">
-            <span className="font-serif text-sm">{st.coversLabel}</span>
-            <span className="font-mono text-sm text-muted">{s.coverCount}</span>
+
+          <div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
+              <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
+            </div>
+            <p className="mt-2 text-xs text-muted">{st.monthlyIntro}</p>
+            <div className="mt-4">
+              <MonthlyTrend
+                months={m.months}
+                values={m.music}
+                label={t.music.kicker}
+                unit={st.unitHoursMonth}
+                lang="en"
+                emptyNote={st.accumulating}
+                baseline={m.baselines.music}
+                baselineLabel={st.baseline}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="mt-10">
-          <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
-          <p className="mt-2 text-xs text-muted">{st.monthlyIntro}</p>
-          <div className="mt-5">
-            <MonthlyTrend
-              months={m.months}
-              values={m.music}
-              label={t.music.kicker}
-              unit={st.unitHoursMonth}
-              lang="en"
-              emptyNote={st.accumulating}
-              baseline={m.baselines.music}
-              baselineLabel={st.baseline}
-            />
-          </div>
-        </div>
-
-        <div className="mt-10">
+        {/* Most played artists (full width) */}
+        <div className="mt-12">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.artistKicker}</h3>
             <span className="font-mono text-[11px] text-muted">{st.hours}</span>
@@ -138,14 +149,13 @@ export default function StatsPage() {
             <p className="mt-4 text-sm text-muted">{st.noData}</p>
           )}
         </div>
-
-        <p className="mt-4 max-w-prose text-xs text-muted">{st.musicNote}</p>
       </section>
 
       {/* ==================== Games ==================== */}
       <section className="mt-16 border-t border-rule pt-10">
         <h2 className="font-serif text-2xl font-bold">{t.games.kicker}</h2>
 
+        {/* By platform (full width) */}
         <div className="mt-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-serif text-sm font-semibold">{st.platformKicker}</h3>
@@ -161,45 +171,48 @@ export default function StatsPage() {
           </div>
         </div>
 
-        <div className="mt-10">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="font-serif text-sm font-semibold">{st.byHours}</h3>
-            <span className="font-mono text-[11px] text-muted">
-              {s.gameCount} {st.entries} · {s.gameHours} {st.hours}
-            </span>
+        {/* Two columns: left = ranking, right = monthly trend (trend always right) */}
+        <div className="mt-12 grid gap-x-10 gap-y-10 lg:grid-cols-2">
+          <div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="font-serif text-sm font-semibold">{st.byHours}</h3>
+              <span className="font-mono text-[11px] text-muted">
+                {s.gameCount} {st.entries} · {s.gameHours} {st.hours}
+              </span>
+            </div>
+            {topGames.length > 0 ? (
+              <RankBar
+                items={topGames.map((g) => ({ label: g.name, hours: g.hours }))}
+                unit={st.hours}
+                format={(v) => String(Math.round(v))}
+              />
+            ) : (
+              <p className="mt-4 text-sm text-muted">{st.noData}</p>
+            )}
+            <p className="mt-4">
+              <Link href="/en/arts/stats/games" className="text-sm text-accent hover:underline">
+                {st.gameFullLink}
+              </Link>
+            </p>
           </div>
-          {topGames.length > 0 ? (
-            <RankBar
-              items={topGames.map((g) => ({ label: g.name, hours: g.hours }))}
-              unit={st.hours}
-              format={(v) => String(Math.round(v))}
-            />
-          ) : (
-            <p className="mt-4 text-sm text-muted">{st.noData}</p>
-          )}
-          <p className="mt-4">
-            <Link href="/en/arts/stats/games" className="text-sm text-accent hover:underline">
-              {st.gameFullLink}
-            </Link>
-          </p>
-        </div>
 
-        <div className="mt-10">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
-            <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
-          </div>
-          <div className="mt-5">
-            <MonthlyTrend
-              months={m.months}
-              values={m.gamesDelta}
-              label={t.games.kicker}
-              unit={st.unitHoursMonth}
-              lang="en"
-              emptyNote={st.accumulating}
-              baseline={m.baselines.games}
-              baselineLabel={st.baseline}
-            />
+          <div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
+              <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
+            </div>
+            <div className="mt-4">
+              <MonthlyTrend
+                months={m.months}
+                values={m.gamesDelta}
+                label={t.games.kicker}
+                unit={st.unitHoursMonth}
+                lang="en"
+                emptyNote={st.accumulating}
+                baseline={m.baselines.games}
+                baselineLabel={st.baseline}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -208,30 +221,54 @@ export default function StatsPage() {
       <section className="mt-16 border-t border-rule pt-10">
         <h2 className="font-serif text-2xl font-bold">{t.screen.kicker}</h2>
 
-        <div className="mt-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="font-serif text-sm font-semibold">{st.screenTypeKicker}</h3>
-            <span className="font-mono text-[11px] text-muted">
-              {s.screenCount} {st.entries} · {fmtScreenHours(s.screenHours)}
-            </span>
+        {/* Two columns: left = by type, right = monthly trend (trend always right) */}
+        <div className="mt-6 grid gap-x-10 gap-y-10 lg:grid-cols-2">
+          <div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="font-serif text-sm font-semibold">{st.screenTypeKicker}</h3>
+              <span className="font-mono text-[11px] text-muted">
+                {s.screenCount} {st.entries} · {fmtScreenHours(s.screenHours)}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-muted">{st.screenTypeIntro}</p>
+            {screenByType.length > 0 ? (
+              <RankBar
+                items={screenByType.map((x) => ({
+                  label: t.screenTypes[x.type],
+                  hours: x.hours,
+                  meta: `${x.count}`,
+                }))}
+                unit={st.hours}
+                format={(v) => v.toFixed(2)}
+              />
+            ) : (
+              <p className="mt-4 text-sm text-muted">{st.noData}</p>
+            )}
           </div>
-          <p className="mt-2 text-xs text-muted">{st.screenTypeIntro}</p>
-          {screenByType.length > 0 ? (
-            <RankBar
-              items={screenByType.map((x) => ({
-                label: t.screenTypes[x.type],
-                hours: x.hours,
-                meta: `${x.count}`,
-              }))}
-              unit={st.hours}
-              format={(v) => v.toFixed(2)}
-            />
-          ) : (
-            <p className="mt-4 text-sm text-muted">{st.noData}</p>
-          )}
+
+          <div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
+              <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
+            </div>
+            <div className="mt-4">
+              <MonthlyTrend
+                months={m.months}
+                values={m.screenDelta}
+                label={t.screen.kicker}
+                unit={st.unitHoursMonth}
+                lang="en"
+                emptyNote={st.accumulating}
+                baseline={m.baselines.screen}
+                baselineLabel={st.baseline}
+                fmtValue={(v) => v.toFixed(2)}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="mt-10">
+        {/* Ranking (full width) */}
+        <div className="mt-12">
           <h3 className="font-serif text-sm font-semibold">{st.byHours}</h3>
           {screen.length > 0 ? (
             <RankBar
@@ -248,67 +285,53 @@ export default function StatsPage() {
             </Link>
           </p>
         </div>
-
-        <div className="mt-10">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
-            <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
-          </div>
-          <div className="mt-5">
-            <MonthlyTrend
-              months={m.months}
-              values={m.screenDelta}
-              label={t.screen.kicker}
-              unit={st.unitHoursMonth}
-              lang="en"
-              emptyNote={st.accumulating}
-              baseline={m.baselines.screen}
-              baselineLabel={st.baseline}
-              fmtValue={(v) => v.toFixed(2)}
-            />
-          </div>
-        </div>
       </section>
 
       {/* ==================== Exercise ==================== */}
       <section className="mt-16 border-t border-rule pt-10">
         <h2 className="font-serif text-2xl font-bold">{t.exercise.kicker}</h2>
 
-        <div className="mt-6">
-          <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
-            <span className="font-serif text-sm">{st.entries}</span>
-            <span className="font-mono text-sm text-muted">
-              {s.exerciseCount} {st.times}
-            </span>
+        {/* Two columns: left = totals, right = monthly trend (trend always right) */}
+        <div className="mt-6 grid gap-x-10 gap-y-10 lg:grid-cols-2">
+          <div>
+            <h3 className="font-serif text-sm font-semibold">{st.totalsKicker}</h3>
+            <div className="mt-4">
+              <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
+                <span className="font-serif text-sm">{st.entries}</span>
+                <span className="font-mono text-sm text-muted">
+                  {s.exerciseCount} {st.times}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
+                <span className="font-serif text-sm">{st.hours}</span>
+                <span className="font-mono text-sm text-muted">
+                  {exerciseH} {st.hours}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between gap-3 py-2.5">
+                <span className="font-serif text-sm">{st.km}</span>
+                <span className="font-mono text-sm text-muted">
+                  {km} {st.km}
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-baseline justify-between gap-3 border-b border-rule/60 py-2.5">
-            <span className="font-serif text-sm">{st.hours}</span>
-            <span className="font-mono text-sm text-muted">
-              {exerciseH} {st.hours}
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-3 py-2.5">
-            <span className="font-serif text-sm">{st.km}</span>
-            <span className="font-mono text-sm text-muted">
-              {km} {st.km}
-            </span>
-          </div>
-        </div>
 
-        <div className="mt-10">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
-            <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
-          </div>
-          <div className="mt-5">
-            <MonthlyTrend
-              months={m.months}
-              values={m.exercise}
-              label={t.exercise.kicker}
-              unit={st.unitHoursMonth}
-              lang="en"
-              emptyNote={st.accumulating}
-            />
+          <div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="font-serif text-sm font-semibold">{st.monthlyKicker}</h3>
+              <span className="font-mono text-[11px] text-muted">{st.unitHoursMonth}</span>
+            </div>
+            <div className="mt-4">
+              <MonthlyTrend
+                months={m.months}
+                values={m.exercise}
+                label={t.exercise.kicker}
+                unit={st.unitHoursMonth}
+                lang="en"
+                emptyNote={st.accumulating}
+              />
+            </div>
           </div>
         </div>
       </section>
