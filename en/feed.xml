@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ting · A Personal Journal</title>
+    <link>https://004tingting.github.io/en/</link>
+    <description>Ting's personal journal at the crossing of control research, engineering and design.</description>
+    <language>en</language>
+    <atom:link href="https://004tingting.github.io/en/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Booking the Settling Time with Delayed Feedback: Notes on Deng et al. (2024)</title>
+      <link>https://004tingting.github.io/en/research/deng-2024-predefined-time-tsmc/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/en/research/deng-2024-predefined-time-tsmc/</guid>
+      <pubDate>Mon, 12 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Close reading of Deng et al., IEEE TAC 2024: a nonsingular predefined-time terminal sliding mode control built on artificial-delay sliding surfaces, with notes on relevance to CAV control.</description>
+    </item>
+    <item>
+      <title>In the Beginning: Why I'm Starting a Personal Journal</title>
+      <link>https://004tingting.github.io/en/chronicles/hello-world/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/en/chronicles/hello-world/</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Who I am, what the five sections hold, and why I'm building this site.</description>
+    </item>
+  </channel>
+</rss>
