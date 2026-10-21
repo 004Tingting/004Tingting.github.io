@@ -8,6 +8,9 @@ const ART = 14; // 牌面视差（px，反向）
 const NUM = 16; // 序号视差（px，同向）
 const TITLE = 22; // 标题视差（px，同向）
 const TRAVEL = 1; // rainbow 扫幅系数
+/** 入场过渡时长（ms）：鼠标突然移到卡面时，视差从 0 平滑走到目标值。
+ *  0 = 关闭（退回瞬时跳变）。对应 widgets 预览页的「入场过渡时长」滑杆。 */
+const ENTER_MS = 260;
 
 /**
  * 塔罗闪卡（78 张通用）。
@@ -82,6 +85,7 @@ export default function TarotFoilCard({
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let settleTimer = 0;
+    let enterTimer = 0;
     let bound = false;
     let disposed = false;
     /** 牌面飞行期间（.tarot-face-anim 存在）不绑定 */
@@ -95,6 +99,17 @@ export default function TarotFoilCard({
       window.setTimeout(() => {
         card.style.transition = "";
       }, 90);
+
+      /* 入场过渡（Ting 2026-10-21）：鼠标突然移到卡面（尤其边缘）时，
+         视差不应瞬间跳到极大值，而要从 0 平滑走到目标值。
+         CSS 自定义属性本身不可过渡，所以短暂给各层挂 transition，
+         让「0 → 目标」这段由样式引擎插值；窗口结束移除，move 恢复 1:1 跟手。 */
+      card.style.setProperty("--enter-ms", `${ENTER_MS}ms`);
+      card.classList.add("entering");
+      window.clearTimeout(enterTimer);
+      enterTimer = window.setTimeout(() => {
+        card.classList.remove("entering");
+      }, ENTER_MS + 40);
     };
 
     const onMove = (e: PointerEvent) => {
@@ -122,6 +137,9 @@ export default function TarotFoilCard({
     const onLeave = () => {
       rectRef.current = null;
       card.classList.remove("live");
+      /* 离开时撤掉入场过渡，交给下面的回正过渡（否则会与 0.32s 弹性回正叠加） */
+      card.classList.remove("entering");
+      window.clearTimeout(enterTimer);
       card.style.transition = "transform .32s cubic-bezier(.2,.65,.3,1.12)";
       card.style.transform = "rotateX(0deg) rotateY(0deg)";
       for (const k of ["ax", "ay", "nx", "ny", "tx", "ty"]) card.style.setProperty(`--${k}`, "0px");
@@ -162,6 +180,7 @@ export default function TarotFoilCard({
       stage.removeEventListener("pointerleave", onLeave);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.clearTimeout(settleTimer);
+      window.clearTimeout(enterTimer);
     };
   }, []);
 
