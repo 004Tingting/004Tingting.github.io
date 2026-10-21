@@ -2,18 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/* 闪卡参数（与 widgets 工作区 preview.html 默认值一致） */
-const TILT = 16; // 倾斜幅度（deg）
-const ART = 14; // 牌面视差（px，反向）
-const NUM = 16; // 序号视差（px，同向）
-const TITLE = 22; // 标题视差（px，同向）
-const TRAVEL = 1; // rainbow 扫幅系数
+/* 闪卡参数（Ting 2026-10-21 23:5x 在 widgets 预览页调定的整行参数，逐项落位）
+ *
+ *   tilt=8 art=8 scale=104.5 num=11 title=11 ox=50.1 oy=46.5 rain=20 travel=135 enter=420 leave=420
+ *
+ * scale / ox / oy 三项在 CSS 里（app/globals.css 的 .tarot-foil-artwork），其余在此。
+ */
+const TILT = 8; // 倾斜幅度（deg）
+const ART = 8; // 牌面视差（px，反向）
+const NUM = 11; // 序号视差（px，同向）
+const TITLE = 11; // 标题视差（px，同向）
+const TRAVEL = 1.35; // rainbow 扫幅系数（预览页 135%）
 /** 入场过渡时长（ms）：鼠标突然移到卡面时，视差从 0 平滑走到目标值。
  *  0 = 关闭（退回瞬时跳变）。对应 widgets 预览页的「入场过渡时长」滑杆。 */
-const ENTER_MS = 260;
+const ENTER_MS = 420;
 /** 出场过渡时长（ms）：指针离开时视差从当前位置平滑回到 0。
  *  与卡片本身的 0.32s 弹性回正并行（变量走 LEAVE_MS，transform 走 0.32s）。 */
-const LEAVE_MS = 260;
+const LEAVE_MS = 420;
 
 /**
  * 塔罗闪卡（78 张通用）。
@@ -95,6 +100,16 @@ export default function TarotFoilCard({
     /** 牌面飞行期间（.tarot-face-anim 存在）不绑定 */
     const FLIP_MS = 430; // .tarot-face-anim 是 0.42s，留 10ms 余量
 
+    /** 入场过渡的触发：进场时挂 .entering，让各层从 0 走到目标值 */
+    const startEntering = () => {
+      card.style.setProperty("--enter-ms", `${ENTER_MS}ms`);
+      card.classList.add("entering");
+      window.clearTimeout(enterTimer);
+      enterTimer = window.setTimeout(() => {
+        card.classList.remove("entering");
+      }, ENTER_MS + 40);
+    };
+
     const onEnter = () => {
       /* 每次进入都重新量——飞行期间量到的是中间态，所以只在绑定后调用 */
       rectRef.current = stage.getBoundingClientRect();
@@ -108,12 +123,7 @@ export default function TarotFoilCard({
          视差不应瞬间跳到极大值，而要从 0 平滑走到目标值。
          CSS 自定义属性本身不可过渡，所以短暂给各层挂 transition，
          让「0 → 目标」这段由样式引擎插值；窗口结束移除，move 恢复 1:1 跟手。 */
-      card.style.setProperty("--enter-ms", `${ENTER_MS}ms`);
-      card.classList.add("entering");
-      window.clearTimeout(enterTimer);
-      enterTimer = window.setTimeout(() => {
-        card.classList.remove("entering");
-      }, ENTER_MS + 40);
+      startEntering();
     };
 
     const onMove = (e: PointerEvent) => {
@@ -172,7 +182,8 @@ export default function TarotFoilCard({
       stage.addEventListener("pointermove", onMove, { passive: true });
       stage.addEventListener("pointerleave", onLeave);
       /* 指针可能已经停在卡面上（飞行期间就移过来了）：补一次 enter，
-         否则要等指针移出再移入才生效——这正是「第一次有概率不灵」的直观感受 */
+         否则要等指针移出再移入才生效——这正是「第一次有概率不灵」的直观感受。
+         onEnter 内部已含进场过渡，所以这里只需调它一次。 */
       if (stage.matches(":hover")) onEnter();
     };
 

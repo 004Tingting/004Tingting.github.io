@@ -373,7 +373,11 @@ const numOr0 = (v: unknown): number => (typeof v === "number" && Number.isFinite
 function readJsonFile<T>(file: string): T | null {
   if (!fs.existsSync(file)) return null;
   try {
-    return JSON.parse(fs.readFileSync(file, "utf-8")) as T;
+    /* ⚠️ 去掉 UTF-8 BOM：token-monitor-history.json 由 PowerShell 的 Set-Content 写出，
+       Windows PowerShell 5.1 默认带 BOM，而 JSON.parse 遇到 BOM 会直接抛错
+       （表现为 71 天历史、按模型分布、摘要整块静默丢失）。 */
+    const raw = fs.readFileSync(file, "utf-8").replace(/^\uFEFF/, "");
+    return JSON.parse(raw) as T;
   } catch {
     return null;
   }

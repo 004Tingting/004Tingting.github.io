@@ -474,7 +474,7 @@ html.tarot-open .nav-gh-info {
    参考 widgets 工作区 preview.html（rider-waite-smith 拆层图）；
    artwork / edge / number / title 为压缩后的 webp（public/tarot/major-00）。 */
 .tarot-foil-artwork {
-  transform: translate(var(--ax, 0px), var(--ay, 0px)) scale(1.06);
+  transform: translate(var(--ax, 0px), var(--ay, 0px)) scale(1.045);
   transform-origin: 50.1% 46.5%;
 }
 .tarot-foil-number {
@@ -485,7 +485,7 @@ html.tarot-open .nav-gh-info {
 }
 .tarot-foil-rainbow {
   mix-blend-mode: color-dodge;
-  opacity: var(--rainbow, 0.5);
+  opacity: var(--rainbow, 0.2);
   background-image: linear-gradient(
     -30deg,
     hsl(0, 57%, 30%),
