@@ -3,6 +3,20 @@
 > 项目级系统提示：开工前先读本文件。
 > **开工前先读本文件**，再按需查 `PLAN.md`、`DESIGN.md`、`PITFALLS.md`。
 
+## 双 Agent 协作守则（2026-10-25 起）
+
+本仓库可能由**两个会话同时维护**（例：A = 站点/代码/数据，B = 内容/翻译/审稿）。任何 agent 开工前除本文件外，还要遵守：
+
+1. **写前同步**：任何写操作（改文件 / commit）前先 `git fetch origin && git rebase origin/main`——保证本地与远端同源，避免覆盖对方提交
+2. **部署互斥**：`bash scripts/deploy.sh` 前，与 Ting 确认另一会话没有正在部署；部署结束立即把 main 推远端（脚本已自动做）
+3. **提交消息标注 agent**：格式 `[A]` / `[B]` 开头，如 `[A] stats: ...`。另一侧一看便知是谁改的
+4. **任务分工优先**（推荐按域切分，避免碰同一批文件）：
+   - **A（本会话）**：站点代码、构建链路、`content/arts/*.json` 数据快照、塔罗学习
+   - **B**：`content/research|chronicles|works` 文章与翻译、about 页内容
+   - 交叉地带（WORKLOG / HANDOFF / i18n 文案）由 Ting 指派归属，未指派前不改
+5. **HANDOFF.md 变为同步点**：从「本地不入库」改为**每次更新后必须 commit + push**——这是双 agent 之间唯一的上下文交换通道。`.gitignore` 里相应条目需 Ting 确认移除
+6. **不抢跑**：若 `git fetch` 发现远端有新 commit 且改动范围与我要做的事重叠，先读对方改动（`git log -p origin/main -3`）再决定继续还是让位
+
 ## 项目是什么
 
 Ting 的个人网站——一本**双语（中文默认 + `/en`）的「个人杂志」**，五栏：研思 / 造物 / 游艺 / 纪事 / 关于。
