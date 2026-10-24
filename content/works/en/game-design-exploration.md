@@ -3,7 +3,7 @@ title: Game Design Exploration
 status: Exploring
 period: "2026 —"
 tags: [game design]
-order: 5
+order: 9
 summary: 'Entering game development through the design door — first what game and why it is fun, then engines and code.'
 draft: false
 ---

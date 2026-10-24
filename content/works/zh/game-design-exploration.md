@@ -3,7 +3,7 @@ title: 游戏设计探索
 status: 探索中
 period: "2026 —"
 tags: [游戏设计]
-order: 5
+order: 9
 summary: 从设计域切入游戏开发：先回答「做什么游戏、为什么好玩」，再考虑引擎和实现。
 draft: false
 ---

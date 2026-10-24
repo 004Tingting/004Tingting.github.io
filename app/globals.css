@@ -97,6 +97,17 @@ body {
   border-radius: 0.25em;
 }
 
+/* 文章配图（react-markdown 输出的裸 img）：杂志风——细边框、随容器宽、
+   图注走 figcaption 不可行（markdown 无此结构），alt 不渲染为可见文本，
+   出处标注由图片下方文字段落承担（素材自带，见 research 文章体例） */
+.prose img {
+  display: block;
+  margin: 1.5em auto;
+  max-width: min(100%, 36rem);
+  height: auto;
+  border: 1px solid var(--color-rule);
+}
+
 /* 代码块：细边框直角，随深浅模式换底 */
 .prose pre {
   font-family: var(--font-mono);

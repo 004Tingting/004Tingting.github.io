@@ -3,7 +3,7 @@ title: OinO Emoji Manager
 status: In development
 period: "2026 —"
 tags: [software, tooling]
-order: 4
+order: 8
 summary: A local-first emoji manager — so the sticker you saved three years ago stops being a matter of luck.
 draft: false
 ---
