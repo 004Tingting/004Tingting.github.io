@@ -3,7 +3,7 @@ import type { Lang } from "@/lib/i18n";
 /* 游艺（/arts）内部条目：状态与类型用枚举存 frontmatter，展示标签统一走 lib/i18n.ts */
 
 export type GameStatus = "playing" | "completed" | "dropped";
-export type ScreenType = "tv" | "anime" | "movie" | "novel" | "manga";
+export type ScreenType = "tv" | "anime" | "movie" | "novel" | "manga" | "concert";
 export type ScreenStatus = "watching" | "completed" | "dropped";
 export type ExerciseKind = "run" | "bodyweight" | "other";
 
@@ -99,7 +99,7 @@ export type LastfmData = {
 };
 
 export const GAME_STATUSES: GameStatus[] = ["playing", "completed", "dropped"];
-export const SCREEN_TYPES: ScreenType[] = ["tv", "anime", "movie", "novel", "manga"];
+export const SCREEN_TYPES: ScreenType[] = ["tv", "anime", "movie", "novel", "manga", "concert"];
 export const EXERCISE_KINDS: ExerciseKind[] = ["run", "bodyweight", "other"];
 
 export function asGameStatus(v: unknown): GameStatus {
@@ -111,7 +111,7 @@ export function asExerciseKind(v: unknown): ExerciseKind | null {
 }
 
 export function asScreenType(v: unknown): ScreenType {
-  return v === "tv" || v === "anime" || v === "movie" || v === "novel" || v === "manga" ? v : "tv";
+  return v === "tv" || v === "anime" || v === "movie" || v === "novel" || v === "manga" || v === "concert" ? v : "tv";
 }
 
 export function asScreenStatus(v: unknown): ScreenStatus {

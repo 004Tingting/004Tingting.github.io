@@ -22,6 +22,7 @@ export default function ScreenPage() {
           `${t.screenTypes.movie} ${s.screenByType.movie}`,
           `${t.screenTypes.novel} ${s.screenByType.novel}`,
           `${t.screenTypes.manga} ${s.screenByType.manga}`,
+          `${t.screenTypes.concert} ${s.screenByType.concert}`,
           `${t.screen.total} ${s.screenHours.toFixed(2)}${t.screen.hoursUnit}`,
         ].join(" · ")}
       </p>

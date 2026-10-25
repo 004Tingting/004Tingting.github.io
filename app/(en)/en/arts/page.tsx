@@ -39,6 +39,7 @@ export default function ArtsPage() {
         `${t.screenTypes.anime} ${s.screenByType.anime}`,
         `${t.screenTypes.movie} ${s.screenByType.movie}`,
         `${t.screenTypes.novel} ${s.screenByType.novel}`,
+        `${t.screenTypes.concert} ${s.screenByType.concert}`,
         `${t.screen.total} ${s.screenHours.toFixed(2)}${t.screen.hoursUnit}`,
       ].join(" · "),
     },
