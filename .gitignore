@@ -9,7 +9,7 @@
 /.worklog/
 
 # working docs at root (local only, kept out of the public repo)
-/HANDOFF.md
+# HANDOFF.md 已入库（2026-10-25）：双 agent 交接的同步点，见 AGENTS.md 协作守则
 /WORKLOG.md
 
 # env（本地密钥，勿提交）
