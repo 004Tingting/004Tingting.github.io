@@ -79,6 +79,12 @@ lib/
 ├── works.ts              # 造物管道（order 排序）
 ├── arts-shared.ts        # 游艺客户端安全：类型、枚举、汇总统计
 ├── arts.ts               # 游艺管道（games / screen / exercise / covers / now / playlist + stats）
+└── tarot-deck.ts         # 塔罗 78 张静态数据（客户端可安全 import）
+public/
+├── research/figures/     # 研思文章配图（2026-10-25：知识讲解 5 张，出处标注内嵌图注）
+├── tarot/                # 塔罗 78 张分层素材（sync-tarot-assets.mjs 同步）
+├── covers/               # 正在听封面映射
+└── og.png                # 分享卡片
 scripts/
 ├── preview.py            # 本地预览（支持 clean URL，对齐 GitHub Pages）
 ├── og.mjs                # 生成 public/og.png 分享卡片（sharp 渲染 SVG）
@@ -159,7 +165,7 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 
 | 项 | 说明 |
 |---|---|
-| 路由 | `content/works/*/tarot.md`（order 3，仅列表元数据、正文空）→ `[slug]/page.tsx` 的 `generateStaticParams` **排除 tarot**；`/works/tarot` 为静态枢纽页，子页 `/works/tarot/[sub]`（**deck / daily / cases**，`dynamicParams=false`） |
+| 路由 | `content/works/*/tarot.md`（order 7，仅列表元数据、正文空）→ `[slug]/page.tsx` 的 `generateStaticParams` **排除 tarot**；`/works/tarot` 为静态枢纽页，子页 `/works/tarot/[sub]`（**deck / daily / cases**，`dynamicParams=false`）。**order 说明**：造物 2026-10-25 重排为 9 条（CAV 1 / 故障诊断 2 / EEG 3 / 忆阻器 4 / TDC 5 / DBI 6 / TAROT 7 / OinO 8 / 游戏设计 9）——插新工程条目时挤在研究条目后面，TAROT 及个人项目后移 |
 | 数据 | `lib/tarot-deck.ts`：韦特 78 张（id / 中英名 / 编号 / 双关键词 / 拼音全拼 + 首字母）；纯静态数据，客户端可安全 import |
 | 组件 | `components/TarotDeck.tsx`（client：筛选 chips + 搜索（中英 / 拼音 / 背音首字母 / 关键词）+ 网格 + 详情弹窗 + `?card=` 分享）；`components/TarotFoilCard.tsx`（**78 张通用**闪卡：artwork / edge / rainbow 箔 / number / title 五层 + 指针倾斜 8° + 反向视差；缺层 `onError` 隐藏）。**闪卡参数（Ting 2026-10-21 预览页调定，2026-10-22 明确「只改网站参数」）**：`tilt=8 art=8 scale=104.5 num=11 title=11 ox=50.1 oy=46.5 rain=20 travel=135 enter=420 leave=420`——`tilt/art/num/title/travel/enter/leave` 在 `TarotFoilCard.tsx` 顶部常量，`scale/ox/oy/rain` 在 `globals.css` 的 `.tarot-foil-artwork` / `.tarot-foil-rainbow`。**只改站点，不要同步到 React 包或预览页**——`P:\widgets` 的 React 组件包与预览页生成器保持各自默认值（Ting 要的是站点独立调参） |
 | 详情动效 | **两拍 FLIP**：第 1 拍牌面**单独在 fixed 层（z-70）**从列表卡片飞到槽位（`.tarot-face-anim`，0.4s）；第 2 拍面板背景 `tarot-bg-in` 从牌面 rect 向外 clip 展开 + 文字淡入（`tarot-panel-content`）+ 遮罩淡入 + 导航收紧；关闭反向（背景先收 0.22s → 牌面缩回 0.36s，文字先撤） |
@@ -193,6 +199,8 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
   | 纪事 | 纪事 | `/chronicles` | 时间切片、复盘与随笔 |
   | 关于 | 关于 | `/about` | 履历与站务 |
 - 旧 URL（`/blog` `/life/*` `/projects/*`）由 `scripts/postbuild.mjs` 生成 meta-refresh 跳转页
+- **造物 ↔ 研思互链体例（2026-10-25 起，八个工程条目确立）**：工程条目（造物）文首放「一分钟背景」引用块（3 句话 + 跳转研思讲解的站内链接）；对应知识讲解（研思，tag `#知识讲解`）文末「在我的项目里」指回造物条目与 GitHub 仓库。对应关系：tdc-primer↔fpga-tdc-carry4 / dbi-primer↔dbi-reconstruction-sim / qat-memristor-primer↔memristor-qat-cim-sim / snn-surrogate-primer↔eeg-decoding-snn。新工程条目沿用此模式
+- **文章配图**：放 `public/research/figures/`（markdown 里用绝对路径 `/research/figures/*.png`）；出处标注写在图注（alt 文本）里，沿用素材原有格式；「配图建议」类的编辑备注**不进正文**。`.prose img` 样式（居中 / hairline 边框 / 36rem 上限）已在 globals.css
 
 ## 文档地图
 
@@ -211,7 +219,9 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 ## 当前状态 / 待办
 
 - 里程碑 **M0–M6 全部完成**（M6 = 五栏信息架构重构）；站点已上线运行
-- **最新状态与待办以根目录 `HANDOFF.md` 为准**
-- 待办主线：**内容替换**——研思首篇真文章《用延迟反馈「预订」收敛时刻：Deng et al. 2024 论文精读笔记》（zh+en）**已上线**（2026-10-12 21:19 发布，Ting 网页审稿中；占位示例已退役）；影卷 38 条 rating 评分待 Ting 补（条目已全「看完」、时长两位小数）、cover 2 条待 BV 号 / 原速 BPM / 曲谱 / 伴奏、OinO / 游戏设计项目页偏框架、about 页仍是占位；**开篇 en 版已按 zh 定稿重写上线**（2026-10-12）；看板（月度趋势 + 游戏/Token 明细页）已上线（详见根目录 `HANDOFF.md`）
+- **最新状态与待办以根目录 `HANDOFF.md` 为准**（含「待 Ting 决定 / 回填」累积清单）
+- **最新上线批次（2026-10-25）**：八篇工程内容——造物重排为 9 条（新增 EEG / 忆阻器 QAT / TDC-Bench / DBI 四个工程条目，order 3–6）+ 研思 4 篇 `#知识讲解`（与造物双层互链）；**塔罗闪卡参数已按 Ting 调定值上线**（详见塔罗节）；**Token 基线 76 天**、双 Agent 协作守则启用
+- 塔罗牌义：`P:\TAROT` 78 张三层内容已全部填充（2026-10-25 批量），**75 张直觉词待 Ting 回填**后逐张升「已学」，届时站点接入牌义正文
+- 长期待办：EN 版八篇工程内容（Ting 定）、影卷 38 条 rating、cover 2 条字段（BV 号 / BPM / 曲谱 / 伴奏）、OinO / 游戏设计页深化、about 正文、t1 的 Henzler 待补图
 - **内容发布流程（2026-10-12 Ting 拍板）**：「默认直接发布，发布后由我在网页上直接审」——助手完成内容交付后直接 `bash scripts/deploy.sh` 发布，Ting 线上审稿后提修订，修订后再发布；不再等本地审稿
 - **giscus 评论已启用**（App 已装、`enabled=true`）；Discussions 分类用 Announcements
