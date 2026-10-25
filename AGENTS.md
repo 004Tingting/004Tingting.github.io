@@ -3,41 +3,34 @@
 > 项目级系统提示：开工前先读本文件。
 > **开工前先读本文件**，再按需查 `PLAN.md`、`DESIGN.md`、`PITFALLS.md`。
 
-## 双 Agent 协作守则（2026-10-25 定，2026-10-25 13:3x 修订）
+## 双 Agent 协作守则（2026-10-25 定，13:5x 修订：本地双会话模型）
 
-本仓库由**两个会话共同维护**：**A**（本仓库 `P:\personal-site`）与 **B**（克隆于 `P:\personal-site-2`）。分工：
+两个 AI 会话（A / B）**同时打开同一个仓库目录 `P:\personal-site`**——共享工作树、git 状态、未提交改动。协作是**文件级**的，不是 git 分支级的；GitHub 远端只是发布通道，不是交接通道。
+
+分工：
 
 - **A**：站点代码、构建链路、`content/arts/*.json` 数据快照、塔罗学习（`P:\TAROT`）、部署
 - **B**：`content/{research,chronicles,works}` 文章与翻译、about 页内容、稿件审校
-- 交叉地带（`lib/i18n.ts` 文案、AGENTS / README）由 Ting 指派归属，未指派前不改
+- 共享文件（`lib/i18n.ts`、AGENTS / README / HANDOFF / WORKLOG）由 Ting 指派归属，未指派前只读
 
-### 六条硬规则
+### 硬规则
 
-1. **写前同步**：任何写操作（改文件 / commit）前先 `git fetch origin && git rebase origin/main`——保证本地与远端同源，避免覆盖对方提交
-2. **部署互斥**：`bash scripts/deploy.sh` 前确认另一侧没在部署（部署含构建 + 双分支推送，撞车必乱）；部署结束 main 已自动推远端，**但 B 侧若部署，deploy 会把 B 侧的 fetch 副产品快照一起回提交**——B 侧原则上**不部署**，内容改完 push 后通知 A 侧统一发布
-3. **提交消息标注**：`[A]` / `[B]` 开头，如 `[B] content: translate t1 primer to en`。git log 一眼区分作者
-4. **数据文件归属**：`content/arts/*.json` 是构建 fetch 的副产品，**只有 A 侧（部署方）提交**；B 侧 build 时本地会变但**不 add 不 commit**（`git checkout -- content/arts/` 丢弃即可）
-5. **交接通道 = git + HANDOFF.md**：HANDOFF.md 已入库（`.gitignore` 已移除该行）——每次更新后 commit + push，另一侧 fetch 即见。本地专属的 WORKLOG / `.worklog/` 仍不入库，各自维护各自的
-6. **不抢跑**：`git fetch` 发现远端有新 commit 且改动范围与我要做的事重叠时，先 `git log -p origin/main -3` 读对方改动，再决定继续还是让位；拿不准就问 Ting
+1. **域内作业**：只改自己域的文件。要动对方域或共享文件，先经 Ting 同意——同一文件被两个会话先后写入是**文件系统级覆盖**（后写赢，没有 git 冲突保护）
+2. **禁 `git add -A` / `git add .`**：共享工作树里全量 add 会把**对方未完成的改动**一起打包提交。只 `git add <具体文件>`；commit 前 `git status` 过目一遍，发现不是自己的改动就别动
+3. **改完即提交**：一批改动做完立即 commit——长期挂着未提交改动，容易被对方的提交裹挟上线
+4. **部署互斥**：跑 `deploy.sh` 前确认对方没有进行中的改动（build 会把半成品一起构建上线）；部署期间（约 3–5 分钟）对方不写文件
+5. **交接 = 本地文件**：HANDOFF.md / WORKLOG.md 就在共享目录里，**改完即同步**（无需 commit/push 给对方看）；编辑保持短小原子，一次写完，避免长时间半写状态被对方读到
+6. **远端只管发布**：push 前确保本地干净；谁部署谁 push（deploy.sh 已内置）
 
 ### 常用判断
 
 | 场景 | 做法 |
 |---|---|
-| B 改了文章，怎么上线 | B push → 告知 A（或 Ting）→ A 侧 `git pull` + `deploy.sh` |
-| A 在部署中，B 想提交 | 等部署结束（main 推上去了）再 fetch + rebase + 提交 |
-| 两边同时改同一文件 | rebase 冲突时**以内容为准逐行合并**，勿整文件覆盖；解决后 push 前再 fetch 一次 |
-| B 侧要跑 build 本地预览 | 可以（`npm run build` 只读不推），但 fetch 副产品不提交 |
-| Ting 让 B 直接部署 | 例外情况：B 先确认 A 没在部署，部署前 `git pull`，部署后检查 `git status` 把 fetch 副产品留在本地 |
-
-### B 侧初始化（一次性）
-
-```powershell
-git clone https://github.com/004Tingting/004Tingting.github.io.git P:\personal-site-2
-Copy-Item P:\personal-site\.env.local P:\personal-site-2\.env.local   # 密钥不进 git，手动复制
-cd P:\personal-site-2
-# Node 路径：C:\Users\SaiKo\.workbuddy\binaries\node\versions\22.22.2-6\node.exe（无全局 npm，用 npm.cmd 同目录）
-```
+| B 改完文章，怎么上线 | B 只 add 文章文件并 commit → 知会 A → A 直接 `deploy.sh`（同一仓库，无需 pull） |
+| 两边同时改不同文件 | 相安无事；各自 commit（各 add 各的文件） |
+| 两边要改同一文件 | 停——文件级覆盖风险；Ting 裁决谁先谁后 |
+| A 部署中，B 想写文件 | 等部署结束（防半成品进构建） |
+| 发现 git status 有陌生改动 | 是对方的进行中工作——不 add、不 checkout、不 stash，绕开它提交自己的 |
 
 ## 项目是什么
 
