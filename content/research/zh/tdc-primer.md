@@ -30,11 +30,7 @@ FPGA 里现成地躺着这把尺子：CARRY4 进位链。它本是做加法进�
 
 ![量化延迟法示意图（作者绘制）](/research/figures/t1_tdc_schematic.png)
 
-> **【待补图】**：若能取得 S. Henzler《Time-to-Digital Conversion》
-> （Springer 2010）的图书馆版本或授权，此处补充一张**延迟链 TDC 的时序
-> 示意图**（时钟沿、锁存时刻与温度计码输出的对应关系），用于替换或补充
-> 上方自绘示意；同向备选为 Song 等 IEEE TNS 波联合 TDC 论文中的链结构图。
-> 取得后请保留原书图注并按"图源：Henzler, Springer 2010, Fig. N"标注。
+![TDC 操作原理：start 信号的延迟版本在 stop 信号上升沿被采样，输出端形成温度计码（图源：Henzler, Springer 2010, Fig. 2.9）](/research/figures/t1_henzler_fig2_9.png)
 
 ## 常见误区
 

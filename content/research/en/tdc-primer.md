@@ -17,7 +17,7 @@ Two engineering details decide success or failure. The first is **encoding**: th
 
 ![Schematic of the quantized-delay method (drawn by the author)](/research/figures/t1_tdc_schematic.png)
 
-> **[Figure to be added]**: if a library copy or permission for S. Henzler's *Time-to-Digital Conversion* (Springer 2010) can be obtained, a **timing diagram of a delay-line TDC** (clock edges, latching instants, and the corresponding thermometer-code output) goes here, to replace or supplement the self-drawn schematic above; an alternative in the same direction is the chain-structure figure in Song et al.'s wave-union TDC paper in IEEE TNS. Once obtained, keep the original caption and credit it as "Figure source: Henzler, Springer 2010, Fig. N".
+![Operating principle of a TDC: delayed versions of the start signal are sampled on the rising edge of the stop signal, resulting in a thermometer code (Figure source: Henzler, Springer 2010, Fig. 2.9)](/research/figures/t1_henzler_fig2_9.png)
 
 ## Common misconceptions
 
