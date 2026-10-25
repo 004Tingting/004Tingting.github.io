@@ -174,7 +174,7 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 | 跨平台同款 | **`STEAM_MERGE`**（`lib/arts.ts`，zh/en 各一份，Steam 库名 → 手动条目 title）：映射内时长**相加**进手动条目展示、Steam 平台分区与全榜**不单列**；总时长口径不变。当前两条：`Where Winds Meet → 燕云十六声`、`Arknights: Endfield（appid 4732690）→ 明日方舟：终末地` |
 | Steam 查询 | **一律按 appid**（名字搜索对新上架 / 本地化名不可靠）；`GetOwnedGames` 只存有游玩记录的游戏；构建时偶发 `fetch failed` → 单独跑 `node scripts/fetch-monthly.mjs` 补拉 |
 | WeGame / Epic | 人工报数 `wegame-games.json` / `epic-games.json`（Ting 周更，助手改数字） |
-| 影卷 / 运动 / 音律 | 影卷 hours 两位小数（rating 待补）；运动逐次条目（duration 分钟 / distance km 可缺省）；音律 = Last.fm scrobble + 网易云官方时长（`netease-monthly.json`） |
+| 影卷 / 运动 / 音律 | 影卷六类（剧集/番剧/电影/小说/漫画/**演出 concert**，2026-10-25 增：`ScreenType` 四处 + i18n + 四页汇总行），hours 两位小数（rating 待补）；**演出条目口径（2026-10-25 Ting 定）**：date 记演出首日、hours 记 3 小时/场；运动逐次条目（duration 分钟 / distance km 可缺省）；音律 = Last.fm scrobble + 网易云官方时长（`netease-monthly.json`） |
 
 ## 塔罗牌库（造物 TAROT，`/works/tarot`，2026-10-18）
 
@@ -235,8 +235,8 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 
 - 里程碑 **M0–M6 全部完成**（M6 = 五栏信息架构重构）；站点已上线运行
 - **最新状态与待办以根目录 `HANDOFF.md` 为准**（含「待 Ting 决定 / 回填」累积清单）
-- **最新上线批次（2026-10-25）**：八篇工程内容——造物重排为 9 条（新增 EEG / 忆阻器 QAT / TDC-Bench / DBI 四个工程条目，order 3–6）+ 研思 4 篇 `#知识讲解`（与造物双层互链）；**塔罗闪卡参数已按 Ting 调定值上线**（详见塔罗节）；**Token 基线 76 天**、双 Agent 协作守则启用
-- 塔罗牌义：`P:\TAROT` 78 张三层内容已全部填充（2026-10-25 批量），**75 张直觉词待 Ting 回填**后逐张升「已学」，届时站点接入牌义正文
-- 长期待办：EN 版八篇工程内容（Ting 定）、影卷 38 条 rating、cover 2 条字段（BV 号 / BPM / 曲谱 / 伴奏）、OinO / 游戏设计页深化、about 正文、t1 的 Henzler 待补图
+- **最新上线批次（2026-10-25，五批）**：① 八篇工程内容——造物重排为 9 条（EEG / 忆阻器 QAT / TDC-Bench / DBI，order 3–6）+ 研思 4 篇 `#知识讲解`（双层互链）；② **EN 版八篇直译**（en works 补齐 9 条）；③ 影卷新增**「演出」（concert）类型** + 音律联觉 2021–2026 六条；④ 明日方舟动画四部（三部曲 + 鲤氏侦探事务所）；⑤ 演出时长口径 Ting 定 **3 小时/场**、t1 的 Henzler 图结案（Fig. 2.9 裁图入库）——影卷总时长 **175.68h**；**塔罗闪卡参数已按 Ting 调定值上线**（详见塔罗节）；**Token 基线 76 天**、双 Agent 协作守则启用
+- 塔罗牌义：`P:\TAROT` 78 张三层内容已全部填充（2026-10-25 批量），**75 张直觉词待 Ting 回填**（Ting 2026-10-25 明确暂没时间，不催）后逐张升「已学」，届时站点接入牌义正文
+- 长期待办：影卷 48 条 rating（38 + 音律联觉 6 + 明日方舟动画 4，等 Ting 统一给）、cover 2 条字段（BV 号 / BPM / 曲谱 / 伴奏）、OinO / 游戏设计页深化、about 正文
 - **内容发布流程（2026-10-12 Ting 拍板）**：「默认直接发布，发布后由我在网页上直接审」——助手完成内容交付后直接 `bash scripts/deploy.sh` 发布，Ting 线上审稿后提修订，修订后再发布；不再等本地审稿
 - **giscus 评论已启用**（App 已装、`enabled=true`）；Discussions 分类用 Announcements
