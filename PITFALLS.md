@@ -289,6 +289,16 @@
 - **`animation: ... both` 的终态压住 inline style**：关闭时给内容设 `style.opacity = "0"` 无效——`fill-mode: both` 的终态 `opacity: 1` 优先级**高于 inline style**（CSS animation 的优先级规则）。修复：关闭类里先 `animation: none` 再设 opacity（禁止在 fill-mode 动画上直接改 inline 值）
 - **层级口诀**（浮层类动效）：遮罩 < 导航 < 面板 < 飞行元素；一次动效里的「飞行元素」要单独提层，否则任何父级裁剪 / 兄弟层级都会咬它
 
+### 27. PowerShell 写 JSON 带 BOM，`JSON.parse` 静默炸掉（catch 吞错）
+
+- **现象**（2026-10-22 实际踩到）：看板的日用量热力图、12 个月折线、按模型分布、摘要 chips **整块消失**，控制台零报错；`token-monitor-history.json` 明明存在且内容完整
+- **根因**：`dump-hub-history.ps1` 用 `Set-Content -Encoding UTF8` 写文件——**Windows PowerShell 5.1 的 UTF8 恒带 BOM**；而 `JSON.parse` 遇到 BOM 直接抛 `Unexpected token '\uFEFF'`，`lib/arts.ts` 的 `readJsonFile` 把异常 `catch` 成 `return null`——**静态基线整块静默丢失**，只剩实时快照撑着
+- **连坑**：想换 `[System.IO.File]::WriteAllText($p, $s, UTF8Encoding($false))` 绕过——在本机沙箱环境下**根本没写进去**（文件 mtime 不变、内容还是旧的），最后是**交给 node 落盘**才稳定（`writeFileSync` 无 BOM 且必定覆盖）
+- **修复**（两层，都已上）：
+  1. `lib/arts.ts` 的 `readJsonFile`：`raw.replace(/^\uFEFF/, "")` 再 parse——防未来任何带 BOM 的 JSON
+  2. `dump-hub-history.ps1`：改走 node 写文件（脚本内有完整实现）
+- **判别口诀**：`JSON.parse` 读了"存在的文件"却失败 → 先查头三个字节是不是 `EF BB BF`；任何 PS 脚本写 JSON 一律走 node 或显式 UTF8Encoding($false) + 校验落盘
+
 ## 快速修复清单（下次会话遇到直接抄）
 
 ```bash
