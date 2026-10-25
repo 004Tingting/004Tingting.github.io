@@ -427,6 +427,7 @@ export function summarize(
       movie: screen.filter((s) => s.type === "movie").length,
       novel: screen.filter((s) => s.type === "novel").length,
       manga: screen.filter((s) => s.type === "manga").length,
+      concert: screen.filter((s) => s.type === "concert").length,
     },
     screenHours: screen.reduce((s, e) => s + (e.hours ?? 0), 0),
     coverCount: covers.length,
