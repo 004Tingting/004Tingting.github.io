@@ -1,5 +1,5 @@
 ---
-title: Arknights Ambience Synesthesia 2026: We Witness
+title: "Arknights Ambience Synesthesia 2026: We Witness"
 type: concert
 status: completed
 hours: 2.5

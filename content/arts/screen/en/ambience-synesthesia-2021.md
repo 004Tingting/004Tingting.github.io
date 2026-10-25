@@ -1,5 +1,5 @@
 ---
-title: Arknights Ambience Synesthesia 2021: The Debut Concert
+title: "Arknights Ambience Synesthesia 2021: The Debut Concert"
 type: concert
 status: completed
 hours: 2.0
