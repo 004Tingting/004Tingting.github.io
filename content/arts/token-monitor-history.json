@@ -1,5 +1,5 @@
 {
-    "generatedAt":  "2026-10-24T20:35:35Z",
+    "generatedAt":  "2026-10-28T04:14:09Z",
     "capDays":  370,
     "daily":  [
                   {
@@ -1161,7 +1161,7 @@
                   {
                       "date":  "2026-09-10",
                       "tokens":  8921288,
-                      "cost":  0.428052071,
+                      "cost":  0.4302618878,
                       "messages":  46,
                       "activeTimeMs":  774570,
                       "cacheReadTokens":  0,
@@ -1172,7 +1172,7 @@
                       "perClient":  {
                                         "workbuddy":  {
                                                           "tokens":  8921288,
-                                                          "cost":  0.428052071,
+                                                          "cost":  0.4302618878,
                                                           "messages":  46,
                                                           "unclassifiedTokens":  8921288
                                                       }
@@ -1180,7 +1180,7 @@
                       "perModel":  {
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  153454,
-                                                                   "cost":  0.00425274,
+                                                                   "cost":  0.0064625568,
                                                                    "unclassifiedTokens":  153454
                                                                },
                                        "glm-5.3-flash":  {
@@ -1206,7 +1206,7 @@
                   {
                       "date":  "2026-09-11",
                       "tokens":  123491493,
-                      "cost":  2.180112421000001,
+                      "cost":  2.027716693000001,
                       "messages":  214,
                       "activeTimeMs":  7079512,
                       "cacheReadTokens":  0,
@@ -1223,7 +1223,7 @@
                                                      },
                                         "workbuddy":  {
                                                           "tokens":  18889851,
-                                                          "cost":  0.970201777,
+                                                          "cost":  0.8178060490000001,
                                                           "messages":  214,
                                                           "unclassifiedTokens":  18889851
                                                       }
@@ -1236,7 +1236,7 @@
                                                              },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  12722448,
-                                                                   "cost":  0.296686,
+                                                                   "cost":  0.14429027200000005,
                                                                    "unclassifiedTokens":  12722448
                                                                },
                                        "glm-5.2-x":  {
@@ -1388,7 +1388,7 @@
                   {
                       "date":  "2026-09-15",
                       "tokens":  17767216,
-                      "cost":  0.36444007999999983,
+                      "cost":  0.16471683200000004,
                       "messages":  108,
                       "activeTimeMs":  875587,
                       "cacheReadTokens":  0,
@@ -1399,7 +1399,7 @@
                       "perClient":  {
                                         "workbuddy":  {
                                                           "tokens":  17767216,
-                                                          "cost":  0.36444007999999983,
+                                                          "cost":  0.16471683200000004,
                                                           "messages":  108,
                                                           "unclassifiedTokens":  17767216
                                                       }
@@ -1407,7 +1407,7 @@
                       "perModel":  {
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  17767216,
-                                                                   "cost":  0.36444007999999983,
+                                                                   "cost":  0.16471683200000004,
                                                                    "unclassifiedTokens":  17767216
                                                                }
                                    },
@@ -1508,7 +1508,7 @@
                   {
                       "date":  "2026-09-20",
                       "tokens":  36672098,
-                      "cost":  1.1195349200000002,
+                      "cost":  0.9066168272000001,
                       "messages":  185,
                       "activeTimeMs":  2498225,
                       "cacheReadTokens":  0,
@@ -1519,7 +1519,7 @@
                       "perClient":  {
                                         "workbuddy":  {
                                                           "tokens":  36672098,
-                                                          "cost":  1.1195349200000002,
+                                                          "cost":  0.9066168272000001,
                                                           "messages":  185,
                                                           "unclassifiedTokens":  36672098
                                                       }
@@ -1527,7 +1527,7 @@
                       "perModel":  {
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  17838622,
-                                                                   "cost":  0.3854533200000001,
+                                                                   "cost":  0.17253522720000003,
                                                                    "unclassifiedTokens":  17838622
                                                                },
                                        "glm-5.3-flash":  {
@@ -1573,7 +1573,7 @@
                   {
                       "date":  "2026-09-22",
                       "tokens":  33991002,
-                      "cost":  0.8401108399999999,
+                      "cost":  0.5885148231999998,
                       "messages":  107,
                       "activeTimeMs":  1888911,
                       "cacheReadTokens":  0,
@@ -1584,7 +1584,7 @@
                       "perClient":  {
                                         "workbuddy":  {
                                                           "tokens":  33991002,
-                                                          "cost":  0.8401108399999999,
+                                                          "cost":  0.5885148231999998,
                                                           "messages":  107,
                                                           "unclassifiedTokens":  33991002
                                                       }
@@ -1592,7 +1592,7 @@
                       "perModel":  {
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  25517143,
-                                                                   "cost":  0.4911365599999999,
+                                                                   "cost":  0.23954054319999987,
                                                                    "unclassifiedTokens":  25517143
                                                                },
                                        "glm-5.3-flash":  {
@@ -1608,7 +1608,7 @@
                   {
                       "date":  "2026-09-23",
                       "tokens":  250128601,
-                      "cost":  2.733740456000003,
+                      "cost":  2.6944008896000033,
                       "messages":  9,
                       "activeTimeMs":  10844389,
                       "cacheReadTokens":  0,
@@ -1625,7 +1625,7 @@
                                                      },
                                         "workbuddy":  {
                                                           "tokens":  3365471,
-                                                          "cost":  0.05724182,
+                                                          "cost":  0.0179022536,
                                                           "messages":  9,
                                                           "unclassifiedTokens":  3365471
                                                       }
@@ -1638,7 +1638,7 @@
                                                           },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  3365471,
-                                                                   "cost":  0.05724182,
+                                                                   "cost":  0.0179022536,
                                                                    "unclassifiedTokens":  3365471
                                                                }
                                    },
@@ -1713,8 +1713,8 @@
                                                              }
                                    },
                       "tokenIntensity":  4,
-                      "costIntensity":  2,
-                      "intensity":  2
+                      "costIntensity":  1,
+                      "intensity":  1
                   },
                   {
                       "date":  "2026-09-26",
@@ -1722,28 +1722,24 @@
                       "cost":  3.8820599760000034,
                       "messages":  0,
                       "activeTimeMs":  10735269,
-                      "cacheReadTokens":  369399296,
+                      "cacheReadTokens":  0,
                       "cacheWriteTokens":  0,
-                      "outputTokens":  1008229,
-                      "unclassifiedTokens":  0,
-                      "tokenComponentsAvailable":  true,
+                      "outputTokens":  0,
+                      "unclassifiedTokens":  371926823,
+                      "tokenComponentsAvailable":  false,
                       "perClient":  {
                                         "reasonix":  {
                                                          "tokens":  371926823,
                                                          "cost":  3.8820599760000034,
                                                          "messages":  0,
-                                                         "cacheReadTokens":  369399296,
-                                                         "outputTokens":  1008229,
-                                                         "unclassifiedTokens":  0
+                                                         "unclassifiedTokens":  371926823
                                                      }
                                     },
                       "perModel":  {
                                        "deepseek-v4-flash":  {
                                                                  "tokens":  371926823,
                                                                  "cost":  3.8820599760000034,
-                                                                 "cacheReadTokens":  369399296,
-                                                                 "outputTokens":  1008229,
-                                                                 "unclassifiedTokens":  0
+                                                                 "unclassifiedTokens":  371926823
                                                              }
                                    },
                       "tokenIntensity":  2,
@@ -1756,35 +1752,29 @@
                       "cost":  7.465368156000009,
                       "messages":  0,
                       "activeTimeMs":  20673118,
-                      "cacheReadTokens":  823515776,
+                      "cacheReadTokens":  0,
                       "cacheWriteTokens":  0,
-                      "outputTokens":  1718019,
-                      "unclassifiedTokens":  0,
-                      "tokenComponentsAvailable":  true,
+                      "outputTokens":  0,
+                      "unclassifiedTokens":  826775964,
+                      "tokenComponentsAvailable":  false,
                       "perClient":  {
                                         "reasonix":  {
                                                          "tokens":  826775964,
                                                          "cost":  7.465368156000009,
                                                          "messages":  0,
-                                                         "cacheReadTokens":  823515776,
-                                                         "outputTokens":  1718019,
-                                                         "unclassifiedTokens":  0
+                                                         "unclassifiedTokens":  826775964
                                                      }
                                     },
                       "perModel":  {
                                        "deepseek-flash":  {
                                                               "tokens":  253293143,
                                                               "cost":  2.181252708,
-                                                              "cacheReadTokens":  252410368,
-                                                              "outputTokens":  446620,
-                                                              "unclassifiedTokens":  0
+                                                              "unclassifiedTokens":  253293143
                                                           },
                                        "deepseek-v4-flash":  {
                                                                  "tokens":  573482821,
                                                                  "cost":  5.284115448000009,
-                                                                 "cacheReadTokens":  571105408,
-                                                                 "outputTokens":  1271399,
-                                                                 "unclassifiedTokens":  0
+                                                                 "unclassifiedTokens":  573482821
                                                              }
                                    },
                       "tokenIntensity":  4,
@@ -1797,28 +1787,24 @@
                       "cost":  0.404855916,
                       "messages":  0,
                       "activeTimeMs":  2046724,
-                      "cacheReadTokens":  28107136,
+                      "cacheReadTokens":  0,
                       "cacheWriteTokens":  0,
-                      "outputTokens":  162412,
-                      "unclassifiedTokens":  0,
-                      "tokenComponentsAvailable":  true,
+                      "outputTokens":  0,
+                      "unclassifiedTokens":  28407277,
+                      "tokenComponentsAvailable":  false,
                       "perClient":  {
                                         "reasonix":  {
                                                          "tokens":  28407277,
                                                          "cost":  0.404855916,
                                                          "messages":  0,
-                                                         "cacheReadTokens":  28107136,
-                                                         "outputTokens":  162412,
-                                                         "unclassifiedTokens":  0
+                                                         "unclassifiedTokens":  28407277
                                                      }
                                     },
                       "perModel":  {
                                        "deepseek-v4-flash":  {
                                                                  "tokens":  28407277,
                                                                  "cost":  0.404855916,
-                                                                 "cacheReadTokens":  28107136,
-                                                                 "outputTokens":  162412,
-                                                                 "unclassifiedTokens":  0
+                                                                 "unclassifiedTokens":  28407277
                                                              }
                                    },
                       "tokenIntensity":  1,
@@ -2046,7 +2032,7 @@
                   {
                       "date":  "2026-10-06",
                       "tokens":  173089385,
-                      "cost":  4.699187144999998,
+                      "cost":  2.726990860999999,
                       "messages":  433,
                       "activeTimeMs":  9680788,
                       "cacheReadTokens":  171326592,
@@ -2057,7 +2043,7 @@
                       "perClient":  {
                                         "workbuddy":  {
                                                           "tokens":  173089385,
-                                                          "cost":  4.699187144999998,
+                                                          "cost":  2.726990860999999,
                                                           "messages":  433,
                                                           "cacheReadTokens":  171326592,
                                                           "outputTokens":  575828,
@@ -2067,7 +2053,7 @@
                       "perModel":  {
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  167720124,
-                                                                   "cost":  3.0287802599999982,
+                                                                   "cost":  1.0565839759999998,
                                                                    "cacheReadTokens":  166190080,
                                                                    "outputTokens":  515641,
                                                                    "unclassifiedTokens":  0
@@ -2094,7 +2080,7 @@
                   {
                       "date":  "2026-10-07",
                       "tokens":  65973941,
-                      "cost":  1.3888775800000006,
+                      "cost":  0.7278633464,
                       "messages":  436,
                       "activeTimeMs":  5750898,
                       "cacheReadTokens":  64033280,
@@ -2105,7 +2091,7 @@
                       "perClient":  {
                                         "workbuddy":  {
                                                           "tokens":  65973941,
-                                                          "cost":  1.3888775800000006,
+                                                          "cost":  0.7278633464,
                                                           "messages":  436,
                                                           "cacheReadTokens":  64033280,
                                                           "outputTokens":  268568,
@@ -2115,7 +2101,7 @@
                       "perModel":  {
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  61301003,
-                                                                   "cost":  1.1414019400000006,
+                                                                   "cost":  0.48038770640000006,
                                                                    "cacheReadTokens":  60113792,
                                                                    "outputTokens":  220358,
                                                                    "unclassifiedTokens":  0
@@ -2184,7 +2170,7 @@
                   {
                       "date":  "2026-10-09",
                       "tokens":  188971908,
-                      "cost":  7.776305989000002,
+                      "cost":  7.662646563400002,
                       "messages":  1098,
                       "activeTimeMs":  27115797,
                       "cacheReadTokens":  178907923,
@@ -2211,7 +2197,7 @@
                                                      },
                                         "workbuddy":  {
                                                           "tokens":  157183474,
-                                                          "cost":  7.253883913000001,
+                                                          "cost":  7.140224487400001,
                                                           "messages":  1047,
                                                           "cacheReadTokens":  147601427,
                                                           "outputTokens":  1398527,
@@ -2235,7 +2221,7 @@
                                                              },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  45359159,
-                                                                   "cost":  0.8001734039999998,
+                                                                   "cost":  0.6865139783999998,
                                                                    "cacheReadTokens":  44406784,
                                                                    "outputTokens":  275578,
                                                                    "unclassifiedTokens":  0
@@ -2283,7 +2269,7 @@
                   {
                       "date":  "2026-10-10",
                       "tokens":  162475962,
-                      "cost":  7.437871008999998,
+                      "cost":  7.287915726599998,
                       "messages":  651,
                       "activeTimeMs":  14825312,
                       "cacheReadTokens":  153215680,
@@ -2294,7 +2280,7 @@
                       "perClient":  {
                                         "workbuddy":  {
                                                           "tokens":  162223899,
-                                                          "cost":  7.425740588999998,
+                                                          "cost":  7.275785306599998,
                                                           "messages":  641,
                                                           "cacheReadTokens":  152982336,
                                                           "outputTokens":  623124,
@@ -2312,7 +2298,7 @@
                       "perModel":  {
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  28337434,
-                                                                   "cost":  0.652238916,
+                                                                   "cost":  0.5022836336000001,
                                                                    "cacheReadTokens":  27444736,
                                                                    "outputTokens":  244179,
                                                                    "unclassifiedTokens":  0
@@ -2411,13 +2397,13 @@
                                                          }
                                    },
                       "tokenIntensity":  2,
-                      "costIntensity":  2,
-                      "intensity":  2
+                      "costIntensity":  1,
+                      "intensity":  1
                   },
                   {
                       "date":  "2026-10-12",
                       "tokens":  291873584,
-                      "cost":  16.3588806372,
+                      "cost":  16.0200147228,
                       "messages":  1252,
                       "activeTimeMs":  30078364,
                       "cacheReadTokens":  281635776,
@@ -2428,7 +2414,7 @@
                       "perClient":  {
                                         "workbuddy":  {
                                                           "tokens":  50108233,
-                                                          "cost":  8.427089205200003,
+                                                          "cost":  8.415397120400003,
                                                           "messages":  378,
                                                           "cacheReadTokens":  46046784,
                                                           "outputTokens":  454289,
@@ -2444,7 +2430,7 @@
                                                   },
                                         "dsh":  {
                                                     "tokens":  27083762,
-                                                    "cost":  0.606763932,
+                                                    "cost":  0.27959010240000004,
                                                     "messages":  231,
                                                     "cacheReadTokens":  26460672,
                                                     "outputTokens":  290081,
@@ -2482,7 +2468,7 @@
                                                          },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  27159794,
-                                                                   "cost":  0.628376148,
+                                                                   "cost":  0.28951023360000006,
                                                                    "cacheReadTokens":  26468608,
                                                                    "outputTokens":  291343,
                                                                    "unclassifiedTokens":  0
@@ -2496,13 +2482,13 @@
                                                           }
                                    },
                       "tokenIntensity":  2,
-                      "costIntensity":  2,
-                      "intensity":  2
+                      "costIntensity":  1,
+                      "intensity":  1
                   },
                   {
                       "date":  "2026-10-13",
                       "tokens":  281724132,
-                      "cost":  15.754883428,
+                      "cost":  14.7447256536,
                       "messages":  917,
                       "activeTimeMs":  20731619,
                       "cacheReadTokens":  273110976,
@@ -2513,7 +2499,7 @@
                       "perClient":  {
                                         "workbuddy":  {
                                                           "tokens":  115986338,
-                                                          "cost":  13.819150108,
+                                                          "cost":  13.6724349096,
                                                           "messages":  451,
                                                           "cacheReadTokens":  109253056,
                                                           "outputTokens":  489204,
@@ -2521,7 +2507,7 @@
                                                       },
                                         "dsh":  {
                                                     "tokens":  165737794,
-                                                    "cost":  1.9357333199999993,
+                                                    "cost":  1.072290743999999,
                                                     "messages":  466,
                                                     "cacheReadTokens":  163857920,
                                                     "outputTokens":  431804,
@@ -2538,7 +2524,7 @@
                                                    },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  171740710,
-                                                                   "cost":  2.2063284479999994,
+                                                                   "cost":  1.1961706735999988,
                                                                    "cacheReadTokens":  169281408,
                                                                    "outputTokens":  503166,
                                                                    "unclassifiedTokens":  0
@@ -2552,13 +2538,13 @@
                                                           }
                                    },
                       "tokenIntensity":  2,
-                      "costIntensity":  2,
-                      "intensity":  2
+                      "costIntensity":  1,
+                      "intensity":  1
                   },
                   {
                       "date":  "2026-10-14",
                       "tokens":  370815381,
-                      "cost":  16.570205362000003,
+                      "cost":  15.967492822800002,
                       "messages":  1375,
                       "activeTimeMs":  24092932,
                       "cacheReadTokens":  361518592,
@@ -2569,7 +2555,7 @@
                       "perClient":  {
                                         "dsh":  {
                                                     "tokens":  233734160,
-                                                    "cost":  2.8384484399999987,
+                                                    "cost":  2.2357359008000004,
                                                     "messages":  908,
                                                     "cacheReadTokens":  231379840,
                                                     "outputTokens":  826526,
@@ -2587,7 +2573,7 @@
                       "perModel":  {
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  222141483,
-                                                                   "cost":  3.166145735999999,
+                                                                   "cost":  2.563433196800001,
                                                                    "cacheReadTokens":  219251456,
                                                                    "outputTokens":  1092921,
                                                                    "unclassifiedTokens":  0
@@ -2613,11 +2599,6 @@
                                                               "outputTokens":  40089,
                                                               "unclassifiedTokens":  0
                                                           },
-                                       "unknown":  {
-                                                       "tokens":  0,
-                                                       "cost":  2.2204460492503131E-16,
-                                                       "unclassifiedTokens":  0
-                                                   },
                                        "step-5-preview":  {
                                                               "tokens":  92779354,
                                                               "cost":  9.3384903,
@@ -2627,13 +2608,13 @@
                                                           }
                                    },
                       "tokenIntensity":  2,
-                      "costIntensity":  2,
-                      "intensity":  2
+                      "costIntensity":  1,
+                      "intensity":  1
                   },
                   {
                       "date":  "2026-10-15",
                       "tokens":  250541784,
-                      "cost":  6.352509599999999,
+                      "cost":  3.3563413327999987,
                       "messages":  739,
                       "activeTimeMs":  12198883,
                       "cacheReadTokens":  246884864,
@@ -2644,7 +2625,7 @@
                       "perClient":  {
                                         "dsh":  {
                                                     "tokens":  86651209,
-                                                    "cost":  1.6954736400000006,
+                                                    "cost":  0.5611731167999998,
                                                     "messages":  321,
                                                     "cacheReadTokens":  86024704,
                                                     "outputTokens":  400746,
@@ -2652,7 +2633,7 @@
                                                 },
                                         "workbuddy":  {
                                                           "tokens":  163890575,
-                                                          "cost":  4.657035959999999,
+                                                          "cost":  2.7951682159999987,
                                                           "messages":  418,
                                                           "cacheReadTokens":  160860160,
                                                           "outputTokens":  924786,
@@ -2662,7 +2643,7 @@
                       "perModel":  {
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  231398065,
-                                                                   "cost":  4.7404233,
+                                                                   "cost":  1.744255032799999,
                                                                    "cacheReadTokens":  228349184,
                                                                    "outputTokens":  1279804,
                                                                    "unclassifiedTokens":  0
@@ -2688,7 +2669,7 @@
                   {
                       "date":  "2026-10-16",
                       "tokens":  210772987,
-                      "cost":  10.124692354000002,
+                      "cost":  9.841979711600002,
                       "messages":  537,
                       "activeTimeMs":  18159508,
                       "cacheReadTokens":  206306944,
@@ -2707,7 +2688,7 @@
                                                      },
                                         "workbuddy":  {
                                                           "tokens":  50888662,
-                                                          "cost":  5.172693783999999,
+                                                          "cost":  4.889981141599999,
                                                           "messages":  92,
                                                           "cacheReadTokens":  48361024,
                                                           "outputTokens":  178715,
@@ -2732,7 +2713,7 @@
                                                              },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  40083093,
-                                                                   "cost":  0.803042864,
+                                                                   "cost":  0.5203302216,
                                                                    "cacheReadTokens":  38842112,
                                                                    "outputTokens":  147577,
                                                                    "unclassifiedTokens":  0
@@ -2759,7 +2740,7 @@
                   {
                       "date":  "2026-10-17",
                       "tokens":  299282550,
-                      "cost":  10.645710642,
+                      "cost":  9.145426243599998,
                       "messages":  611,
                       "activeTimeMs":  20852582,
                       "cacheReadTokens":  289756992,
@@ -2778,7 +2759,7 @@
                                                      },
                                         "workbuddy":  {
                                                           "tokens":  63003006,
-                                                          "cost":  4.903036600000001,
+                                                          "cost":  4.2896604152,
                                                           "messages":  199,
                                                           "cacheReadTokens":  61106112,
                                                           "outputTokens":  264645,
@@ -2794,7 +2775,7 @@
                                                   },
                                         "dsh":  {
                                                     "tokens":  89194288,
-                                                    "cost":  1.4835937800000005,
+                                                    "cost":  0.5966855664,
                                                     "messages":  149,
                                                     "cacheReadTokens":  87851392,
                                                     "outputTokens":  141801,
@@ -2825,7 +2806,7 @@
                                                          },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  141581885,
-                                                                   "cost":  2.5178596200000016,
+                                                                   "cost":  1.0175752216,
                                                                    "cacheReadTokens":  139272448,
                                                                    "outputTokens":  390392,
                                                                    "unclassifiedTokens":  0
@@ -2838,7 +2819,7 @@
                   {
                       "date":  "2026-10-18",
                       "tokens":  321220140,
-                      "cost":  12.301324929999998,
+                      "cost":  11.829686465999998,
                       "messages":  866,
                       "activeTimeMs":  22833434,
                       "cacheReadTokens":  310438592,
@@ -2849,7 +2830,7 @@
                       "perClient":  {
                                         "workbuddy":  {
                                                           "tokens":  154408172,
-                                                          "cost":  6.39771688,
+                                                          "cost":  5.927915156,
                                                           "messages":  433,
                                                           "cacheReadTokens":  150060352,
                                                           "outputTokens":  507804,
@@ -2865,7 +2846,7 @@
                                                   },
                                         "dsh":  {
                                                     "tokens":  10848,
-                                                    "cost":  0.0034010999999999998,
+                                                    "cost":  0.00156436,
                                                     "messages":  1,
                                                     "outputTokens":  163,
                                                     "unclassifiedTokens":  0
@@ -2874,7 +2855,7 @@
                       "perModel":  {
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  127507817,
-                                                                   "cost":  1.6631425199999996,
+                                                                   "cost":  1.1915040559999999,
                                                                    "cacheReadTokens":  125841920,
                                                                    "outputTokens":  453691,
                                                                    "unclassifiedTokens":  0
@@ -2895,13 +2876,13 @@
                                                    }
                                    },
                       "tokenIntensity":  2,
-                      "costIntensity":  2,
-                      "intensity":  2
+                      "costIntensity":  1,
+                      "intensity":  1
                   },
                   {
                       "date":  "2026-10-19",
                       "tokens":  218277825,
-                      "cost":  6.986884118000002,
+                      "cost":  6.893858563600002,
                       "messages":  866,
                       "activeTimeMs":  19430303,
                       "cacheReadTokens":  209045000,
@@ -2926,7 +2907,7 @@
                                                     },
                                         "workbuddy":  {
                                                           "tokens":  81157631,
-                                                          "cost":  2.1728697420000005,
+                                                          "cost":  2.0798441876000004,
                                                           "messages":  390,
                                                           "cacheReadTokens":  78083328,
                                                           "outputTokens":  478703,
@@ -2951,7 +2932,7 @@
                                                           },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  56940420,
-                                                                   "cost":  1.2552450360000005,
+                                                                   "cost":  1.1622194816000004,
                                                                    "cacheReadTokens":  55101056,
                                                                    "outputTokens":  414255,
                                                                    "unclassifiedTokens":  0
@@ -2997,7 +2978,7 @@
                   {
                       "date":  "2026-10-20",
                       "tokens":  420862928,
-                      "cost":  20.061234487999997,
+                      "cost":  13.705171464000005,
                       "messages":  1814,
                       "activeTimeMs":  54312943,
                       "cacheReadTokens":  371310848,
@@ -3008,7 +2989,7 @@
                       "perClient":  {
                                         "dsh":  {
                                                     "tokens":  108394947,
-                                                    "cost":  12.162364895999993,
+                                                    "cost":  5.8131509920000015,
                                                     "messages":  476,
                                                     "cacheReadTokens":  70546816,
                                                     "outputTokens":  427383,
@@ -3016,7 +2997,7 @@
                                                 },
                                         "workbuddy":  {
                                                           "tokens":  235990586,
-                                                          "cost":  5.081159662000003,
+                                                          "cost":  5.074310542000003,
                                                           "messages":  996,
                                                           "cacheReadTokens":  227505536,
                                                           "outputTokens":  980891,
@@ -3048,7 +3029,7 @@
                                                                   },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  209092469,
-                                                                   "cost":  14.208630815999994,
+                                                                   "cost":  7.852567792000004,
                                                                    "cacheReadTokens":  167294336,
                                                                    "outputTokens":  739361,
                                                                    "unclassifiedTokens":  0
@@ -3062,13 +3043,13 @@
                                                          }
                                    },
                       "tokenIntensity":  2,
-                      "costIntensity":  2,
-                      "intensity":  2
+                      "costIntensity":  1,
+                      "intensity":  1
                   },
                   {
                       "date":  "2026-10-21",
                       "tokens":  917975248,
-                      "cost":  17.15555043244,
+                      "cost":  9.891398970040001,
                       "messages":  2184,
                       "activeTimeMs":  41906799,
                       "cacheReadTokens":  901004292,
@@ -3079,7 +3060,7 @@
                       "perClient":  {
                                         "dsh":  {
                                                     "tokens":  437897767,
-                                                    "cost":  6.678764766999999,
+                                                    "cost":  2.6083163525999993,
                                                     "messages":  1016,
                                                     "cacheReadTokens":  434874564,
                                                     "outputTokens":  613696,
@@ -3087,7 +3068,7 @@
                                                 },
                                         "workbuddy":  {
                                                           "tokens":  461316741,
-                                                          "cost":  9.77260722544,
+                                                          "cost":  6.578904177440001,
                                                           "messages":  1132,
                                                           "cacheReadTokens":  448439040,
                                                           "outputTokens":  1295951,
@@ -3112,14 +3093,14 @@
                                                           },
                                        "deepseek-v4.1-flash-sg":  {
                                                                       "tokens":  553736498,
-                                                                      "cost":  9.26144764,
+                                                                      "cost":  3.118820062400001,
                                                                       "cacheReadTokens":  549865472,
                                                                       "outputTokens":  955148,
                                                                       "unclassifiedTokens":  0
                                                                   },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  184986275,
-                                                                   "cost":  2.279364785439999,
+                                                                   "cost":  1.15784090064,
                                                                    "cacheReadTokens":  178934656,
                                                                    "outputTokens":  389698,
                                                                    "unclassifiedTokens":  0
@@ -3154,13 +3135,13 @@
                                                    }
                                    },
                       "tokenIntensity":  4,
-                      "costIntensity":  2,
-                      "intensity":  2
+                      "costIntensity":  1,
+                      "intensity":  1
                   },
                   {
                       "date":  "2026-10-22",
                       "tokens":  170560756,
-                      "cost":  3.145191872999999,
+                      "cost":  2.686353856199999,
                       "messages":  846,
                       "activeTimeMs":  14413716,
                       "cacheReadTokens":  165995883,
@@ -3171,7 +3152,7 @@
                       "perClient":  {
                                         "dsh":  {
                                                     "tokens":  131355990,
-                                                    "cost":  2.3911000729999987,
+                                                    "cost":  2.337295473799999,
                                                     "messages":  584,
                                                     "cacheReadTokens":  127810411,
                                                     "outputTokens":  400908,
@@ -3179,7 +3160,7 @@
                                                 },
                                         "workbuddy":  {
                                                           "tokens":  39204766,
-                                                          "cost":  0.7540918000000001,
+                                                          "cost":  0.3490583824,
                                                           "messages":  262,
                                                           "cacheReadTokens":  38185472,
                                                           "outputTokens":  164208,
@@ -3196,7 +3177,7 @@
                                                           },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  45058094,
-                                                                   "cost":  0.88701498,
+                                                                   "cost":  0.4281769631999999,
                                                                    "cacheReadTokens":  43728896,
                                                                    "outputTokens":  208671,
                                                                    "unclassifiedTokens":  0
@@ -3216,7 +3197,7 @@
                   {
                       "date":  "2026-10-23",
                       "tokens":  562464198,
-                      "cost":  43.75821582900001,
+                      "cost":  43.38102337620001,
                       "messages":  2005,
                       "activeTimeMs":  55169568,
                       "cacheReadTokens":  368224847,
@@ -3227,7 +3208,7 @@
                       "perClient":  {
                                         "dsh":  {
                                                     "tokens":  302879138,
-                                                    "cost":  28.501615445000002,
+                                                    "cost":  28.483278245,
                                                     "messages":  1279,
                                                     "cacheReadTokens":  113924879,
                                                     "outputTokens":  1229543,
@@ -3241,7 +3222,7 @@
                                                     },
                                         "workbuddy":  {
                                                           "tokens":  176966482,
-                                                          "cost":  1.901111124,
+                                                          "cost":  1.5422558712000007,
                                                           "messages":  502,
                                                           "cacheReadTokens":  175298304,
                                                           "outputTokens":  387631,
@@ -3266,7 +3247,7 @@
                                                                          },
                                        "deepseek-flash":  {
                                                               "tokens":  6134965,
-                                                              "cost":  0.19010196000000001,
+                                                              "cost":  0.19010195999999996,
                                                               "cacheReadTokens":  5749760,
                                                               "outputTokens":  44491,
                                                               "unclassifiedTokens":  0
@@ -3291,14 +3272,14 @@
                                                    },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  177235706,
-                                                                   "cost":  1.932787524,
+                                                                   "cost":  1.5555950712000008,
                                                                    "cacheReadTokens":  175503104,
                                                                    "outputTokens":  399987,
                                                                    "unclassifiedTokens":  0
                                                                },
                                        "glm-5.3-flash":  {
                                                              "tokens":  54577523,
-                                                             "cost":  1.9668970700000006,
+                                                             "cost":  1.9668970700000004,
                                                              "cacheReadTokens":  52273664,
                                                              "outputTokens":  151738,
                                                              "unclassifiedTokens":  0
@@ -3319,31 +3300,31 @@
                                                                 },
                                        "minimax-m3.1-flash":  {
                                                                   "tokens":  10785995,
-                                                                  "cost":  0.302890755,
+                                                                  "cost":  0.30289075500000007,
                                                                   "cacheReadTokens":  9905817,
                                                                   "outputTokens":  49504,
                                                                   "unclassifiedTokens":  0
                                                               }
                                    },
                       "tokenIntensity":  3,
-                      "costIntensity":  4,
-                      "intensity":  4
+                      "costIntensity":  3,
+                      "intensity":  3
                   },
                   {
                       "date":  "2026-10-24",
-                      "tokens":  584405070,
-                      "cost":  41.263770214000004,
-                      "messages":  1771,
-                      "activeTimeMs":  51633253,
-                      "cacheReadTokens":  540723001,
+                      "tokens":  586995023,
+                      "cost":  43.705415908400006,
+                      "messages":  1778,
+                      "activeTimeMs":  51789173,
+                      "cacheReadTokens":  542958969,
                       "cacheWriteTokens":  0,
-                      "outputTokens":  2352253,
+                      "outputTokens":  2356578,
                       "unclassifiedTokens":  0,
                       "tokenComponentsAvailable":  true,
                       "perClient":  {
                                         "dsh":  {
                                                     "tokens":  215525276,
-                                                    "cost":  3.5115398759999996,
+                                                    "cost":  5.831495030399999,
                                                     "messages":  963,
                                                     "cacheReadTokens":  179569529,
                                                     "outputTokens":  1121627,
@@ -3372,11 +3353,11 @@
                                                           "unclassifiedTokens":  0
                                                       },
                                         "zcode":  {
-                                                      "tokens":  139725146,
-                                                      "cost":  34.394566839999996,
-                                                      "messages":  441,
-                                                      "cacheReadTokens":  134312000,
-                                                      "outputTokens":  558668,
+                                                      "tokens":  142315099,
+                                                      "cost":  34.51625738,
+                                                      "messages":  448,
+                                                      "cacheReadTokens":  136547968,
+                                                      "outputTokens":  562993,
                                                       "unclassifiedTokens":  0
                                                   }
                                     },
@@ -3429,16 +3410,16 @@
                                                                   },
                                        "deepseek-v4.1-flash":  {
                                                                    "tokens":  130420398,
-                                                                   "cost":  2.4086106599999995,
+                                                                   "cost":  4.728565814399999,
                                                                    "cacheReadTokens":  109611392,
                                                                    "outputTokens":  355367,
                                                                    "unclassifiedTokens":  0
                                                                },
                                        "glm-5.3-flash":  {
-                                                             "tokens":  37866660,
-                                                             "cost":  1.3861035099999997,
-                                                             "cacheReadTokens":  36686912,
-                                                             "outputTokens":  310097,
+                                                             "tokens":  40456613,
+                                                             "cost":  1.5077940499999998,
+                                                             "cacheReadTokens":  38922880,
+                                                             "outputTokens":  314422,
                                                              "unclassifiedTokens":  0
                                                          },
                                        "glm-5.3":  {
@@ -3450,64 +3431,288 @@
                                                    }
                                    },
                       "tokenIntensity":  3,
+                      "costIntensity":  3,
+                      "intensity":  3
+                  },
+                  {
+                      "date":  "2026-10-25",
+                      "tokens":  770139593,
+                      "cost":  66.72253236199998,
+                      "messages":  3153,
+                      "activeTimeMs":  82207474,
+                      "cacheReadTokens":  742601788,
+                      "cacheWriteTokens":  0,
+                      "outputTokens":  3369681,
+                      "unclassifiedTokens":  0,
+                      "tokenComponentsAvailable":  true,
+                      "perClient":  {
+                                        "dsh":  {
+                                                    "tokens":  116767448,
+                                                    "cost":  25.192483301999996,
+                                                    "messages":  344,
+                                                    "cacheReadTokens":  107553980,
+                                                    "outputTokens":  227735,
+                                                    "unclassifiedTokens":  0
+                                                },
+                                        "workbuddy":  {
+                                                          "tokens":  300156288,
+                                                          "cost":  5.629498059999996,
+                                                          "messages":  736,
+                                                          "cacheReadTokens":  296578432,
+                                                          "outputTokens":  914658,
+                                                          "unclassifiedTokens":  0
+                                                      },
+                                        "zcode":  {
+                                                      "tokens":  353215857,
+                                                      "cost":  35.90055099999999,
+                                                      "messages":  2073,
+                                                      "cacheReadTokens":  338469376,
+                                                      "outputTokens":  2227288,
+                                                      "unclassifiedTokens":  0
+                                                  }
+                                    },
+                      "perModel":  {
+                                       "minimax-m3.1-flash":  {
+                                                                  "tokens":  34605417,
+                                                                  "cost":  0.7905660300000001,
+                                                                  "cacheReadTokens":  32710332,
+                                                                  "outputTokens":  34774,
+                                                                  "unclassifiedTokens":  0
+                                                              },
+                                       "deepseek-v4.1-flash-sg":  {
+                                                                      "tokens":  185870927,
+                                                                      "cost":  3.254117299999997,
+                                                                      "cacheReadTokens":  184211456,
+                                                                      "outputTokens":  467098,
+                                                                      "unclassifiedTokens":  0
+                                                                  },
+                                       "deepseek-v4.1-flash":  {
+                                                                   "tokens":  106043742,
+                                                                   "cost":  2.4765304519999987,
+                                                                   "cacheReadTokens":  100397056,
+                                                                   "outputTokens":  328297,
+                                                                   "unclassifiedTokens":  0
+                                                               },
+                                       "glm-5.3-flash":  {
+                                                             "tokens":  287703568,
+                                                             "cost":  10.765502459999997,
+                                                             "cacheReadTokens":  275770112,
+                                                             "outputTokens":  2006802,
+                                                             "unclassifiedTokens":  0
+                                                         },
+                                       "glm-5.3":  {
+                                                       "tokens":  155915939,
+                                                       "cost":  49.43581612,
+                                                       "cacheReadTokens":  149512832,
+                                                       "outputTokens":  532710,
+                                                       "unclassifiedTokens":  0
+                                                   }
+                                   },
+                      "tokenIntensity":  4,
                       "costIntensity":  4,
                       "intensity":  4
                   },
                   {
-                      "date":  "2026-10-25",
-                      "tokens":  95557028,
-                      "cost":  13.21434414,
-                      "messages":  295,
-                      "activeTimeMs":  4833622,
-                      "cacheReadTokens":  93518336,
+                      "date":  "2026-10-26",
+                      "tokens":  202625171,
+                      "cost":  5.764633994199999,
+                      "messages":  528,
+                      "activeTimeMs":  11882972,
+                      "cacheReadTokens":  197019011,
                       "cacheWriteTokens":  0,
-                      "outputTokens":  254502,
+                      "outputTokens":  491700,
+                      "unclassifiedTokens":  0,
+                      "tokenComponentsAvailable":  true,
+                      "perClient":  {
+                                        "dsh":  {
+                                                    "tokens":  12381461,
+                                                    "cost":  0.3744645149999999,
+                                                    "messages":  18,
+                                                    "cacheReadTokens":  11007171,
+                                                    "outputTokens":  7141,
+                                                    "unclassifiedTokens":  0
+                                                },
+                                        "workbuddy":  {
+                                                          "tokens":  51654833,
+                                                          "cost":  0.7627267191999999,
+                                                          "messages":  212,
+                                                          "cacheReadTokens":  50475008,
+                                                          "outputTokens":  188756,
+                                                          "unclassifiedTokens":  0
+                                                      },
+                                        "zcode":  {
+                                                      "tokens":  138588877,
+                                                      "cost":  4.627442759999998,
+                                                      "messages":  298,
+                                                      "cacheReadTokens":  135536832,
+                                                      "outputTokens":  295803,
+                                                      "unclassifiedTokens":  0
+                                                  }
+                                    },
+                      "perModel":  {
+                                       "minimax-m3.1-flash":  {
+                                                                  "tokens":  12381461,
+                                                                  "cost":  0.3744645149999999,
+                                                                  "cacheReadTokens":  11007171,
+                                                                  "outputTokens":  7141,
+                                                                  "unclassifiedTokens":  0
+                                                              },
+                                       "deepseek-v4.1-flash-sg":  {
+                                                                      "tokens":  1345605,
+                                                                      "cost":  0.0324637,
+                                                                      "cacheReadTokens":  1300480,
+                                                                      "outputTokens":  12300,
+                                                                      "unclassifiedTokens":  0
+                                                                  },
+                                       "deepseek-v4.1-flash":  {
+                                                                   "tokens":  50309228,
+                                                                   "cost":  0.7302630191999999,
+                                                                   "cacheReadTokens":  49174528,
+                                                                   "outputTokens":  176456,
+                                                                   "unclassifiedTokens":  0
+                                                               },
+                                       "glm-5.3-flash":  {
+                                                             "tokens":  138588877,
+                                                             "cost":  4.627442759999998,
+                                                             "cacheReadTokens":  135536832,
+                                                             "outputTokens":  295803,
+                                                             "unclassifiedTokens":  0
+                                                         }
+                                   },
+                      "tokenIntensity":  1,
+                      "costIntensity":  1,
+                      "intensity":  1
+                  },
+                  {
+                      "date":  "2026-10-27",
+                      "tokens":  518884795,
+                      "cost":  18.4425179068,
+                      "messages":  1941,
+                      "activeTimeMs":  62044120,
+                      "cacheReadTokens":  497746304,
+                      "cacheWriteTokens":  0,
+                      "outputTokens":  2268111,
                       "unclassifiedTokens":  0,
                       "tokenComponentsAvailable":  true,
                       "perClient":  {
                                         "workbuddy":  {
-                                                          "tokens":  55232402,
-                                                          "cost":  1.0288163399999994,
-                                                          "messages":  223,
-                                                          "cacheReadTokens":  54544896,
-                                                          "outputTokens":  200911,
+                                                          "tokens":  97793029,
+                                                          "cost":  0.5822812968000001,
+                                                          "messages":  211,
+                                                          "cacheReadTokens":  97000704,
+                                                          "outputTokens":  228403,
                                                           "unclassifiedTokens":  0
                                                       },
                                         "zcode":  {
-                                                      "tokens":  40324626,
-                                                      "cost":  12.185527800000001,
-                                                      "messages":  72,
-                                                      "cacheReadTokens":  38973440,
-                                                      "outputTokens":  53591,
+                                                      "tokens":  421091766,
+                                                      "cost":  17.860236609999998,
+                                                      "messages":  1730,
+                                                      "cacheReadTokens":  400745600,
+                                                      "outputTokens":  2039708,
                                                       "unclassifiedTokens":  0
                                                   }
                                     },
                       "perModel":  {
                                        "deepseek-v4.1-flash-sg":  {
-                                                                      "tokens":  1602035,
-                                                                      "cost":  0.027919419999999997,
-                                                                      "cacheReadTokens":  1586304,
-                                                                      "outputTokens":  3888,
+                                                                      "tokens":  20270998,
+                                                                      "cost":  0.14978420800000006,
+                                                                      "cacheReadTokens":  19856640,
+                                                                      "outputTokens":  29915,
                                                                       "unclassifiedTokens":  0
                                                                   },
                                        "deepseek-v4.1-flash":  {
-                                                                   "tokens":  53630367,
-                                                                   "cost":  1.0008969199999995,
-                                                                   "cacheReadTokens":  52958592,
-                                                                   "outputTokens":  197023,
+                                                                   "tokens":  77522031,
+                                                                   "cost":  0.43249708880000004,
+                                                                   "cacheReadTokens":  77144064,
+                                                                   "outputTokens":  198488,
                                                                    "unclassifiedTokens":  0
                                                                },
+                                       "glm-5.3-flash":  {
+                                                             "tokens":  414779548,
+                                                             "cost":  15.52448409,
+                                                             "cacheReadTokens":  394948288,
+                                                             "outputTokens":  2003847,
+                                                             "unclassifiedTokens":  0
+                                                         },
                                        "glm-5.3":  {
-                                                       "tokens":  40324626,
-                                                       "cost":  12.185527800000001,
-                                                       "cacheReadTokens":  38973440,
-                                                       "outputTokens":  53591,
+                                                       "tokens":  6312218,
+                                                       "cost":  2.3357525199999998,
+                                                       "cacheReadTokens":  5797312,
+                                                       "outputTokens":  35861,
                                                        "unclassifiedTokens":  0
                                                    }
                                    },
-                      "tokenIntensity":  1,
+                      "tokenIntensity":  3,
                       "costIntensity":  2,
                       "intensity":  2
+                  },
+                  {
+                      "date":  "2026-10-28",
+                      "tokens":  413605728,
+                      "cost":  16.61285237080001,
+                      "messages":  1128,
+                      "activeTimeMs":  29053324,
+                      "cacheReadTokens":  406279552,
+                      "cacheWriteTokens":  0,
+                      "outputTokens":  1054183,
+                      "unclassifiedTokens":  0,
+                      "tokenComponentsAvailable":  true,
+                      "perClient":  {
+                                        "workbuddy":  {
+                                                          "tokens":  190492568,
+                                                          "cost":  1.2733393007999996,
+                                                          "messages":  412,
+                                                          "cacheReadTokens":  188036224,
+                                                          "outputTokens":  498925,
+                                                          "unclassifiedTokens":  0
+                                                      },
+                                        "zcode":  {
+                                                      "tokens":  223113160,
+                                                      "cost":  15.33951307000001,
+                                                      "messages":  716,
+                                                      "cacheReadTokens":  218243328,
+                                                      "outputTokens":  555258,
+                                                      "unclassifiedTokens":  0
+                                                  }
+                                    },
+                      "perModel":  {
+                                       "deepseek-v4.1-flash-sg":  {
+                                                                      "tokens":  90015112,
+                                                                      "cost":  0.6199773551999999,
+                                                                      "cacheReadTokens":  88563456,
+                                                                      "outputTokens":  159925,
+                                                                      "unclassifiedTokens":  0
+                                                                  },
+                                       "deepseek-v4.1-flash":  {
+                                                                   "tokens":  100477456,
+                                                                   "cost":  0.6533619455999997,
+                                                                   "cacheReadTokens":  99472768,
+                                                                   "outputTokens":  339000,
+                                                                   "unclassifiedTokens":  0
+                                                               },
+                                       "glm-5.3-flash":  {
+                                                             "tokens":  201432572,
+                                                             "cost":  6.478575510000004,
+                                                             "cacheReadTokens":  199101952,
+                                                             "outputTokens":  445497,
+                                                             "unclassifiedTokens":  0
+                                                         },
+                                       "glm-5.3":  {
+                                                       "tokens":  21680588,
+                                                       "cost":  8.860937560000002,
+                                                       "cacheReadTokens":  19141376,
+                                                       "outputTokens":  109761,
+                                                       "unclassifiedTokens":  0
+                                                   },
+                                       "unknown":  {
+                                                       "tokens":  0,
+                                                       "cost":  3.5527136788005009E-15,
+                                                       "unclassifiedTokens":  0
+                                                   }
+                                   },
+                      "tokenIntensity":  2,
+                      "costIntensity":  1,
+                      "intensity":  1
                   }
               ],
     "monthly":  [
@@ -3594,12 +3799,12 @@
                     {
                         "month":  "2026-09",
                         "tokens":  2991165778,
-                        "cost":  47.60917242200001,
+                        "cost":  46.7554095868,
                         "activeTimeMs":  130159186,
                         "perClient":  {
                                           "workbuddy":  {
                                                             "tokens":  340679547,
-                                                            "cost":  15.798807793999998,
+                                                            "cost":  14.9450449588,
                                                             "messages":  2201
                                                         },
                                           "reasonix":  {
@@ -3647,7 +3852,7 @@
                                                                           },
                                          "deepseek-v4.1-flash":  {
                                                                      "tokens":  77364354,
-                                                                     "cost":  1.5992105199999997
+                                                                     "cost":  0.7454476848
                                                                  },
                                          "deepseek-flash":  {
                                                                 "tokens":  675021690,
@@ -3657,14 +3862,14 @@
                     },
                     {
                         "month":  "2026-10",
-                        "tokens":  6345888889,
-                        "cost":  281.39277890864,
-                        "activeTimeMs":  531583351,
+                        "tokens":  8158177101,
+                        "cost":  353.51398136084003,
+                        "activeTimeMs":  712093539,
                         "perClient":  {
                                           "workbuddy":  {
-                                                            "tokens":  2803135348,
-                                                            "cost":  113.03154501364,
-                                                            "messages":  10189
+                                                            "tokens":  3387999664,
+                                                            "cost":  109.91011685364,
+                                                            "messages":  11537
                                                         },
                                           "reasonix":  {
                                                            "tokens":  269730896,
@@ -3672,14 +3877,14 @@
                                                            "messages":  0
                                                        },
                                           "dsh":  {
-                                                      "tokens":  1872895034,
-                                                      "cost":  62.78236406899999,
-                                                      "messages":  6709
+                                                      "tokens":  2002043943,
+                                                      "cost":  76.3610885012,
+                                                      "messages":  7071
                                                   },
                                           "zcode":  {
-                                                        "tokens":  1400127611,
-                                                        "cost":  102.41904838999997,
-                                                        "messages":  4860
+                                                        "tokens":  2498402598,
+                                                        "cost":  164.08295456999997,
+                                                        "messages":  9612
                                                     },
                                           "unknown":  {
                                                           "tokens":  0,
@@ -3689,24 +3894,24 @@
                                       },
                         "perModel":  {
                                          "glm-5.3-flash":  {
-                                                               "tokens":  1815435302,
-                                                               "cost":  67.82774961999999
+                                                               "tokens":  2860529820,
+                                                               "cost":  105.34544497999998
                                                            },
                                          "deepseek-v4-flash":  {
                                                                    "tokens":  269730896,
                                                                    "cost":  3.1598214359999997
                                                                },
                                          "deepseek-v4.1-flash":  {
-                                                                     "tokens":  2281476894,
-                                                                     "cost":  47.47742820144
+                                                                     "tokens":  2562198984,
+                                                                     "cost":  34.583130783040005
                                                                  },
                                          "deepseek-flash":  {
                                                                 "tokens":  238897995,
                                                                 "cost":  2.839425143999999
                                                             },
                                          "glm-5.3":  {
-                                                         "tokens":  261207808,
-                                                         "cost":  88.95091676
+                                                         "tokens":  404791927,
+                                                         "cost":  137.39789516000002
                                                      },
                                          "hy4-preview":  {
                                                              "tokens":  2792639,
@@ -3726,15 +3931,15 @@
                                                              },
                                          "unknown":  {
                                                          "tokens":  0,
-                                                         "cost":  2.19824158875781E-14
+                                                         "cost":  2.5313084961453569E-14
                                                      },
                                          "step-5-preview":  {
                                                                 "tokens":  255462174,
                                                                 "cost":  26.793324700000003
                                                             },
                                          "deepseek-v4.1-flash-sg":  {
-                                                                        "tokens":  636769302,
-                                                                        "cost":  10.752054436000002
+                                                                        "tokens":  932669909,
+                                                                        "cost":  8.637850001599999
                                                                     },
                                          "cline-free/minimax-m3.1-flash":  {
                                                                                "tokens":  6109053,
@@ -3749,8 +3954,8 @@
                                                                "cost":  29.22138259
                                                            },
                                          "minimax-m3.1-flash":  {
-                                                                    "tokens":  80817277,
-                                                                    "cost":  1.6150223849999998
+                                                                    "tokens":  127804155,
+                                                                    "cost":  2.7800529299999996
                                                                 },
                                          "global:deepseek-v4.1-flash":  {
                                                                             "tokens":  186,
@@ -3768,14 +3973,14 @@
                     }
                 ],
     "summary":  {
-                    "totalTokens":  10699123484,
-                    "totalCost":  366.46730699364,
-                    "activeDays":  76,
-                    "currentStreak":  21,
-                    "longestStreak":  21,
+                    "totalTokens":  12511411696,
+                    "totalCost":  437.73474661064006,
+                    "activeDays":  79,
+                    "currentStreak":  24,
+                    "longestStreak":  24,
                     "peakDayTokens":  917975248,
                     "favoriteModel":  "deepseek-v4-flash",
-                    "messages":  24644,
-                    "activeTimeMs":  748698624
+                    "messages":  31106,
+                    "activeTimeMs":  929208812
                 }
 }
