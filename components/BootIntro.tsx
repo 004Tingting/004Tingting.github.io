@@ -4,8 +4,9 @@ import { useEffect, useLayoutEffect, useState } from "react";
 
 /** 每个会话只播一次的 sessionStorage 键（新标签页视为新会话） */
 const SESSION_KEY = "boot-intro-played";
-/** 与 globals.css 的 .boot-overlay 动画总时长对齐（含淡出尾巴） */
-const COVER_MS = 2650;
+/** 与 globals.css 的 .boot-overlay 动画总时长对齐（含淡出尾巴）：
+ *  五稿时序 = 0–1s 四个大字逐字落定 → 1s 起字雨（约 2.4–4.4s 收尾）→ 3.4s 起整层淡出 */
+const COVER_MS = 4600;
 /** 点击跳过后的快淡时长（与 .boot-skip 的 0.26s 对齐） */
 const SKIP_MS = 280;
 
@@ -37,14 +38,12 @@ type Props = {
 };
 
 /**
- * 开场动画（杂志封面式，2026-10-29 四稿）：纸色全屏覆盖 → 竖排大标题自下而上逐字
- * 浮现（完全不透明，标题列按视口高度撑到 ~66vh、z-20 压在散字之上）+ hairline 竖线
- * 同高生长 + 压脚小字；**散字雨铺满全屏**（字号 17–38px 六档，四稿整体上调约 30%）——
- * 取材自导航五词（必须包含）/ 兴趣 / 文章标题，淡入淡出、大小不一、位置与节奏由
- * 词面哈希确定性排出（词池跑两遍加密铺满）。动画全程纯 CSS 时间线（globals.css 的
- * boot-\* 段）——无 JS 时约 2.6s 后覆盖层自行隐藏不挡内容；本组件只负责「播不播」
- * （sessionStorage 每会话一次 / prefers-reduced-motion 不播）、锁滚动、点击跳过与
- * 到点卸载。层级 z-[90]。
+ * 开场动画（杂志封面式，2026-10-29 五稿）：纸色全屏覆盖 → **先**竖排大标题逐字落定
+ * （0–1s，~66vh 高、z-20 压顶）→ **后**字雨升起：散字与主标题同向竖排（vertical-rl），
+ * 从全屏各处下落、淡入淡出，字号六档错落有致（17–35px；导航词 26–38px），词池跑
+ * 两遍加密铺满；3.4s 起整层淡出，全程约 4.6s。动画为纯 CSS 时间线（globals.css 的
+ * boot-\* 段）——无 JS 时到点自行隐藏不挡内容；本组件只负责「播不播」（sessionStorage
+ * 每会话一次 / prefers-reduced-motion 不播）、锁滚动、点击跳过与到点卸载。层级 z-[90]。
  */
 export default function BootIntro({ letters, caption, words, anchorCount = 5 }: Props) {
   const [show, setShow] = useState(true);
@@ -93,10 +92,11 @@ export default function BootIntro({ letters, caption, words, anchorCount = 5 }: 
       aria-hidden="true"
       onClick={() => setSkipping(true)}
     >
-      {/* 散字层：下落字雨铺满全屏——词池跑两遍（盐值错开、延迟错相），位置全部由
-          词面哈希推出：左定位词从 --wx 向右排，.side-r 词以 right 定位从右缘向左排，
-          两侧合起来覆盖整个视口；纵向 -8%..77% 加落距直达底缘。长词少量出界由
-          覆盖层 overflow-hidden 裁掉。 */}
+      {/* 散字层：字雨分两拍——四个大字先落定（约 1s），字雨随后才起（wdelay 基线 1s）。
+          竖排（writing-mode: vertical-rl，与主标题同向成「雨丝」）；竖排后词宽只剩单字，
+          横向 3%..94% 全幅起排、纵向 -6%..72% 加落距直达底缘。字号六档按
+          「哈希偏移 + 序号轮转」错开，保证相邻字雨大小错落有致；词池跑两遍
+          （盐值错开、延迟错相）加密铺满，长词出界由覆盖层 overflow-hidden 裁掉。 */}
       <div className="boot-words" aria-hidden="true">
         {[...words, ...words].map((w, i) => {
           const anchor = i < anchorCount;
@@ -104,16 +104,16 @@ export default function BootIntro({ letters, caption, words, anchorCount = 5 }: 
           const pick = (salt: number, mod: number) => hash(w, salt + pass * 97) % mod;
           const sizes = anchor ? ANCHOR_SIZES : WORD_SIZES;
           const style = {
-            "--wx": `${3 + pick(13, 58)}%`,
-            "--wy": `${-8 + pick(17, 86)}%`,
-            "--ws": `${sizes[pick(19, sizes.length)]}px`,
+            "--wx": `${3 + pick(13, 92)}%`,
+            "--wy": `${-6 + pick(17, 79)}%`,
+            "--ws": `${sizes[(pick(19, 3) + i) % sizes.length]}px`,
             "--wo": ((anchor ? 75 + pick(23, 16) : 45 + pick(23, 41)) / 100).toFixed(2),
             "--wdur": `${((170 + pick(29, 70)) / 100).toFixed(2)}s`,
-            "--wdelay": `${((pick(31, 100) + pass * 40) / 100).toFixed(2)}s`,
+            "--wdelay": `${(100 + pick(31, 70) + pass * 30) / 100}s`,
             "--wf": `${18 + pick(37, 15)}vh`,
           } as React.CSSProperties;
           return (
-            <span key={`${i}-${w}`} className={`boot-word${pick(11, 2) === 1 ? " side-r" : ""}`} style={style}>
+            <span key={`${i}-${w}`} className="boot-word" style={style}>
               {w}
             </span>
           );
