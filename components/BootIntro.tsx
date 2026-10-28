@@ -9,9 +9,10 @@ const COVER_MS = 2650;
 /** 点击跳过后的快淡时长（与 .boot-skip 的 0.26s 对齐） */
 const SKIP_MS = 280;
 
-/** 散字字号档位：导航词（anchor）只取大三档，其余词全档位（Ting 要求大小不一） */
-const ANCHOR_SIZES = [20, 24, 28];
-const WORD_SIZES = [13, 15, 17, 20, 24, 28];
+/** 散字字号档位：导航词（anchor）只取大三档，其余词全档位（Ting 要求大小不一）；
+ *  四稿整体上调约 30%——标题 z-20 压顶，小字再大也不遮挡四字主标题 */
+const ANCHOR_SIZES = [26, 32, 38];
+const WORD_SIZES = [17, 20, 23, 27, 31, 35];
 
 /** SSR（无 window）用 useEffect 占位避免告警；客户端用 useLayoutEffect 在首绘前移除，
  *  回访（已播过 / 减弱动效）不会闪一帧纸色覆盖层 */
@@ -36,13 +37,14 @@ type Props = {
 };
 
 /**
- * 开场动画（杂志封面式，2026-10-29 三稿）：纸色全屏覆盖 → 竖排大标题自下而上逐字
- * 浮现（完全不透明，标题列按视口高度撑到 ~66vh）+ hairline 竖线同高生长 + 压脚小字；
- * **散字雨铺满全屏**——取材自导航五词（必须包含）/ 兴趣 / 文章标题，淡入淡出、大小
- * 不一、位置与节奏由词面哈希确定性排出（词池跑两遍加密铺满）。动画全程纯 CSS 时间线
- * （globals.css 的 boot-\* 段）——无 JS 时约 2.6s 后覆盖层自行隐藏不挡内容；本组件
- * 只负责「播不播」（sessionStorage 每会话一次 / prefers-reduced-motion 不播）、锁滚动、
- * 点击跳过与到点卸载。层级 z-[90]。
+ * 开场动画（杂志封面式，2026-10-29 四稿）：纸色全屏覆盖 → 竖排大标题自下而上逐字
+ * 浮现（完全不透明，标题列按视口高度撑到 ~66vh、z-20 压在散字之上）+ hairline 竖线
+ * 同高生长 + 压脚小字；**散字雨铺满全屏**（字号 17–38px 六档，四稿整体上调约 30%）——
+ * 取材自导航五词（必须包含）/ 兴趣 / 文章标题，淡入淡出、大小不一、位置与节奏由
+ * 词面哈希确定性排出（词池跑两遍加密铺满）。动画全程纯 CSS 时间线（globals.css 的
+ * boot-\* 段）——无 JS 时约 2.6s 后覆盖层自行隐藏不挡内容；本组件只负责「播不播」
+ * （sessionStorage 每会话一次 / prefers-reduced-motion 不播）、锁滚动、点击跳过与
+ * 到点卸载。层级 z-[90]。
  */
 export default function BootIntro({ letters, caption, words, anchorCount = 5 }: Props) {
   const [show, setShow] = useState(true);
@@ -118,7 +120,7 @@ export default function BootIntro({ letters, caption, words, anchorCount = 5 }: 
         })}
       </div>
 
-      <div className="relative z-10 flex items-stretch gap-5 md:gap-7">
+      <div className="relative z-20 flex items-stretch gap-5 md:gap-7">
         <div className="boot-rule w-px bg-rule" />
         <div className="flex flex-col items-center font-serif text-[14vh] font-bold leading-[1.18] text-ink">
           {chars.map((ch, i) => (
