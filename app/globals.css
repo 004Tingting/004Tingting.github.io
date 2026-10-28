@@ -213,6 +213,81 @@ body {
 }
 
 
+/* ---------- 开场动画（BootIntro.tsx，2026-10-28）：杂志封面式启动 ----------
+   纸色全屏覆盖 → 竖排标题自下而上逐字浮现（底部字先出，延迟由 --d 逐字递减）
+   + hairline 竖线自底生长 → 等宽压脚小字 → 整层淡出。
+   纯 CSS 时间线驱动：无 JS 时约 2s 后覆盖层自行隐藏（visibility 收尾），不挡内容；
+   JS 只负责「播不播」（sessionStorage 每会话一次 / reduced-motion 不播）、锁滚动与到点卸载。
+   层级 z-[90]：高于导航（z-50）与塔罗面板（z-60/70），播完即卸载。 */
+.boot-overlay {
+  animation: boot-cover 2.05s ease 0s both;
+}
+.boot-skip {
+  /* 点击跳过：同一条淡出曲线压缩到 0.26s（写在 .boot-overlay 之后以覆盖之） */
+  animation: boot-cover 0.26s ease 0s both;
+}
+@keyframes boot-cover {
+  0%,
+  72% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.boot-char {
+  animation: boot-char-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+@keyframes boot-char-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.boot-rule {
+  transform-origin: bottom;
+  animation: boot-rule-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+@keyframes boot-rule-in {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.boot-caption {
+  animation: boot-caption-in 0.45s ease-out 0.75s both;
+}
+@keyframes boot-caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* 减弱动效：JS 侧本就不渲染；此块只兜「reduced-motion + 无 JS」——覆盖层快速消失，文字不逐字动 */
+  .boot-overlay,
+  .boot-skip {
+    animation: boot-cover 0.2s ease 0s both;
+  }
+  .boot-char,
+  .boot-rule,
+  .boot-caption {
+    animation: none;
+  }
+}
+
 /* 歌单 iframe（srcdoc）：深色模式经 color-scheme 传播进 iframe 文档 */
 .playlist-frame {
   color-scheme: light;
