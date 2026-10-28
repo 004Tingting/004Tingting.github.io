@@ -1,0 +1,4 @@
+User-Agent: *
+Allow: /
+
+Sitemap: https://004tingting.github.io/sitemap.xml

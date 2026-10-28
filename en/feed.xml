@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ting · A Personal Journal</title>
+    <link>https://004tingting.github.io/en/</link>
+    <description>Ting's personal journal at the crossing of control research, engineering and design.</description>
+    <language>en</language>
+    <atom:link href="https://004tingting.github.io/en/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Teaching Neurons to Fire: Surrogate Gradients and Spiking Networks in EEG Decoding</title>
+      <link>https://004tingting.github.io/en/research/snn-surrogate-primer/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/en/research/snn-surrogate-primer/</guid>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Spikes are 0 or 1; gradients are continuous — once surrogate gradients bridge that gap, spiking networks overtake their ANN prototypes on EEG decoding.</description>
+    </item>
+    <item>
+      <title>Booking the Settling Time with Delayed Feedback: Notes on Deng et al. (2024)</title>
+      <link>https://004tingting.github.io/en/research/deng-2024-predefined-time-tsmc/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/en/research/deng-2024-predefined-time-tsmc/</guid>
+      <pubDate>Mon, 12 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Close reading of Deng et al., IEEE TAC 2024: a nonsingular predefined-time terminal sliding mode control built on artificial-delay sliding surfaces, with notes on relevance to CAV control.</description>
+    </item>
+    <item>
+      <title>In the Beginning: Why I'm Starting a Personal Journal</title>
+      <link>https://004tingting.github.io/en/chronicles/hello-world/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/en/chronicles/hello-world/</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Who I am, what the five sections hold, and why I'm building this site.</description>
+    </item>
+    <item>
+      <title>Why 4-bit Doesn't Lose Accuracy: Quantization-Aware Training and Device Non-idealities</title>
+      <link>https://004tingting.github.io/en/research/qat-memristor-primer/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/en/research/qat-memristor-primer/</guid>
+      <pubDate>Wed, 15 Jan 2025 00:00:00 GMT</pubDate>
+      <description>Stuff a neural network into analog hardware and the weights drop to 4 bits with noise always lurking — QAT's answer: don't face the hardware after training ends; live inside it during training.</description>
+    </item>
+    <item>
+      <title>Slicing Time into 72 ps: The Quantized-Delay Method and Coarse-Fine Counting in TDCs</title>
+      <link>https://004tingting.github.io/en/research/tdc-primer/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/en/research/tdc-primer/</guid>
+      <pubDate>Tue, 15 Oct 2024 00:00:00 GMT</pubDate>
+      <description>What do you do when a stopwatch's ticks are too coarse? Turn the carry chain into a delay ruler ticked cell by cell, then pair coarse and fine counting to stretch the range to milliseconds — that is the whole secret of TDCs on FPGAs.</description>
+    </item>
+    <item>
+      <title>Two 5 GHz Halves Make One 10 GHz Whole: Bandwidth Interleaving and the Overlap-Band Notch</title>
+      <link>https://004tingting.github.io/en/research/dbi-primer/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/en/research/dbi-primer/</guid>
+      <pubDate>Sun, 15 Sep 2024 00:00:00 GMT</pubDate>
+      <description>One ADC can't capture 10 GHz, so use two, each capturing half, then stitch — the hard part is not the split but the notch tens of dB deep at the seam: where it comes from and how to remove it.</description>
+    </item>
+  </channel>
+</rss>
