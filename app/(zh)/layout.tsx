@@ -8,6 +8,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import Analytics from "@/components/Analytics";
 import BootIntro from "@/components/BootIntro";
+import { getBootWords } from "@/lib/boot-words";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -54,7 +55,7 @@ export default function ZhLayout({ children }: { children: ReactNode }) {
         <Analytics />
       </head>
       <body className="bg-paper font-sans text-ink antialiased">
-        <BootIntro letters="个人杂志" caption="TING" />
+        <BootIntro letters="个人杂志" caption="TING" words={getBootWords("zh")} />
         <Nav lang="zh" />
         <main>{children}</main>
         <Footer lang="zh" />

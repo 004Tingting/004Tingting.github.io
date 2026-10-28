@@ -213,14 +213,15 @@ body {
 }
 
 
-/* ---------- 开场动画（BootIntro.tsx，2026-10-28）：杂志封面式启动 ----------
-   纸色全屏覆盖 → 竖排标题自下而上逐字浮现（底部字先出，延迟由 --d 逐字递减）
-   + hairline 竖线自底生长 → 等宽压脚小字 → 整层淡出。
-   纯 CSS 时间线驱动：无 JS 时约 2s 后覆盖层自行隐藏（visibility 收尾），不挡内容；
+/* ---------- 开场动画（BootIntro.tsx，2026-10-28 二稿）：杂志封面式启动 ----------
+   纸色全屏覆盖 → 竖排大标题自下而上逐字浮现（底部字先出，延迟由 --d 逐字递减，
+   终态完全不透明）+ hairline 竖线自底生长 + 压脚小字；**周围散字下落**（导航五词 +
+   兴趣 + 文章标题，淡入淡出、大小不一）→ 整层淡出。
+   纯 CSS 时间线驱动：无 JS 时约 2.6s 后覆盖层自行隐藏（visibility 收尾），不挡内容；
    JS 只负责「播不播」（sessionStorage 每会话一次 / reduced-motion 不播）、锁滚动与到点卸载。
    层级 z-[90]：高于导航（z-50）与塔罗面板（z-60/70），播完即卸载。 */
 .boot-overlay {
-  animation: boot-cover 2.05s ease 0s both;
+  animation: boot-cover 2.6s ease 0s both;
 }
 .boot-skip {
   /* 点击跳过：同一条淡出曲线压缩到 0.26s（写在 .boot-overlay 之后以覆盖之） */
@@ -275,15 +276,65 @@ body {
     transform: none;
   }
 }
+
+/* 散字层（Ting 2026-10-28 二稿）：围绕竖排大标题的「下落字雨」——位置 / 字号 /
+   峰值不透明度 / 时长 / 延迟 / 落距全部由词面哈希推出的 CSS 变量驱动（组件侧确定性
+   排字，无随机源，SSR 与 hydration 一致）；20%–60% 区间保持峰值、两头淡入淡出，
+   缓动带一点重力感。侧带避开中央标题列；.side-r 用 right 定位防止长词溢出右缘。 */
+.boot-words {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.boot-word {
+  position: absolute;
+  left: var(--wx, 10%);
+  top: var(--wy, 0%);
+  font-family: var(--font-serif);
+  font-size: var(--ws, 16px);
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  animation: boot-word var(--wdur, 2s) cubic-bezier(0.3, 0, 0.7, 1) var(--wdelay, 0s) both;
+}
+.boot-word.side-r {
+  left: auto;
+  right: var(--wx, 10%);
+}
+@keyframes boot-word {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: var(--wo, 0.8);
+  }
+  60% {
+    opacity: var(--wo, 0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(var(--wf, 24vh));
+  }
+}
+/* 小屏减半密度，避免散字与居中大标题挤在一起 */
+@media (max-width: 639px) {
+  .boot-words .boot-word:nth-child(even) {
+    display: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  /* 减弱动效：JS 侧本就不渲染；此块只兜「reduced-motion + 无 JS」——覆盖层快速消失，文字不逐字动 */
+  /* 减弱动效：JS 侧本就不渲染；此块只兜「reduced-motion + 无 JS」——覆盖层快速消失，
+     文字不逐字动；散字基础态 opacity 0，关动画即整层不可见 */
   .boot-overlay,
   .boot-skip {
     animation: boot-cover 0.2s ease 0s both;
   }
   .boot-char,
   .boot-rule,
-  .boot-caption {
+  .boot-caption,
+  .boot-word {
     animation: none;
   }
 }

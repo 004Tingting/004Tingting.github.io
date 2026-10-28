@@ -8,6 +8,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import Analytics from "@/components/Analytics";
 import BootIntro from "@/components/BootIntro";
+import { getBootWords } from "@/lib/boot-words";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -53,7 +54,7 @@ export default function EnLayout({ children }: { children: ReactNode }) {
         <Analytics />
       </head>
       <body className="bg-paper font-sans text-ink antialiased">
-        <BootIntro letters="TING" caption="PERSONAL JOURNAL" />
+        <BootIntro letters="TING" caption="PERSONAL JOURNAL" words={getBootWords("en")} />
         <Nav lang="en" />
         <main>{children}</main>
         <Footer lang="en" />
