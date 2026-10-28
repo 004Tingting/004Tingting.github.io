@@ -36,12 +36,13 @@ type Props = {
 };
 
 /**
- * 开场动画（杂志封面式，2026-10-28 二稿）：纸色全屏覆盖 → 竖排大标题自下而上逐字
- * 浮现（完全不透明）+ hairline 竖线自底生长 + 压脚小字；**周围散字下落**——取材自
- * 导航五词（必须包含）/ 兴趣 / 文章标题，淡入淡出、大小不一、位置与节奏由词面哈希
- * 确定性排出。动画全程纯 CSS 时间线（globals.css 的 boot-\* 段）——无 JS 时约 2.6s
- * 后覆盖层自行隐藏不挡内容；本组件只负责「播不播」（sessionStorage 每会话一次 /
- * prefers-reduced-motion 不播）、锁滚动、点击跳过与到点卸载。层级 z-[90]。
+ * 开场动画（杂志封面式，2026-10-29 三稿）：纸色全屏覆盖 → 竖排大标题自下而上逐字
+ * 浮现（完全不透明，标题列按视口高度撑到 ~66vh）+ hairline 竖线同高生长 + 压脚小字；
+ * **散字雨铺满全屏**——取材自导航五词（必须包含）/ 兴趣 / 文章标题，淡入淡出、大小
+ * 不一、位置与节奏由词面哈希确定性排出（词池跑两遍加密铺满）。动画全程纯 CSS 时间线
+ * （globals.css 的 boot-\* 段）——无 JS 时约 2.6s 后覆盖层自行隐藏不挡内容；本组件
+ * 只负责「播不播」（sessionStorage 每会话一次 / prefers-reduced-motion 不播）、锁滚动、
+ * 点击跳过与到点卸载。层级 z-[90]。
  */
 export default function BootIntro({ letters, caption, words, anchorCount = 5 }: Props) {
   const [show, setShow] = useState(true);
@@ -90,19 +91,23 @@ export default function BootIntro({ letters, caption, words, anchorCount = 5 }: 
       aria-hidden="true"
       onClick={() => setSkipping(true)}
     >
-      {/* 散字层：下落字雨，排字参数全部由词面哈希推出 */}
+      {/* 散字层：下落字雨铺满全屏——词池跑两遍（盐值错开、延迟错相），位置全部由
+          词面哈希推出：左定位词从 --wx 向右排，.side-r 词以 right 定位从右缘向左排，
+          两侧合起来覆盖整个视口；纵向 -8%..77% 加落距直达底缘。长词少量出界由
+          覆盖层 overflow-hidden 裁掉。 */}
       <div className="boot-words" aria-hidden="true">
-        {words.map((w, i) => {
+        {[...words, ...words].map((w, i) => {
           const anchor = i < anchorCount;
-          const pick = (salt: number, mod: number) => hash(w, salt) % mod;
+          const pass = i >= words.length ? 1 : 0;
+          const pick = (salt: number, mod: number) => hash(w, salt + pass * 97) % mod;
           const sizes = anchor ? ANCHOR_SIZES : WORD_SIZES;
           const style = {
-            "--wx": `${4 + pick(13, 24)}%`,
-            "--wy": `${-25 + pick(17, 70)}%`,
+            "--wx": `${3 + pick(13, 58)}%`,
+            "--wy": `${-8 + pick(17, 86)}%`,
             "--ws": `${sizes[pick(19, sizes.length)]}px`,
             "--wo": ((anchor ? 75 + pick(23, 16) : 45 + pick(23, 41)) / 100).toFixed(2),
             "--wdur": `${((170 + pick(29, 70)) / 100).toFixed(2)}s`,
-            "--wdelay": `${(pick(31, 100) / 100).toFixed(2)}s`,
+            "--wdelay": `${((pick(31, 100) + pass * 40) / 100).toFixed(2)}s`,
             "--wf": `${18 + pick(37, 15)}vh`,
           } as React.CSSProperties;
           return (
@@ -115,7 +120,7 @@ export default function BootIntro({ letters, caption, words, anchorCount = 5 }: 
 
       <div className="relative z-10 flex items-stretch gap-5 md:gap-7">
         <div className="boot-rule w-px bg-rule" />
-        <div className="flex flex-col items-center font-serif text-6xl font-bold leading-[1.18] text-ink md:text-7xl">
+        <div className="flex flex-col items-center font-serif text-[14vh] font-bold leading-[1.18] text-ink">
           {chars.map((ch, i) => (
             <span
               key={`${i}-${ch}`}
