@@ -2,9 +2,23 @@
   "source": "netease",
   "playlistId": 13345990688,
   "name": "FaMic",
-  "trackCount": 315,
-  "updatedAt": "2026-10-28T08:31:54.815Z",
+  "trackCount": 316,
+  "updatedAt": "2026-11-06T18:51:11.271Z",
   "tracks": [
+    {
+      "id": 413077430,
+      "name": "GOEMON",
+      "artist": "Suck a Stew Dry",
+      "album": "N/A",
+      "duration": 249893
+    },
+    {
+      "id": 3447018270,
+      "name": "途",
+      "artist": "林震Linz",
+      "album": "途",
+      "duration": 178599
+    },
     {
       "id": 3440114174,
       "name": "破晓黎明 feat.初音ミク",
@@ -407,7 +421,7 @@
     {
       "id": 1970303952,
       "name": "QUEEN",
-      "artist": "kanaria / GUMI",
+      "artist": "Kanaria / GUMI",
       "album": "QUEEN",
       "duration": 141882
     },
@@ -536,13 +550,6 @@
       "artist": "ヒトリエ",
       "album": "ai/SOlate",
       "duration": 271743
-    },
-    {
-      "id": 518904426,
-      "name": "Umbrella (Matte Remix)",
-      "artist": "Matte / Ember Island",
-      "album": "Umbrella (Matte Remix)",
-      "duration": 285676
     },
     {
       "id": 500410102,
