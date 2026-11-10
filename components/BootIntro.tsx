@@ -16,6 +16,10 @@ const SKIP_MS = 280;
 const ANCHOR_SIZES = [42, 51, 60];
 const WORD_SIZES = [25, 30, 35, 41, 47, 52];
 
+/** 字雨开关（Ting 2026-11-10：先关掉，只看五个字的大标题效果）。
+ *  改回 true 即恢复原字雨，无需其它改动。 */
+const SHOW_WORD_RAIN = false;
+
 /** SSR（无 window）用 useEffect 占位避免告警；客户端用 useLayoutEffect 在首绘前移除，
  *  回访（已播过 / 减弱动效）不会闪一帧纸色覆盖层 */
 const isoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -30,6 +34,8 @@ function hash(s: string, salt: number): number {
 type Props = {
   /** 竖排逐字浮现的主标题（zh：个人杂志；en：TING） */
   letters: string;
+  /** 品牌字（如 "Ting"）：给了就走 2026-11-10 的「参考样张」排版——brand 竖排 + 四字错落 + 米字格 */
+  brand?: string;
   /** 压脚小字（等宽 + 朱红点，与 Kicker 体例一致） */
   caption: string;
   /** 散字池（导航五词 + 兴趣 + 文章/造物标题，构建时由 lib/boot-words.ts 取材） */
@@ -47,7 +53,7 @@ type Props = {
  * boot-\* 段）——无 JS 时到点自行隐藏不挡内容；本组件只负责「播不播」（sessionStorage
  * 每会话一次 / prefers-reduced-motion 不播）、锁滚动、点击跳过与到点卸载。层级 z-[90]。
  */
-export default function BootIntro({ letters, caption, words, anchorCount = 5 }: Props) {
+export default function BootIntro({ letters, brand, caption, words, anchorCount = 5 }: Props) {
   const [show, setShow] = useState(true);
   const [skipping, setSkipping] = useState(false);
 
@@ -98,47 +104,88 @@ export default function BootIntro({ letters, caption, words, anchorCount = 5 }: 
           竖排（writing-mode: vertical-rl，与主标题同向成「雨丝」）；竖排后词宽只剩单字，
           横向 3%..94% 全幅起排、纵向 -6%..72% 加落距直达底缘。字号六档按
           「哈希偏移 + 序号轮转」错开，保证相邻字雨大小错落有致；词池跑两遍
-          （盐值错开、延迟错相）加密铺满，长词出界由覆盖层 overflow-hidden 裁掉。 */}
-      <div className="boot-words" aria-hidden="true">
-        {[...words, ...words].map((w, i) => {
-          const anchor = i < anchorCount;
-          const pass = i >= words.length ? 1 : 0;
-          const pick = (salt: number, mod: number) => hash(w, salt + pass * 97) % mod;
-          const sizes = anchor ? ANCHOR_SIZES : WORD_SIZES;
-          const style = {
-            "--wx": `${3 + pick(13, 92)}%`,
-            "--wy": `${-6 + pick(17, 79)}%`,
-            "--ws": `${sizes[(pick(19, 3) + i) % sizes.length]}px`,
-            "--wo": ((anchor ? 55 + pick(23, 41) : 22 + pick(23, 57)) / 100).toFixed(2),
-            "--wdur": `${((170 + pick(29, 70)) / 100).toFixed(2)}s`,
-            "--wdelay": `${(100 + pick(31, 70) + pass * 30) / 100}s`,
-            "--wf": `${18 + pick(37, 15)}vh`,
-          } as React.CSSProperties;
-          return (
-            <span key={`${i}-${w}`} className="boot-word" style={style}>
-              {w}
-            </span>
-          );
-        })}
-      </div>
-
-      <div className="relative z-20 flex items-stretch gap-5 md:gap-7">
-        <div className="boot-rule w-px bg-rule" />
-        <div className="flex flex-col items-center font-serif text-[14vh] font-bold leading-[1.18] text-ink">
-          {chars.map((ch, i) => (
-            <span
-              key={`${i}-${ch}`}
-              className="boot-char"
-              style={{ "--d": 140 + (n - 1 - i) * 110 } as React.CSSProperties}
-            >
-              {ch}
-            </span>
-          ))}
+          （盐值错开、延迟错相）加密铺满，长词出界由覆盖层 overflow-hidden 裁掉。
+          2026-11-10：SHOW_WORD_RAIN=false 暂时整层不渲染，先看标题排版。 */}
+      {SHOW_WORD_RAIN && (
+        <div className="boot-words" aria-hidden="true">
+          {[...words, ...words].map((w, i) => {
+            const anchor = i < anchorCount;
+            const pass = i >= words.length ? 1 : 0;
+            const pick = (salt: number, mod: number) => hash(w, salt + pass * 97) % mod;
+            const sizes = anchor ? ANCHOR_SIZES : WORD_SIZES;
+            const style = {
+              "--wx": `${3 + pick(13, 92)}%`,
+              "--wy": `${-6 + pick(17, 79)}%`,
+              "--ws": `${sizes[(pick(19, 3) + i) % sizes.length]}px`,
+              "--wo": ((anchor ? 55 + pick(23, 41) : 22 + pick(23, 57)) / 100).toFixed(2),
+              "--wdur": `${((170 + pick(29, 70)) / 100).toFixed(2)}s`,
+              "--wdelay": `${(100 + pick(31, 70) + pass * 30) / 100}s`,
+              "--wf": `${18 + pick(37, 15)}vh`,
+            } as React.CSSProperties;
+            return (
+              <span key={`${i}-${w}`} className="boot-word" style={style}>
+                {w}
+              </span>
+            );
+          })}
         </div>
-      </div>
-      <p className="boot-caption absolute bottom-10 z-10 font-mono text-xs tracking-[0.35em] text-muted md:bottom-14 md:text-sm">
-        <span className="text-accent">·</span> {caption}
-      </p>
+      )}
+
+      {brand ? (
+        /* 标题排版（2026-11-10，参考 Ting 给的「横撇竖点折」样张）：
+           brand 竖排（样张右上拼音列的位置）+ 四字错落：个最大压左上、人小一号落左下、
+           杂大一号偏右、志入米字格压右下；朱红小印点在左下；整体轻微旋转错位。 */
+        <div className="boot-title relative z-20">
+          <span className="boot-brand" style={{ "--d": 120 } as React.CSSProperties}>
+            {brand}
+          </span>
+          <span
+            className="boot-char boot-glyph boot-glyph-ge"
+            style={{ "--d": 200 } as React.CSSProperties}
+          >
+            {chars[0]}
+          </span>
+          <span
+            className="boot-char boot-glyph boot-glyph-ren"
+            style={{ "--d": 380 } as React.CSSProperties}
+          >
+            {chars[1]}
+          </span>
+          <span
+            className="boot-char boot-glyph boot-glyph-za"
+            style={{ "--d": 290 } as React.CSSProperties}
+          >
+            {chars[2]}
+          </span>
+          <span className="boot-grid" style={{ "--d": 520 } as React.CSSProperties}>
+            <span className="boot-grid-char">{chars[3]}</span>
+          </span>
+          <span className="boot-seal" style={{ "--d": 680 } as React.CSSProperties}>
+            T
+          </span>
+        </div>
+      ) : (
+        <div className="relative z-20 flex items-stretch gap-5 md:gap-7">
+          <div className="boot-rule w-px bg-rule" />
+          <div className="flex flex-col items-center font-serif text-[14vh] font-bold leading-[1.18] text-ink">
+            {chars.map((ch, i) => (
+              <span
+                key={`${i}-${ch}`}
+                className="boot-char"
+                style={{ "--d": 140 + (n - 1 - i) * 110 } as React.CSSProperties}
+              >
+                {ch}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* 压脚 caption 只在旧版竖排（无 brand）时出现；2026-11-10 试验版只保留五个字，画面更干净 */}
+      {!brand && (
+        <p className="boot-caption absolute bottom-10 z-10 font-mono text-xs tracking-[0.35em] text-muted md:bottom-14 md:text-sm">
+          <span className="text-accent">·</span> {caption}
+        </p>
+      )}
     </div>
   );
 }

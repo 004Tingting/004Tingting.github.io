@@ -277,6 +277,127 @@ body {
   }
 }
 
+/* 标题排版（2026-11-10，参考 Ting 给的「横撇竖点折」样张）：
+   品牌字竖排（样张右上拼音列位）+ 四字大小错落叠压 + 「志」入米字格 + 朱红小印。
+   尺寸统一用 --u = min(1vh, 1.32vw) 作等比基准——窄屏自动缩，不溢出。
+   旋转用独立的 rotate 属性（不是 transform），避免被 boot-char-in 的 to{transform} 抹掉。 */
+.boot-title {
+  --u: min(1vh, 1.32vw);
+  position: relative;
+  width: calc(66 * var(--u));
+  height: calc(78 * var(--u));
+}
+.boot-brand {
+  position: absolute;
+  right: calc(-1 * var(--u));
+  top: 0;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: var(--font-mono);
+  font-size: calc(2.6 * var(--u));
+  letter-spacing: 0.28em;
+  color: var(--color-muted);
+  animation: boot-char-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+.boot-glyph {
+  position: absolute;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  line-height: 0.82;
+  color: var(--color-ink);
+}
+.boot-glyph-ge {
+  left: 0;
+  top: calc(-4 * var(--u));
+  font-size: calc(35 * var(--u));
+  rotate: -2deg;
+}
+.boot-glyph-ren {
+  left: calc(4 * var(--u));
+  top: calc(37 * var(--u));
+  font-size: calc(16 * var(--u));
+  rotate: 1.5deg;
+}
+.boot-glyph-za {
+  left: calc(33 * var(--u));
+  top: calc(19 * var(--u));
+  font-size: calc(27 * var(--u));
+  rotate: 2deg;
+}
+/* 米字格：外框实线 + 十字虚线 + 两条对角线（参考样张里「折」字的练习格） */
+.boot-grid {
+  position: absolute;
+  left: calc(36 * var(--u));
+  top: calc(50 * var(--u));
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+  border: 1px solid var(--color-ink);
+  background-image:
+    linear-gradient(
+      to bottom right,
+      transparent calc(50% - 0.5px),
+      var(--color-rule) calc(50% - 0.5px),
+      var(--color-rule) calc(50% + 0.5px),
+      transparent calc(50% + 0.5px)
+    ),
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 0.5px),
+      var(--color-rule) calc(50% - 0.5px),
+      var(--color-rule) calc(50% + 0.5px),
+      transparent calc(50% + 0.5px)
+    );
+  rotate: -1.2deg;
+  animation: boot-char-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+.boot-grid::before,
+.boot-grid::after {
+  content: "";
+  position: absolute;
+}
+.boot-grid::before {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--color-rule);
+}
+.boot-grid::after {
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--color-rule);
+}
+.boot-grid-char {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: calc(22 * var(--u));
+  line-height: 1;
+  color: var(--color-ink);
+}
+/* 朱红小印（样张左下的印章位） */
+.boot-seal {
+  position: absolute;
+  left: 0;
+  top: calc(54 * var(--u));
+  display: grid;
+  place-items: center;
+  width: calc(4.6 * var(--u));
+  height: calc(4.6 * var(--u));
+  background: var(--color-accent);
+  color: var(--color-paper);
+  font-family: var(--font-serif);
+  font-size: calc(2.4 * var(--u));
+  rotate: -5deg;
+  animation: boot-char-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+
 /* 散字层（Ting 2026-10-29 五稿；2026-11-10 字号再放大 + 透明度拉开）：字雨分两拍——四个大字先落定（0–1s），字雨 1s 起
    （组件侧 wdelay 基线 1s + 哈希 0–0.7s + 两遍错相 0.3s）；字与主标题同向**竖排**
    （writing-mode: vertical-rl，竖列如雨丝）。位置 / 字号 / 峰值不透明度 / 时长 /

@@ -55,7 +55,7 @@ export default function ZhLayout({ children }: { children: ReactNode }) {
         <Analytics />
       </head>
       <body className="bg-paper font-sans text-ink antialiased">
-        <BootIntro letters="个人杂志" caption="TING" words={getBootWords("zh")} />
+        <BootIntro brand="Ting" letters="个人杂志" caption="TING" words={getBootWords("zh")} />
         <Nav lang="zh" />
         <main>{children}</main>
         <Footer lang="zh" />
