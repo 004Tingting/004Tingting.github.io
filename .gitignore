@@ -7,6 +7,8 @@
 
 # workspace memory (local only)
 /.worklog/
+# 视觉工具产物（本地截图 / 裁剪，勿入库）
+/.dsh-vision-toolkit/
 
 # working docs at root (local only, kept out of the public repo)
 /HANDOFF.md
