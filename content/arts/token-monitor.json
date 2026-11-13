@@ -1,7 +1,7 @@
 {
   "source": "token-monitor-hub",
-  "fetchedAt": "2026-11-10T02:44:10.555Z",
-  "hubUpdatedAt": "2026-11-10T02:44:10.360Z",
+  "fetchedAt": "2026-11-13T02:47:40.099Z",
+  "hubUpdatedAt": "2026-11-13T02:47:39.941Z",
   "staleAfterMs": 600000,
   "deviceCount": 2,
   "periods": {
