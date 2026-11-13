@@ -132,35 +132,35 @@ export default function BootIntro({ letters, brand, caption, words, anchorCount 
       )}
 
       {brand ? (
-        /* 标题排版（2026-11-10，参考 Ting 给的「横撇竖点折」样张）：
-           brand 竖排（样张右上拼音列的位置）+ 四字错落：个最大压左上、人小一号落左下、
-           杂大一号偏右、志入米字格压右下；朱红小印点在左下；整体轻微旋转错位。 */
+        /* 标题排版（2026-11-10 二版，按 Ting 红框实测比例重排）：
+           五个框取自参考图（A 最大左上 / B 右中 / C 中间 / D 左下 / E 底部米字格），
+           归一化到 51u × 78u 版心；个→A、人→B、杂→C、Ting→D（竖排小签）、志→E（格内）。 */
         <div className="boot-title relative z-20">
           <span className="boot-brand" style={{ "--d": 120 } as React.CSSProperties}>
             {brand}
           </span>
           <span
             className="boot-char boot-glyph boot-glyph-ge"
-            style={{ "--d": 200 } as React.CSSProperties}
+            style={{ "--d": 240 } as React.CSSProperties}
           >
             {chars[0]}
           </span>
           <span
             className="boot-char boot-glyph boot-glyph-ren"
-            style={{ "--d": 380 } as React.CSSProperties}
+            style={{ "--d": 360 } as React.CSSProperties}
           >
             {chars[1]}
           </span>
           <span
             className="boot-char boot-glyph boot-glyph-za"
-            style={{ "--d": 290 } as React.CSSProperties}
+            style={{ "--d": 480 } as React.CSSProperties}
           >
             {chars[2]}
           </span>
-          <span className="boot-grid" style={{ "--d": 520 } as React.CSSProperties}>
+          <span className="boot-grid" style={{ "--d": 600 } as React.CSSProperties}>
             <span className="boot-grid-char">{chars[3]}</span>
           </span>
-          <span className="boot-seal" style={{ "--d": 680 } as React.CSSProperties}>
+          <span className="boot-seal" style={{ "--d": 720 } as React.CSSProperties}>
             T
           </span>
         </div>
