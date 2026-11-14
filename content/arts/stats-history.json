@@ -1,6 +1,6 @@
 {
   "source": "stats-history",
-  "updatedAt": "2026-11-13T06:50:18.568Z",
+  "updatedAt": "2026-11-14T03:13:47.115Z",
   "snapshots": {
     "2026-10": {
       "games": {
@@ -591,8 +591,8 @@
         "Old Yellow Bricks|Arctic Monkeys": 0,
         "your trip|chilldspot": 0,
         "ユラレル|みゆな": 0,
-        "Teeth|5 Seconds of Summer": 0,
-        "听书|暗杠": 0
+        "晴る|ヨルシカ": 0,
+        "花に亡霊|ヨルシカ": 0
       },
       "steam": {
         "Left 4 Dead": 19.8,
@@ -754,6 +754,7 @@
         "ELDEN RING": 150.7,
         "Tiny Bunny: Prologue": 0.3,
         "Microsoft Flight Simulator (2020)": 7.1,
+        "The Life and Suffering of Sir Brante": 1.7,
         "PrprLive": 4,
         "Guild Wars 2®": 0.5,
         "GWENT: The Witcher Card Game": 3.1,
@@ -763,6 +764,7 @@
         "VTube Studio": 0.3,
         "Mass Effect™ Legendary Edition": 0.7,
         "雀魂麻将(MahjongSoul)": 13,
+        "Idle Slayer – Incremental RPG": 0.4,
         "Street Fighter™ 6": 83.3,
         "Dyson Sphere Program": 281.9,
         "Virtual Cottage": 107.1,
@@ -822,7 +824,7 @@
         "Battlefield™ 6": 0.3,
         "Buckshot Roulette": 0.3,
         "8AM": 3,
-        "Slay the Spire 2": 60.8,
+        "Slay the Spire 2": 61.8,
         "Cats": 8.4,
         "City Lights Love Bites Season 0": 1.4,
         "Morimens": 67.4,
