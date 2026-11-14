@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ting · 个人杂志</title>
+    <link>https://004tingting.github.io/</link>
+    <description>Ting 的个人杂志：控制科学研究、工程实践与设计的交叉地带。</description>
+    <language>zh-CN</language>
+    <atom:link href="https://004tingting.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>让神经元学会发放：代理梯度与脑电解码中的脉冲网络</title>
+      <link>https://004tingting.github.io/research/snn-surrogate-primer/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/research/snn-surrogate-primer/</guid>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 GMT</pubDate>
+      <description>脉冲是 0 或 1，梯度却是连续的——代理梯度填平这道鸿沟之后，脉冲网络在脑电解码上反超了它的 ANN 原型。</description>
+    </item>
+    <item>
+      <title>用延迟反馈「预订」收敛时刻：Deng et al. 2024 论文精读笔记</title>
+      <link>https://004tingting.github.io/research/deng-2024-predefined-time-tsmc/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/research/deng-2024-predefined-time-tsmc/</guid>
+      <pubDate>Mon, 12 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Deng 等 2024 年发表于 IEEE TAC 的论文精读，用带人工时延的平滑滑模面构造非奇异预定时间终端滑模控制，附对 CAV 场景的适用性分析。</description>
+    </item>
+    <item>
+      <title>写在开始：为什么我要办一份「个人杂志」</title>
+      <link>https://004tingting.github.io/chronicles/hello-world/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/chronicles/hello-world/</guid>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 GMT</pubDate>
+      <description>我是谁、五栏各是干什么的，以及办这个站的一点私心。</description>
+    </item>
+    <item>
+      <title>4-bit 为什么不掉点：量化感知训练与器件非理想性</title>
+      <link>https://004tingting.github.io/research/qat-memristor-primer/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/research/qat-memristor-primer/</guid>
+      <pubDate>Wed, 15 Jan 2025 00:00:00 GMT</pubDate>
+      <description>把神经网络塞进模拟硬件，权重只剩 4-bit、噪声随时来搅局——量化感知训练的答案是：别在训练结束后才面对硬件，训练时就住在里面。</description>
+    </item>
+    <item>
+      <title>把时间切成 72 ps：TDC 的量化延迟法与粗细计数</title>
+      <link>https://004tingting.github.io/research/tdc-primer/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/research/tdc-primer/</guid>
+      <pubDate>Tue, 15 Oct 2024 00:00:00 GMT</pubDate>
+      <description>秒表的格子不够细怎么办？把&quot;进位链&quot;变成一格一格的延迟尺，再用粗细两级计数把量程铺到毫秒级——这就是 FPGA 上 TDC 的全部秘密。</description>
+    </item>
+    <item>
+      <title>两个 5 GHz 拼一个 10 GHz：带宽交错与那道交叠带凹陷</title>
+      <link>https://004tingting.github.io/research/dbi-primer/</link>
+      <guid isPermaLink="true">https://004tingting.github.io/research/dbi-primer/</guid>
+      <pubDate>Sun, 15 Sep 2024 00:00:00 GMT</pubDate>
+      <description>一台 ADC 拍不动 10 GHz，就用两台各拍一半再拼——难的不是切，而是拼合处那道深达几十 dB 的凹陷从哪来、怎么消。</description>
+    </item>
+  </channel>
+</rss>
