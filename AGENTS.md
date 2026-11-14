@@ -80,7 +80,7 @@ content/
     ├── stats-history.json    # 构建时生成（月度快照：games/steam/wegame/epic/screen，勿手改）
     ├── lastfm-monthly.json / netease-monthly.json  # 构建时生成（听歌月度，勿手改）
     ├── token-monitor.json     # 构建时生成（hub 实时快照：三周期+30d/12mo，勿手改）
-    ├── token-monitor-history.json  # 静态全量基线（dump-hub-history.ps1 每周导出，65→370 天）
+    ├── token-monitor-history.json  # 静态全量基线（dump-hub-history.ps1 每周导出，当前 95 天）
     ├── wegame-games.json / epic-games.json          # 人工报数（Ting 周更，助手改数字）
     ├── games/{zh,en}/*.md    # 游戏条目（手动精选）
     ├── screen/{zh,en}/*.md   # 影卷条目（剧 / 番 / 影 / 小说）
@@ -158,7 +158,7 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 | 数据源 | hub `/api/public/stats`——**唯一免密钥路由**（Worker 开了 `PUBLIC_STATS_ENABLED=1`），CORS `*`，`cache-control: max-age=15`；已剥离 devices / 项目标识 / 账号，只留 deviceCount + periods（today/month/allTime）+ historyPreview（30 天日序列 + 12 个月月序列）+ updatedAt/staleAfterMs |
 | 快照仓库 | **`004Tingting/token-monitor-data`**（public，Ting 2026-10-14 拍板单开）：`token-monitor.json`（normalized 快照）+ `refresh.mjs` + **15 分钟定时工作流（已启用，2026-10-14 22:03 手动触发验证通过）**；`npm run token-snapshot`（`scripts/push-token-snapshot.mjs`）手动补刀。代理通道 gh-proxy / gh.llkk（无缓存）+ jsDelivr（兜底）实测可达 |
 | 构建时 | `scripts/fetch-token-stats.mjs` **仓库优先**（Contents API + .env.local 的 GITHUB_TOKEN，构建机对 api.github.com 可达性通常好于 workers.dev）→ hub 直连 → 保留旧文件不阻断构建；产物 `content/arts/token-monitor.json` |
-| 静态基线 | `content/arts/token-monitor-history.json` = dump-hub-history.ps1（**带密钥**，只在本机跑）从 `/api/history` 导出的全量历史（370 天滚动窗口；**当前 89 天**，2026-11-07）。**建议每周重新生成提交一次**；密钥绝不进前端与仓库。**⚠️ 必须无 BOM**——`JSON.parse` 遇 BOM 直接抛错并被 `catch` 吞掉，历史 / 按模型 / 摘要会整块静默消失（2026-10-22 实际踩到；脚本已改走 node 落盘，`lib/arts.ts` 的 `readJsonFile` 也加了去 BOM 兜底） |
+| 静态基线 | `content/arts/token-monitor-history.json` = dump-hub-history.ps1（**带密钥**，只在本机跑）从 `/api/history` 导出的全量历史（370 天滚动窗口；**当前 95 天**，2026-11-14）。**建议每周重新生成提交一次**；密钥绝不进前端与仓库。**⚠️ 必须无 BOM**——`JSON.parse` 遇 BOM 直接抛错并被 `catch` 吞掉，历史 / 按模型 / 摘要会整块静默消失（2026-10-22 实际踩到；脚本已改走 node 落盘，`lib/arts.ts` 的 `readJsonFile` 也加了去 BOM 兜底） |
 | 合并 | `lib/arts.ts` 的 `getTokenMonitor()`：静态基线铺底，实时快照按 date/month upsert 覆盖——三处挂载（侧栏 / 关于页 / 明细页）**同源同数** |
 | 前端 | `components/TokenMonitor.tsx`（client，三变体 aside/grid/full）：**云端优先 + 2s 规则**（Ting 2026-10-14 定，治双闪与干等）——首帧实时槽位显示骨架（`tm-pending`，快照数字 opacity 0 留在 DOM 供爬虫/no-JS）；挂载时 hub（`fetchTimeoutMs=2000`）与仓库快照（三源 Promise.any 各 3s、5 分钟会话缓存 + in-flight 去重）**并行**；hub 成 → 实时；hub 败 → 仓库快照（此前有实时值则保留 last-good）→ SSR 快照；全程最多一次跳转、最坏 ~3s 骨架。此后单例轮询 **90s**（后台标签页暂停、切回立即刷新） |
 | 展示位置 | 首页侧栏紧凑卡 + 关于页摘要栅格（与「站点数据」同篇幅）+ 看板子页 `/arts/stats/tokens`（完整：三周期 + 近 30 天柱状 + 日用量热力图 + 近 12 个月累计折线 + 按模型两列 + 摘要 chips，zh/en）；首页卡为点阵屏 `DotMatrix`（2026-10-17 升级：boot 自检 + 两侧状态灯 + 错点四档 + 数值组 accent；增量组未启用） |
@@ -235,7 +235,8 @@ Ting 把散落多处的 token monitor（两台桌面 widget，各自只统计本
 
 - 里程碑 **M0–M6 全部完成**（M6 = 五栏信息架构重构）；站点已上线运行
 - **最新状态与待办以根目录 `HANDOFF.md` 为准**（含「待 Ting 决定 / 回填」累积清单）
-- **最新上线批次（2026-11-13）**：启动页标题按 Ting 红框**实测**重排（第二版）——版心 51u×78u（参考 446×679 比例 0.657），五框归一化落位：个→A(31u,7.2u/0)、人→B(25u,29.5u/23.6u)、杂→C(20u,10.9u/30.1u)、Ting→D(竖排小签 4.8u,0.5u/43.5u)、志→E(米字格 28.6u @17.5u/49.3u, 格内 23u)；四汉字+米字格墨迹框与参考误差 **≤2.6%**。Ting 是四字母单词，无法同时满足 A 框 53%×41% 的方块比例，故置于 D 位。提交 `857bf86`。**字雨仍关**（`BootIntro.tsx` 的 `SHOW_WORD_RAIN=false`）
+- **最新上线批次（2026-11-14）**：Token 数据周更——累计 16.49B → **18.00B**（今日 0 / 11 月 4.31B）、基线 89 → **95 天**（07-07..11-14，5 个月度）
+- **上一批次（2026-11-13）**：启动页标题按 Ting 红框**实测**重排（第二版）——版心 51u×78u（参考 446×679 比例 0.657），五框归一化落位：个→A(31u,7.2u/0)、人→B(25u,29.5u/23.6u)、杂→C(20u,10.9u/30.1u)、Ting→D(竖排小签 4.8u,0.5u/43.5u)、志→E(米字格 28.6u @17.5u/49.3u, 格内 23u)；四汉字+米字格墨迹框与参考误差 **≤2.6%**。Ting 是四字母单词，无法同时满足 A 框 53%×41% 的方块比例，故置于 D 位。提交 `857bf86`。**字雨仍关**（`BootIntro.tsx` 的 `SHOW_WORD_RAIN=false`）
 - **上一批次（2026-11-10）**：① 启动页大标题第一版「Ting + 个人杂志」五字错落（已被 11-13 版取代）；② 字雨字号放大档位 + 透明度拉开（普通 **25–52px**、导航 **42–60px**；不透明度普通 **0.22–0.78**、导航 **0.55–0.95**；排字机制不变，禁随机源）
 - **上一批次（2026-11-07 数据刷新）**：Token 累计 10.70B → **16.49B**（今日 585M / 11 月 2.63B）、基线 76 → **89 天**（07-07..11-07，5 个月度）；Steam 248 款 7140.6h → **251 款 7304.4h**（分区显示 249 款 7243.6h，2 条 STEAM_MERGE 已扣）；终末地 721.4 → **755.5h**；游戏总时长 **11628.5h**；网易云 6067.4 → **6299.7h**
 - **上一批次（2026-10-25/29）**：① 八篇工程内容——造物重排为 9 条（EEG / 忆阻器 QAT / TDC-Bench / DBI，order 3–6）+ 研思 4 篇 `#知识讲解`（双层互链）；② **EN 版八篇直译**（en works 补齐 9 条）；③ 影卷新增**「演出」（concert）类型** + 音律联觉 2021–2026 六条；④ 明日方舟动画四部；⑤ 演出时长口径 Ting 定 **3 小时/场**、t1 的 Henzler 图结案（Fig. 2.9 裁图入库）——影卷总时长 **175.68h**；⑥ **开场动画 BootIntro 五稿**（两拍时序：先竖排大字落定、后字雨，总 4.6s；`components/BootIntro.tsx` + `lib/boot-words.ts` + globals.css `boot-*` 段）；**塔罗闪卡参数已按 Ting 调定值上线**（详见塔罗节）
